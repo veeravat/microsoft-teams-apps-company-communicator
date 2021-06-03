@@ -7,11 +7,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
 {
     using System.Net;
     using global::Azure.Storage.Blobs;
+    using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Diagnostics;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
+    using Microsoft.Bot.Builder;
+    using Microsoft.Bot.Builder.ApplicationInsights;
+    using Microsoft.Bot.Builder.Integration.ApplicationInsights.Core;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Extensions.Configuration;
@@ -21,6 +25,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Graph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
@@ -29,6 +34,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Blob;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
@@ -41,6 +47,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Controllers.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
     using Microsoft.Teams.Apps.CompanyCommunicator.Localization;
+    using Microsoft.Teams.Apps.FAQPlusPlus.Common.Providers.Translator;
 
     /// <summary>
     /// Register services in DI container, and set up middle-wares in the pipeline.
@@ -162,6 +169,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddSingleton<ITeamDataRepository, TeamDataRepository>();
             services.AddSingleton<IUserDataRepository, UserDataRepository>();
             services.AddSingleton<ISentNotificationDataRepository, SentNotificationDataRepository>();
+            services.AddSingleton<ISendingNotificationDataRepository, SendingNotificationDataRepository>();
             services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
             services.AddSingleton<IExportDataRepository, ExportDataRepository>();
             services.AddSingleton<IAppConfigRepository, AppConfigRepository>();
@@ -181,8 +189,32 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddScoped<IGroupsService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetGroupsService());
             services.AddScoped<IAppCatalogService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetAppCatalogService());
 
-            // Add Application Insights telemetry.
+            services.AddSingleton<IMicrosoftTranslator, MicrosoftTranslator>();
+
+            // Add bot services.
+            #region Telemetry
+
+            // Add Application Insights services into service collection
             services.AddApplicationInsightsTelemetry();
+
+            // Create the telemetry client.
+            services.AddSingleton<IBotTelemetryClient, BotTelemetryClient>();
+
+            // Add telemetry initializer that will set the correlation context for all telemetry items.
+            services.AddSingleton<ITelemetryInitializer, OperationCorrelationTelemetryInitializer>();
+
+            // Add telemetry initializer that sets the user ID and session ID (in addition to other bot-specific properties such as activity ID)
+            services.AddSingleton<ITelemetryInitializer, TelemetryBotIdInitializer>();
+
+            // Create the telemetry middleware to initialize telemetry gathering
+            services.AddSingleton<TelemetryInitializerMiddleware>();
+
+            // Create the telemetry middleware (used by the telemetry initializer) to track conversation events
+            services.AddSingleton<TelemetryLoggerMiddleware>();
+            // PII now collected
+            //services.AddSingleton<TelemetryLoggerMiddleware>(s => new TelemetryLoggerMiddleware(s.GetService<IBotTelemetryClient>(), true));
+
+            #endregion
 
             // Add miscellaneous dependencies.
             services.AddTransient<TableRowKeyGenerator>();
@@ -190,6 +222,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddTransient<IAppSettingsService, AppSettingsService>();
             services.AddTransient<IUserDataService, UserDataService>();
             services.AddTransient<ITeamMembersService, TeamMembersService>();
+            services.AddTransient<IStorageClientFactory, StorageClientFactory>();
+            services.AddTransient<IBlobStorageProvider, BlobStorageProvider>();
         }
 
         /// <summary>

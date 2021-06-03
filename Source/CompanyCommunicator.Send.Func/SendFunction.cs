@@ -9,6 +9,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Bot.Builder;
+    using Microsoft.Bot.Builder.Teams;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
@@ -137,6 +138,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                 // Send message.
                 var messageActivity = await this.GetMessageActivity(messageContent);
+                //messageActivity.TeamsNotifyUser();
+                //messageActivity.Summary = "This is important message";
                 var response = await this.messageService.SendMessageAsync(
                     message: messageActivity,
                     serviceUrl: messageContent.GetServiceUrl(),
@@ -224,14 +227,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
         private async Task<IMessageActivity> GetMessageActivity(SendQueueMessageContent message)
         {
-            var notification = await this.notificationRepo.GetAsync(
-                NotificationDataTableNames.SendingNotificationsPartition,
-                message.NotificationId);
+            // Download serialized AC from blob storage.
+            var jsonAC = await this.notificationRepo.GetAdaptiveCardAsync(message.NotificationId);
 
             var adaptiveCardAttachment = new Attachment()
             {
                 ContentType = AdaptiveCardContentType,
-                Content = JsonConvert.DeserializeObject(notification.Content),
+                Content = JsonConvert.DeserializeObject(jsonAC),
             };
 
             return MessageFactory.Attachment(adaptiveCardAttachment);

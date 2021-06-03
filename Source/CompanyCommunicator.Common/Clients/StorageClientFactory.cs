@@ -17,18 +17,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients
     public class StorageClientFactory : IStorageClientFactory
     {
         private readonly string storageConnectionString;
+        //private readonly BlobServiceClient blobServiceClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StorageClientFactory"/> class.
         /// </summary>
         /// <param name="repositoryOptions">User data repository.</param>
-        public StorageClientFactory(IOptions<RepositoryOptions> repositoryOptions)
+        public StorageClientFactory(IOptions<RepositoryOptions> repositoryOptions
+            /*, BlobServiceClient blobServiceClient*/)
         {
             this.storageConnectionString = repositoryOptions.Value.StorageAccountConnectionString;
+            //this.blobServiceClient = blobServiceClient;
         }
 
         /// <inheritdoc/>
-        public BlobContainerClient CreateBlobContainerClient()
+        public BlobContainerClient CreateBlobContainerClient(string blobContainerName)
         {
             var options = new BlobClientOptions();
 
@@ -39,8 +42,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients
 
             return new BlobContainerClient(
                 this.storageConnectionString,
-                Constants.BlobContainerName,
+                blobContainerName,
                 options);
         }
+
+        //public async Task<BlobContainerClient> GetBlobContainer(string blobContainerName)
+        //{
+        //    try
+        //    {
+        //        BlobContainerClient container = this.blobServiceClient
+        //                        .GetBlobContainerClient(blobContainerName);
+        //        await container.CreateIfNotExistsAsync();
+        //        await container.SetAccessPolicyAsync(Azure.Storage.Blobs.Models.PublicAccessType.None);
+
+        //        return container;
+        //    }
+        //    catch (RequestFailedException ex)
+        //    {
+        //        this.logger.LogError($"Cannot find blob container: ImagesBlobContainerName - error details: {ex.Message}");
+        //        throw;
+        //    }
+        //}
     }
 }

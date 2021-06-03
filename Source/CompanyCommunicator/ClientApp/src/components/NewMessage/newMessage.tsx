@@ -8,6 +8,7 @@ import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import * as AdaptiveCards from "adaptivecards";
 import { Button, Loader, Dropdown, Text, Flex, Input, TextArea, RadioGroup } from '@fluentui/react-northstar'
 import * as microsoftTeams from "@microsoft/teams-js";
+import { SimpleMarkdownEditor } from 'react-simple-markdown-editor';
 
 import './newMessage.scss';
 import './teamTheme.scss';
@@ -84,6 +85,7 @@ export interface INewMessageProps extends RouteComponentProps, WithTranslation {
 class NewMessage extends React.Component<INewMessageProps, formState> {
     readonly localize: TFunction;
     private card: any;
+    private fileInput: any;
 
     constructor(props: INewMessageProps) {
         super(props);
@@ -121,7 +123,10 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             errorImageUrlMessage: "",
             errorButtonUrlMessage: "",
         }
-    }
+
+        this.fileInput = React.createRef();
+        this.handleImageSelection = this.handleImageSelection.bind(this);
+    }    
 
     public async componentDidMount() {
         microsoftTeams.initialize();
@@ -318,6 +323,123 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         document.removeEventListener("keydown", this.escFunction, false);
     }
 
+    /**
+    * Event Handler for image change
+    */
+    //handleChange = (event: any) => {
+    //    const fileUploaded = event.target.files[0];
+    //    if (fileUploaded) {
+    //        let isValid = true;
+    //        let img = new Image
+    //        img.src = window.URL.createObjectURL(fileUploaded)
+    //        img.onload = () => {
+    //            //if (img.width < 850 || img.height < 290
+    //            //    || img.width > 900 || img.height > 310) {
+    //                isValid = false;
+    //            //}
+
+    //            //this.setState({ isPhotoDimentionsValid: isValid });
+    //        }
+    //    }
+    //};
+
+    _handleReaderLoaded = (readerEvt: any) => {
+        const binaryString = readerEvt.target.result;
+        console.log(binaryString);
+    }
+
+    //convertBase64 = (file:any) => {
+    //    return new Promise((resolve, reject) => {
+    //        const fileReader = new FileReader();
+    //        fileReader.readAsDataURL(file);
+    //        fileReader.onload = () => {
+    //            resolve(fileReader.result);
+    //        };
+    //        fileReader.onerror = (error) => {
+    //            reject(error);
+    //        }
+    //    });
+    //}
+
+    handleImageSelection() {
+        const file = this.fileInput.current.files[0];
+        const { type: mimeType } = file;
+        console.log('file.size: ' + file.size); console.log('mimeType: ' + mimeType);
+
+        const fileReader = new FileReader();
+        fileReader.readAsDataURL(file);
+        fileReader.onload = () => {
+            var image = new Image();
+            image.src = fileReader.result as string;
+            var resizedImageAsBase64 = fileReader.result as string;
+            console.log("resizedImageAsBase64: " + resizedImageAsBase64.length);
+            image.onload = function (e: any) {
+                const MAX_WIDTH = 1024;
+                // access image size here 
+                console.log('image.width: ' + image.width);
+                console.log('image.height: ' + image.height);
+                console.log('image.src.length: ' + image.src.length);
+
+                if (image.width > MAX_WIDTH) {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = ~~(image.height * (MAX_WIDTH / image.width));
+                    const context = canvas.getContext('2d', { alpha: false });
+                     if (!context) {
+                      return;
+                     }
+                    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+                    resizedImageAsBase64 = canvas.toDataURL(mimeType);
+                    console.log("resizedImageAsBase64: after resizing: " + resizedImageAsBase64.length);
+                }
+            }
+
+            setCardImageLink(this.card, resizedImageAsBase64);
+            this.updateCard();
+            //lets set the state with the image value
+            this.setState({
+                imageLink: resizedImageAsBase64
+            });
+        }
+
+        fileReader.onerror = (error) => {
+            //reject(error);
+        }
+
+
+
+        //if (file) {
+        //    Resizer.imageFileResizer(file, 400, 400, 'JPEG', 80, 0,
+        //        uri => {
+        //            if (uri.toString().length < 64000) {
+        //                this.setState({
+        //                    imageLink: uri.toString()
+        //                }, () => {
+        //                    this._handleReaderLoaded.bind(this);
+        //                }
+        //                );
+        //            } else {
+        //                console.log("Image size too large.");
+        //            }
+
+        //        },
+        //        'base64');
+        //}
+    }
+    
+    // Simulates calling a click event on a hidden file input <input />
+    //private handleUploadClick() {
+    //    if (this.fileInput.current) {
+    //        this.fileInput.current.click()
+    //    }
+    //}
+
+    handleUploadClick = (event: any) => {        
+        if (this.fileInput.current) {
+            this.fileInput.current.click();
+        }
+    };
+
     public render(): JSX.Element {
         if (this.state.loader) {
             return (
@@ -342,23 +464,46 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                             fluid
                                         />
 
-                                        <Input fluid className="inputField"
-                                            value={this.state.imageLink}
-                                            label={this.localize("ImageURL")}
-                                            placeholder={this.localize("ImageURL")}
-                                            onChange={this.onImageLinkChanged}
-                                            error={!(this.state.errorImageUrlMessage === "")}
-                                            autoComplete="off"
-                                        />
-                                        <Text className={(this.state.errorImageUrlMessage === "") ? "hide" : "show"} error size="small" content={this.state.errorImageUrlMessage} />
+                                        <Flex gap="gap.small" vAlign="end">
+                                            <Input fluid className="inputField"
+                                                value={this.state.imageLink}
+                                                label={this.localize("ImageURL")}
+                                                placeholder={this.localize("ImageURL")}
+                                                onChange={this.onImageLinkChanged}
+                                                error={!(this.state.errorImageUrlMessage === "")}
+                                                autoComplete="off"
+                                            />                                            
+                                            <Flex.Item push>
+                                                <Button onClick={this.handleUploadClick}
+                                                    size="medium" className="inputField"
+                                                    content={this.localize("UploadImage")} iconPosition="before" />
+                                            </Flex.Item>
+                                            <input type="file" accept=".jpg, .jpeg, .png, .gif"
+                                                style={{ display: 'none' }}
+                                                multiple={false}
+                                                onChange={this.handleImageSelection}
+                                                ref={this.fileInput} />
+                                            <Text className={(this.state.errorImageUrlMessage === "") ? "hide" : "show"} error size="small" content={this.state.errorImageUrlMessage} />
+                                        </Flex>
+                                        
 
                                         <div className="textArea">
                                             <Text content={this.localize("Summary")} />
+                                            <SimpleMarkdownEditor textAreaID={"summaryTextArea"}
+                                                enabledButtons={{
+                                                    strike: false,
+                                                    code: false,
+                                                    quote: false,
+                                                    h1: false,
+                                                    h2: false,
+                                                    h3: false,
+                                                    image: false }} />
                                             <TextArea
                                                 autoFocus
                                                 placeholder={this.localize("Summary")}
                                                 value={this.state.summary}
                                                 onChange={this.onSummaryChanged}
+                                                id="summaryTextArea"
                                                 fluid />
                                         </div>
 
@@ -537,6 +682,9 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                             <Flex className="footerContainer" vAlign="end" hAlign="end">
                                 <Flex className="buttonContainer" gap="gap.small">
                                     <Flex.Item push>
+                                    <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label={this.localize("PreparingMessageLabel")} labelPosition="end" />
+                                </Flex.Item>
+                                    <Flex.Item push>
                                         <Button content={this.localize("Back")} onClick={this.onBack} secondary />
                                     </Flex.Item>
                                     <Button content={this.localize("SaveAsDraft")} disabled={this.isSaveBtnDisabled()} id="saveBtn" onClick={this.onSave} primary />
@@ -699,6 +847,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
     }
 
     private onSave = () => {
+        let spanner = document.getElementsByClassName("sendingLoader");
+        spanner[0].classList.remove("hiddenLoader");
         const selectedTeams: string[] = [];
         const selctedRosters: string[] = [];
         const selectedGroups: string[] = [];

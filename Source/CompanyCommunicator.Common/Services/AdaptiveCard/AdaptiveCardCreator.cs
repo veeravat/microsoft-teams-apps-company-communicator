@@ -7,7 +7,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
 {
     using System;
     using AdaptiveCards;
+    using Microsoft.Bot.Schema;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// Adaptive Card Creator service.
@@ -27,7 +29,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 notificationDataEntity.Summary,
                 notificationDataEntity.Author,
                 notificationDataEntity.ButtonTitle,
-                notificationDataEntity.ButtonLink);
+                notificationDataEntity.ButtonLink,
+                notificationDataEntity.Id);
         }
 
         /// <summary>
@@ -46,7 +49,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
             string summary,
             string author,
             string buttonTitle,
-            string buttonUrl)
+            string buttonUrl,
+            string notificationId)
         {
             var version = new AdaptiveSchemaVersion(1, 0);
             AdaptiveCard card = new AdaptiveCard(version);
@@ -61,13 +65,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
 
             if (!string.IsNullOrWhiteSpace(imageUrl))
             {
-                card.Body.Add(new AdaptiveImage()
+                var img = new AdaptiveImageWithLongUrl()
                 {
-                    Url = new Uri(imageUrl, UriKind.RelativeOrAbsolute),
+                    LongUrl = imageUrl,
                     Spacing = AdaptiveSpacing.Default,
                     Size = AdaptiveImageSize.Stretch,
                     AltText = string.Empty,
-                });
+                };
+
+                // Image enlarge support for Teams web/desktop client.
+                img.AdditionalProperties.Add("msteams", new { AllowExpand = true });
+
+                card.Body.Add(img);
             }
 
             if (!string.IsNullOrWhiteSpace(summary))
@@ -99,10 +108,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                     Url = new Uri(buttonUrl, UriKind.RelativeOrAbsolute),
                 });
             }
-            
-            // Full Width Adaptive Card.
-            card.AdditionalProperties.Add("msteams", new { width = "full" });
+            //if (!string.IsNullOrEmpty(notificationId))
+            //{
+            //    card.Actions.Add(
+            //        new AdaptiveSubmitAction()
+            //        {
+            //            Title = "Translate",
+            //            Id = "translate",
+            //            Data = "translate",
+            //            DataJson = JsonConvert.SerializeObject(new { notificationId = notificationId, translation = true }),
+            //        }
+            //    );
+            //}
 
+            // Full width Adaptive card.
+            card.AdditionalProperties.Add("msteams", new { width = "full" });
             return card;
         }
     }

@@ -16,6 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Options;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
@@ -104,7 +105,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             var exportDataEntity = new ExportDataEntity() { FileName = null, PartitionKey = "partitionKey" };
             var userDataEntity = new UserDataEntity() { ServiceUrl = "serviceUrl", ConversationId = "conversationId" };
             var blobContainerClientmock = GetBlobContainerClientMock();
-            this.storageClientFactory.Setup(x => x.CreateBlobContainerClient()).Returns(blobContainerClientmock.Object);
+            this.storageClientFactory.Setup(x => x.CreateBlobContainerClient(Constants.BlobContainerName)).Returns(blobContainerClientmock.Object);
             this.userDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(userDataEntity);
 
             // Act
@@ -126,7 +127,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             var exportDataEntity = new ExportDataEntity() { FileName = "fileName", PartitionKey = "partitionKey" };
             var userDataEntity = new UserDataEntity() { ServiceUrl = "serviceUrl", ConversationId = "conversationId" };
             var blobContainerClientmock = GetBlobContainerClientMock();
-            this.storageClientFactory.Setup(x => x.CreateBlobContainerClient()).Returns(blobContainerClientmock.Object);
+            this.storageClientFactory.Setup(x => x.CreateBlobContainerClient(Constants.BlobContainerName)).Returns(blobContainerClientmock.Object);
             this.userDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(userDataEntity);
 
             // Act
@@ -147,7 +148,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             var activityInstance = this.GetHandleExportFailureActivity();
             var exportDataEntity = new ExportDataEntity() { FileName = null, PartitionKey = "partitionKey" };
             var userDataEntity = new UserDataEntity() { ServiceUrl = "serviceUrl", ConversationId = "conversationId" };
-            this.storageClientFactory.Setup(x => x.CreateBlobContainerClient()).Returns(default(BlobContainerClient));
+            this.storageClientFactory.Setup(x => x.CreateBlobContainerClient(Constants.BlobContainerName)).Returns(default(BlobContainerClient));
             this.userDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(userDataEntity);
             string failureText = "ExportFailureText";
             var exportFailureString = new LocalizedString(failureText, failureText);
@@ -172,7 +173,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             var activityInstance = this.GetHandleExportFailureActivity();
             var exportDataEntity = new ExportDataEntity() { FileName = null, PartitionKey = "partitionKey" };
             var userDataEntity = new UserDataEntity() { ServiceUrl = "serviceUrl", ConversationId = "conversationId" };
-            this.storageClientFactory.Setup(x => x.CreateBlobContainerClient()).Returns(default(BlobContainerClient));
+            this.storageClientFactory.Setup(x => x.CreateBlobContainerClient(Constants.BlobContainerName)).Returns(default(BlobContainerClient));
             this.userDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(userDataEntity);
             string failureText = "ExportFailureText";
             var exportFailureString = new LocalizedString(failureText, failureText);

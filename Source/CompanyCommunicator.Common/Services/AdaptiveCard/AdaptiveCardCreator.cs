@@ -8,6 +8,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
     using System;
     using AdaptiveCards;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// Adaptive Card Creator service.
@@ -19,7 +21,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
         /// </summary>
         /// <param name="notificationDataEntity">Notification data entity.</param>
         /// <returns>An adaptive card.</returns>
-        public virtual AdaptiveCard CreateAdaptiveCard(NotificationDataEntity notificationDataEntity)
+        public virtual AdaptiveCard CreateAdaptiveCard(NotificationDataEntity notificationDataEntity,
+            bool translate = false)
         {
             return this.CreateAdaptiveCard(
                 notificationDataEntity.Title,
@@ -27,7 +30,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 notificationDataEntity.Summary,
                 notificationDataEntity.Author,
                 notificationDataEntity.ButtonTitle,
-                notificationDataEntity.ButtonLink);
+                notificationDataEntity.ButtonLink,
+                notificationDataEntity.Id,
+                translate);
         }
 
         /// <summary>
@@ -46,7 +51,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
             string summary,
             string author,
             string buttonTitle,
-            string buttonUrl)
+            string buttonUrl,
+            string notificationId,
+            bool translate = false)
         {
             var version = new AdaptiveSchemaVersion(1, 0);
             AdaptiveCard card = new AdaptiveCard(version);
@@ -100,7 +107,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 });
             }
 
+            if (!string.IsNullOrEmpty(notificationId))
+            {
+                card.Actions.Add(
+                    new AdaptiveSubmitAction()
+                    {
+                        Title = !translate ? Strings.TranslateButton : Strings.ShowOriginalButton,
+                        Id = "translate",
+                        Data = "translate",
+                        DataJson = JsonConvert.SerializeObject(
+                            new { notificationId = notificationId, translation = !translate }),
+                    }
+                );
+            }
+
             return card;
         }
+
     }
 }

@@ -421,6 +421,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to See original message.
+        /// </summary>
+        public static string ShowOriginalButton {
+            get {
+                return ResourceManager.GetString("ShowOriginalButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Succeeded.
         /// </summary>
         public static string Succeeded {
@@ -435,6 +444,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         public static string Throttled {
             get {
                 return ResourceManager.GetString("Throttled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Translate.
+        /// </summary>
+        public static string TranslateButton {
+            get {
+                return ResourceManager.GetString("TranslateButton", resourceCulture);
             }
         }
         

@@ -99,6 +99,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                     Url = new Uri(buttonUrl, UriKind.RelativeOrAbsolute),
                 });
             }
+            
+            // Full Width Adaptive Card.
+            card.AdditionalProperties.Add("msteams", new { width = "full" });
 
             return card;
         }

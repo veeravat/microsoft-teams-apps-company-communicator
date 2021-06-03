@@ -16,6 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     using Microsoft.Bot.Schema;
     using Microsoft.Bot.Schema.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.FAQPlusPlus.Common.Providers.Translator;
     using Newtonsoft.Json;
@@ -171,7 +172,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                 { "Locale", clientInfoEntity?.Properties["locale"]?.ToString() },
                 { "Country", clientInfoEntity?.Properties["country"]?.ToString() },
                 { "TimeZone", clientInfoEntity?.Properties["timezone"]?.ToString() },
-                { "Platform", clientInfoEntity?.Properties["platform"]?.ToString() }
+                { "Platform", clientInfoEntity?.Properties["platform"]?.ToString() },
             };
             this.botTelemetryClient.TrackEvent("UserActivity", properties);
         }
@@ -207,99 +208,106 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             taskInfo.Title = uIConstants.Title.ToString();
         }
 
+        /// <summary>
+        /// Handle translate button click.
+        /// </summary>
+        /// <param name="turnContext"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         protected override async Task OnMessageActivityAsync(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
         {
-            LogActivityTelemetry(turnContext.Activity);
-            if (!string.IsNullOrEmpty(turnContext.Activity.ReplyToId))
-            {
-                var txt = turnContext.Activity.Text;
-                dynamic value = turnContext.Activity.Value;
+            //this.LogActivityTelemetry(turnContext.Activity);
 
-                // Check if the activity came from a submit action
-                if (string.IsNullOrEmpty(txt) && value != null)
-                {
-                    var properties = new Dictionary<string, string> { { "translation", turnContext.Activity.Value.ToString() } };
+            //if (!string.IsNullOrEmpty(turnContext.Activity.ReplyToId))
+            //{
+            //    var txt = turnContext.Activity.Text;
+            //    dynamic value = turnContext.Activity.Value;
 
-                    this.botTelemetryClient.TrackEvent("Translation", properties);
-                    string notificationId = value["notificationId"];
-                    bool translation = Convert.ToBoolean(value["translation"]);
+            //    // Check if the activity came from a submit action.
+            //    if (string.IsNullOrEmpty(txt) && value != null)
+            //    {
+            //        var properties = new Dictionary<string, string> { { "translation", turnContext.Activity.Value.ToString() } };
+            //        this.botTelemetryClient.TrackEvent("Translation", properties);
 
-                    // Download serialized AC from blob storage.
-                    var jsonAC = await this.notificationRepo.GetAdaptiveCardAsync(notificationId);
-                    var acResult = AdaptiveCard.FromJson(jsonAC);
-                    var card = acResult.Card;
+            //        string notificationId = value["notificationId"];
+            //        bool translation = Convert.ToBoolean(value["translation"]);
 
-                    AdaptiveSubmitAction translateButton = null;
-                    AdaptiveOpenUrlAction openUrlButton = null;
-                    for (int i = 0; i < card.Actions.Count; i++)
-                    {
-                        var action = card.Actions[i];
-                        if (action is AdaptiveSubmitAction)
-                        {
-                            translateButton = action as AdaptiveSubmitAction;
-                        }
-                        else if (action is AdaptiveOpenUrlAction)
-                        {
-                            openUrlButton = action as AdaptiveOpenUrlAction; 
-                        }
-                    }
+            //        // Download serialized AC from blob storage.
+            //        var jsonAC = await this.notificationRepo.GetAdaptiveCardAsync(notificationId);
+            //        var acResult = AdaptiveCard.FromJson(jsonAC);
+            //        var card = acResult.Card;
 
-                    if (translation)
-                    {
-                        var detectedUserLocale = turnContext.Activity.Locale;
-                        string userLanguage = "";
-                        if (detectedUserLocale.Contains('-'))
-                        {
-                            userLanguage = detectedUserLocale.Split('-')[0];
-                        }
+            //        AdaptiveSubmitAction translateButton = null;
+            //        AdaptiveOpenUrlAction openUrlButton = null;
 
-                        var title = card.Body[0] as AdaptiveTextBlock;
-                        if (title != null)
-                        {
-                            title.Text = await this.translator.TranslateAsync(title.Text, userLanguage);
-                        }
-                        var summary = card.Body[1] as AdaptiveTextBlock;
-                        if (summary != null)
-                        {
-                            summary.Text = await this.translator.TranslateAsync(summary.Text, userLanguage);
-                        }
+            //        // only first two buttons matter
+            //        for (int i = 0; i < card.Actions.Count && i < 2; i++)
+            //        {
+            //            var action = card.Actions[i];
 
-                        //for (var i = 1; i < card.Body.Count; i++)
-                        //{
-                        //    if (card.Body[i].Id == "summary")
-                        //    {
-                        //        card.Body[i].
-                        //    }
-                        //}
-                        
-                        openUrlButton.Title = await this.translator.TranslateAsync(openUrlButton.Title, userLanguage);
-                    }
+            //            if (action is AdaptiveSubmitAction) /* translate button */
+            //            {
+            //                translateButton = action as AdaptiveSubmitAction;
+            //            }
+            //            else if (action is AdaptiveOpenUrlAction) // standard call to action button
+            //            {
+            //                openUrlButton = action as AdaptiveOpenUrlAction;
+            //            }
+            //        }
 
-                    if (translateButton != null && translation)
-                    {
-                        translateButton.Title = "See original message";
-                        translateButton.DataJson = JsonConvert.SerializeObject(new { notificationId = notificationId, translation = false });
-                    }
-                    else
-                    {
-                        translateButton.Title = "Translate";
-                        translateButton.DataJson = JsonConvert.SerializeObject(new { notificationId = notificationId, translation = true });
-                    }
+            //        if (translation)
+            //        {
+            //            var detectedUserLocale = turnContext.Activity.Locale;
+            //            string userLanguage = string.Empty;
+            //            if (detectedUserLocale.Contains('-'))
+            //            {
+            //                userLanguage = detectedUserLocale.Split('-')[0];
+            //                var title = card.Body[0] as AdaptiveTextBlock;
+            //                if (title != null)
+            //                {
+            //                    title.Text = await this.translator.TranslateAsync(title.Text, userLanguage);
+            //                }
+
+            //                var summary = card.Body[1] as AdaptiveTextBlock;
+            //                if (summary != null)
+            //                {
+            //                    summary.Text = await this.translator.TranslateAsync(summary.Text, userLanguage);
+            //                }
+
+            //                if (openUrlButton != null)
+            //                {
+            //                    openUrlButton.Title = await this.translator.TranslateAsync(openUrlButton.Title, userLanguage);
+            //                }
+            //            }
+            //        }
+
+            //        if (translateButton != null && translation)
+            //        {
+            //            translateButton.Title = Strings.ShowOriginalButton; // "See original message";
+            //            translateButton.DataJson = JsonConvert.SerializeObject(new { notificationId = notificationId, translation = false });
+            //        }
+            //        else
+            //        {
+            //            translateButton.Title = Strings.TranslateButton; // "Translate";
+            //            translateButton.DataJson = JsonConvert.SerializeObject(new { notificationId = notificationId, translation = true });
+            //        }
 
 
-                    var adaptiveCardAttachment = new Attachment()
-                    {
-                        ContentType = AdaptiveCard.ContentType,
-                        Content = card,
-                    };
+            //        var adaptiveCardAttachment = new Attachment()
+            //        {
+            //            ContentType = AdaptiveCard.ContentType,
+            //            Content = card,
+            //        };
 
-                    var activity = MessageFactory.Attachment(adaptiveCardAttachment);
-                    activity.Id = turnContext.Activity.ReplyToId;
-                    await turnContext.UpdateActivityAsync(activity, cancellationToken);
-                }
-            }
-            //else { await base.OnMessageActivityAsync(turnContext, cancellationToken); }
-
+            //        var activity = MessageFactory.Attachment(adaptiveCardAttachment);
+            //        activity.Id = turnContext.Activity.ReplyToId;
+            //        await turnContext.UpdateActivityAsync(activity, cancellationToken);
+            //    }
+            //}
+            //else
+            //{
+            //    await base.OnMessageActivityAsync(turnContext, cancellationToken);
+            //}
         }
 
         //public override Task OnTurnAsync(ITurnContext turnContext, CancellationToken cancellationToken = default)

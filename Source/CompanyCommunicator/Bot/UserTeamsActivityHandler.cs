@@ -35,8 +35,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// Initializes a new instance of the <see cref="UserTeamsActivityHandler"/> class.
         /// </summary>
         /// <param name="teamsDataCapture">Teams data capture service.</param>
-        public UserTeamsActivityHandler(TeamsDataCapture teamsDataCapture, ITranslator translator, 
-            INotificationDataRepository notificationDataRepository, AdaptiveCardCreator adaptiveCardCreator)
+        public UserTeamsActivityHandler(TeamsDataCapture teamsDataCapture,
+            ITranslator translator,
+            INotificationDataRepository notificationDataRepository,
+            AdaptiveCardCreator adaptiveCardCreator)
         {
             this.teamsDataCapture = teamsDataCapture ?? throw new ArgumentNullException(nameof(teamsDataCapture));
             this.translator = translator ?? throw new ArgumentException(nameof(translator));
@@ -79,22 +81,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             {
                 await this.teamsDataCapture.OnBotRemovedAsync(activity);
             }
-        }
-
-        private bool IsTeamInformationUpdated(IConversationUpdateActivity activity)
-        {
-            if (activity == null)
-            {
-                return false;
-            }
-
-            var channelData = activity.GetChannelData<TeamsChannelData>();
-            if (channelData == null)
-            {
-                return false;
-            }
-
-            return UserTeamsActivityHandler.TeamRenamedEventType.Equals(channelData.EventType, StringComparison.OrdinalIgnoreCase);
         }
 
         protected override async Task OnMessageActivityAsync(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
@@ -151,6 +137,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             }
         }
 
+        private bool IsTeamInformationUpdated(IConversationUpdateActivity activity)
+        {
+            if (activity == null)
+            {
+                return false;
+            }
 
+            var channelData = activity.GetChannelData<TeamsChannelData>();
+            if (channelData == null)
+            {
+                return false;
+            }
+
+            return UserTeamsActivityHandler.TeamRenamedEventType.Equals(channelData.EventType, StringComparison.OrdinalIgnoreCase);
+        }
     }
 }

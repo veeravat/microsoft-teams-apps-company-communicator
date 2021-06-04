@@ -109,16 +109,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
 
             if (!string.IsNullOrEmpty(notificationId))
             {
-                card.Actions.Add(
-                    new AdaptiveSubmitAction()
-                    {
-                        Title = !translate ? Strings.TranslateButton : Strings.ShowOriginalButton,
-                        Id = "translate",
-                        Data = "translate",
-                        DataJson = JsonConvert.SerializeObject(
-                            new { notificationId = notificationId, translation = !translate }),
-                    }
-                );
+                card.Actions.Add(new AdaptiveSubmitAction()
+                {
+                    Title = !translate ? Strings.TranslateButton : Strings.ShowOriginalButton,
+                    Id = "translate",
+                    Data = "translate",
+                    DataJson = JsonConvert.SerializeObject(
+                        new { notificationId = notificationId, translation = !translate }),
+                });
             }
 
             return card;

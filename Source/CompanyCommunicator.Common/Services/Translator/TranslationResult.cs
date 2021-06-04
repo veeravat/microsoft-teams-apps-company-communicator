@@ -1,10 +1,9 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Translator
 {
+    using Newtonsoft.Json;
+
     /// <summary>
     /// Translation result from Translator API v3.
     /// </summary>

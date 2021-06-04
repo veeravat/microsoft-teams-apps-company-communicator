@@ -14,6 +14,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Translator
     using Microsoft.Extensions.Configuration;
     using Newtonsoft.Json;
 
+    /// <summary>
+    /// .NET wrapper for Microsoft Cognitive Translator API.
+    /// Translator allows to detect source language during translation and translate into 90+ languages.
+    /// Cognitive Services translation documentation. <seealso cref="https://docs.microsoft.com/en-us/azure/cognitive-services/translator/quickstart-csharp-translate"/>
+    /// </summary>
     public class MicrosoftTranslator : ITranslator
     {
         private const string Host = "https://api.cognitive.microsofttranslator.com";
@@ -24,16 +29,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Translator
 
         private readonly string key;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MicrosoftTranslator"/> class.
+        /// </summary>
+        /// <param name="configuration"></param>
         public MicrosoftTranslator(IConfiguration configuration)
         {
             var key = configuration["TranslatorKey"];
             this.key = key ?? throw new ArgumentNullException(nameof(key));
         }
 
+        /// <summary>
+        /// Translate a string.
+        /// </summary>
+        /// <param name="text">Original string.</param>
+        /// <param name="targetLocale">Target locale, for example ru.</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public async Task<string> TranslateAsync(string text, string targetLocale, CancellationToken cancellationToken = default(CancellationToken))
         {
-            // From Cognitive Services translation documentation:
-            // https://docs.microsoft.com/en-us/azure/cognitive-services/translator/quickstart-csharp-translate
             var body = new object[] { new { Text = text } };
             var requestBody = JsonConvert.SerializeObject(body);
 

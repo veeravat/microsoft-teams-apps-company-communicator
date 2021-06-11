@@ -30,7 +30,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         private static readonly string TeamRenamedEventType = "teamRenamed";
         private readonly ISendingNotificationDataRepository notificationRepo;
         private readonly IBotTelemetryClient botTelemetryClient;
-        private readonly IMicrosoftTranslator translator;
 
         private readonly TeamsDataCapture teamsDataCapture;
 
@@ -40,13 +39,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// <param name="teamsDataCapture">Teams data capture service.</param>
         public UserTeamsActivityHandler(TeamsDataCapture teamsDataCapture, 
             ISendingNotificationDataRepository notificationRepo, 
-            IBotTelemetryClient botTelemetryClient,
-            IMicrosoftTranslator translator)
+            IBotTelemetryClient botTelemetryClient
+            )
         {
             this.teamsDataCapture = teamsDataCapture ?? throw new ArgumentNullException(nameof(teamsDataCapture));
             this.notificationRepo = notificationRepo ?? throw new ArgumentNullException(nameof(notificationRepo));
             this.botTelemetryClient = botTelemetryClient ?? throw new ArgumentNullException(nameof(botTelemetryClient));
-            this.translator = translator ?? throw new ArgumentNullException(nameof(translator));
         }
 
         protected override async Task OnReactionsAddedAsync(IList<MessageReaction> messageReactions, ITurnContext<IMessageReactionActivity> turnContext, CancellationToken cancellationToken)

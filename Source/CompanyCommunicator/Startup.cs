@@ -188,8 +188,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddScoped<IGraphServiceFactory, GraphServiceFactory>();
             services.AddScoped<IGroupsService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetGroupsService());
             services.AddScoped<IAppCatalogService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetAppCatalogService());
-
-            services.AddSingleton<IMicrosoftTranslator, MicrosoftTranslator>();
+                        
 
             // Add bot services.
             #region Telemetry

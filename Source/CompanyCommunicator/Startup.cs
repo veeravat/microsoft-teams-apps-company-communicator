@@ -47,7 +47,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Controllers.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
     using Microsoft.Teams.Apps.CompanyCommunicator.Localization;
-    using Microsoft.Teams.Apps.FAQPlusPlus.Common.Providers.Translator;
 
     /// <summary>
     /// Register services in DI container, and set up middle-wares in the pipeline.

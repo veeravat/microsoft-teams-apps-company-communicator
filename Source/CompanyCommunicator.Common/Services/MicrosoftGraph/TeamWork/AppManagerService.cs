@@ -11,6 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
     using System.Threading.Tasks;
 
     using Microsoft.Graph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
 
     /// <summary>
     /// Manage Teams Apps for a user or a team.
@@ -50,12 +51,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 },
             };
 
-            await this.graphServiceClient.Users[userId]
+            // Skip Guest users.
+            var user = await this.graphServiceClient.Users[userId].Request().GetAsync();
+            if (string.Equals(user?.UserType, UserType.Member, StringComparison.OrdinalIgnoreCase))
+            {
+                await this.graphServiceClient.Users[userId]
                 .Teamwork
                 .InstalledApps
                 .Request()
                 .WithMaxRetry(GraphConstants.MaxRetry)
                 .AddAsync(userScopeTeamsAppInstallation);
+            }
         }
 
         /// <inheritdoc/>

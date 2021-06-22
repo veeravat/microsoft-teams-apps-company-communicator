@@ -451,7 +451,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             if (this.state.page === "CardCreation") {
                 return (
                     <div className="taskModule">
-                        <Flex column className="formContainer" vAlign="stretch" gap="gap.small" styles={{ background: "white" }}>
+                        <Flex column className="formContainer" vAlign="stretch" gap="gap.small">
                             <Flex className="scrollableContent">
                                 <Flex.Item size="size.half">
                                     <Flex column className="formContentContainer">
@@ -554,7 +554,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             else if (this.state.page === "AudienceSelection") {
                 return (
                     <div className="taskModule">
-                        <Flex column className="formContainer" vAlign="stretch" gap="gap.small" styles={{ background: "white" }}>
+                        <Flex column className="formContainer" vAlign="stretch" gap="gap.small">
                             <Flex className="scrollableContent">
                                 <Flex.Item size="size.half">
                                     <Flex column className="formContentContainer">

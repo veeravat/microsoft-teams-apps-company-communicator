@@ -259,4 +259,10 @@
   <data name="GuestUserNotSupported" xml:space="preserve">
     <value>Guest User not supported</value>
   </data>
+  <data name="ShowOriginalButton" xml:space="preserve">
+    <value>See original message</value>
+  </data>
+  <data name="TranslateButton" xml:space="preserve">
+    <value>Translate</value>
+  </data>
 </root>

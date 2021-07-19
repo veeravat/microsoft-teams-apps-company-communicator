@@ -139,7 +139,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
                 draftNotificationEntity.Summary,
                 draftNotificationEntity.Author,
                 draftNotificationEntity.ButtonTitle,
-                draftNotificationEntity.ButtonLink);
+                draftNotificationEntity.ButtonLink, string.Empty);
 
             var attachment = new Attachment
             {

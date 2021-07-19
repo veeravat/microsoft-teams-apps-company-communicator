@@ -22,6 +22,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Analytics;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
@@ -45,6 +46,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly IExportDataRepository exportDataRepository;
         private readonly IAppCatalogService appCatalogService;
         private readonly IAppSettingsService appSettingsService;
+        private readonly IAnalyticsService analyticsService;
         private readonly UserAppOptions userAppOptions;
         private readonly ILogger<SentNotificationsController> logger;
 
@@ -74,6 +76,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             IExportDataRepository exportDataRepository,
             IAppCatalogService appCatalogService,
             IAppSettingsService appSettingsService,
+            IAnalyticsService analyticsService,
             IOptions<UserAppOptions> userAppOptions,
             ILoggerFactory loggerFactory)
         {
@@ -92,6 +95,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             this.exportDataRepository = exportDataRepository ?? throw new ArgumentNullException(nameof(exportDataRepository));
             this.appCatalogService = appCatalogService ?? throw new ArgumentNullException(nameof(appCatalogService));
             this.appSettingsService = appSettingsService ?? throw new ArgumentNullException(nameof(appSettingsService));
+            this.analyticsService = analyticsService ?? throw new ArgumentNullException(nameof(analyticsService));
             this.userAppOptions = userAppOptions?.Value ?? throw new ArgumentNullException(nameof(userAppOptions));
             this.logger = loggerFactory?.CreateLogger<SentNotificationsController>() ?? throw new ArgumentNullException(nameof(loggerFactory));
         }
@@ -208,6 +212,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             var userId = this.HttpContext.User.FindFirstValue(Common.Constants.ClaimTypeUserId);
             var userNotificationDownload = await this.exportDataRepository.GetAsync(userId, id);
 
+            var uniqueViews = await this.analyticsService.GetUniqueViewsCountByNotificationIdAsync(id);
+            var uniqueClicks = await this.analyticsService.GetUniqueClicksCountByNotificationIdAsync(id);
+            var acknowledgementsClicks = await this.analyticsService.GetAcknowledgementsCountByNotificationIdAsync(id);
+
             var result = new SentNotification
             {
                 Id = notificationEntity.Id,
@@ -220,12 +228,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 CreatedDateTime = notificationEntity.CreatedDate,
                 SentDate = notificationEntity.SentDate,
                 Succeeded = notificationEntity.Succeeded,
+                ViewsCount = uniqueViews,
+                ClicksCount = uniqueClicks,
+                AcknowledgementsCount = acknowledgementsClicks,
                 Failed = notificationEntity.Failed,
                 Unknown = this.GetUnknownCount(notificationEntity),
                 TeamNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Teams),
                 RosterNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Rosters),
                 GroupNames = groupNames,
                 AllUsers = notificationEntity.AllUsers,
+                Ack = notificationEntity.Ack,
                 SendingStartedDate = notificationEntity.SendingStartedDate,
                 ErrorMessage = notificationEntity.ErrorMessage,
                 WarningMessage = notificationEntity.WarningMessage,

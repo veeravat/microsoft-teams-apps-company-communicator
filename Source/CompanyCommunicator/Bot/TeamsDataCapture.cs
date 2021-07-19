@@ -7,8 +7,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 {
     using System;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.Bot.Builder;
+    using Microsoft.Bot.Builder.Teams;
     using Microsoft.Bot.Schema;
+    using Microsoft.Bot.Schema.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.User;
@@ -47,7 +51,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// </summary>
         /// <param name="activity">Teams activity instance.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        public async Task OnBotAddedAsync(IConversationUpdateActivity activity)
+        public async Task OnBotAddedAsync(ITurnContext turnContext, IConversationUpdateActivity activity, CancellationToken cancellationToken)
         {
             // Take action if the event includes the bot being added.
             var membersAdded = activity.MembersAdded;
@@ -62,7 +66,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                     await this.teamDataRepository.SaveTeamDataAsync(activity);
                     break;
                 case TeamsDataCapture.PersonalType:
-                    await this.userDataService.SaveUserDataAsync(activity);
+
+                    // Skip Guest users.
+                    TeamsChannelAccount teamsUser = await TeamsInfo.GetMemberAsync(turnContext, activity.From.Id, cancellationToken);
+                    if (!teamsUser.UserPrincipalName.ToLower().Contains("#ext#"))
+                    {
+                        await this.userDataService.SaveUserDataAsync(activity);
+                    }
+
                     break;
                 default: break;
             }

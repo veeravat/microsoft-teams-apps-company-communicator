@@ -160,6 +160,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Rosters = notification.Rosters,
                 Groups = notification.Groups,
                 AllUsers = notification.AllUsers,
+                Ack = notification.Ack,
             };
 
             await this.notificationDataRepository.CreateOrUpdateAsync(notificationEntity);
@@ -252,6 +253,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Rosters = notificationEntity.Rosters,
                 Groups = notificationEntity.Groups,
                 AllUsers = notificationEntity.AllUsers,
+                Ack = notificationEntity.Ack,
             };
 
             return this.Ok(result);

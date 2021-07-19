@@ -6,8 +6,11 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
 {
     using System;
+    using System.Linq;
     using AdaptiveCards;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard.TaskModule;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// Adaptive Card Creator service.
@@ -19,7 +22,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
         /// </summary>
         /// <param name="notificationDataEntity">Notification data entity.</param>
         /// <returns>An adaptive card.</returns>
-        public virtual AdaptiveCard CreateAdaptiveCard(NotificationDataEntity notificationDataEntity)
+        public virtual AdaptiveCard CreateAdaptiveCard(NotificationDataEntity notificationDataEntity, 
+            bool acknowledged = false)
         {
             return this.CreateAdaptiveCard(
                 notificationDataEntity.Title,
@@ -27,7 +31,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 notificationDataEntity.Summary,
                 notificationDataEntity.Author,
                 notificationDataEntity.ButtonTitle,
-                notificationDataEntity.ButtonLink);
+                notificationDataEntity.ButtonLink,
+                notificationDataEntity.Id,
+                notificationDataEntity.Ack,
+                acknowledged);
+        }
+
+        public AdaptiveCard CreateMessageDetailsAdaptiveCard(string summary)
+        {
+            var version = new AdaptiveSchemaVersion(1, 2);
+            AdaptiveCard card = new AdaptiveCard(version);
+            if (!string.IsNullOrWhiteSpace(summary))
+            {
+                card.Body.Add(new AdaptiveTextBlock()
+                {
+                    Text = summary,
+                    Wrap = true,
+                });
+            }
+
+            return card;
         }
 
         /// <summary>
@@ -46,7 +69,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
             string summary,
             string author,
             string buttonTitle,
-            string buttonUrl)
+            string buttonUrl,
+            string notificationId,
+            bool ack = false,
+            bool acknowledged = false)
         {
             var version = new AdaptiveSchemaVersion(1, 0);
             AdaptiveCard card = new AdaptiveCard(version);
@@ -61,13 +87,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
 
             if (!string.IsNullOrWhiteSpace(imageUrl))
             {
-                card.Body.Add(new AdaptiveImage()
+                var img = new AdaptiveImage()
                 {
                     Url = new Uri(imageUrl, UriKind.RelativeOrAbsolute),
                     Spacing = AdaptiveSpacing.Default,
                     Size = AdaptiveImageSize.Stretch,
                     AltText = string.Empty,
-                });
+
+                };
+
+                // Image enlarge support for Teams web/desktop client.
+                img.AdditionalProperties.Add("msteams", new { AllowExpand = true });
+                card.Body.Add(img);
             }
 
             if (!string.IsNullOrWhiteSpace(summary))
@@ -84,9 +115,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 card.Body.Add(new AdaptiveTextBlock()
                 {
                     Text = author,
+                    Size = AdaptiveTextSize.Default,
+                    Weight = AdaptiveTextWeight.Bolder,
+                    Wrap = true,
+                });
+            }
+
+            if (ack && !string.IsNullOrWhiteSpace(notificationId))
+            {
+                card.Body.Add(new AdaptiveTextBlock()
+                {
+                    Text = acknowledged ? "Thanks for the confirmation!" : "An author requested a read receipt be sent when message is read. Please click the ✔️ acknowledge button below to send a read receipt.",
                     Size = AdaptiveTextSize.Small,
                     Weight = AdaptiveTextWeight.Lighter,
                     Wrap = true,
+                    Id = notificationId,
                 });
             }
 
@@ -98,6 +141,40 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                     Title = buttonTitle,
                     Url = new Uri(buttonUrl, UriKind.RelativeOrAbsolute),
                 });
+            }
+
+            if (ack && !acknowledged)
+            {
+                card.Actions.Add(new AdaptiveSubmitAction()
+                {
+                    Title = "✔️ acknowledge",
+                    Id = "acknowledge",
+                    Data = "acknowledge",
+                    DataJson = JsonConvert.SerializeObject(
+                        new { notificationId = notificationId }),
+                });
+            }
+
+            if (!string.IsNullOrEmpty(notificationId))
+            {
+                //card.Actions.Add(new AdaptiveSubmitAction()
+                //{
+                //    Title = "Message Detail",
+                //    Data = new AdaptiveCardTaskFetchValue<string> { Data = notificationId },
+                //});
+                //var taskModules = new[]
+                //{
+                //    TaskModuleUIConstants.AdaptiveCard,
+                //    TaskModuleUIConstants.CustomForm,
+                //    TaskModuleUIConstants.YouTube,
+                //}
+                //.Select(cardType => new AdaptiveSubmitAction()
+                //{
+                //    Title = cardType.ButtonTitle,
+                //    Data = new AdaptiveCardTaskFetchValue<string>() { Data = cardType.Id },
+                //})
+                //.ToList<AdaptiveAction>();
+                //card.Actions.AddRange(taskModules);
             }
 
             return card;

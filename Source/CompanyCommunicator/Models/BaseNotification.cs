@@ -51,5 +51,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets the Created DateTime value.
         /// </summary>
         public DateTime CreatedDateTime { get; set; }
+
+        public bool Ack { get; set; }
     }
 }

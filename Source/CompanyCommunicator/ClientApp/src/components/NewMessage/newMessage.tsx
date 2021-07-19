@@ -6,7 +6,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { withTranslation, WithTranslation } from "react-i18next";
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import * as AdaptiveCards from "adaptivecards";
-import { Button, Loader, Dropdown, Text, Flex, Input, TextArea, RadioGroup } from '@fluentui/react-northstar'
+import { Button, Loader, Dropdown, Text, Flex, Input, TextArea, RadioGroup, Checkbox } from '@fluentui/react-northstar'
 import * as microsoftTeams from "@microsoft/teams-js";
 
 import './newMessage.scss';
@@ -19,6 +19,7 @@ import {
 import { getBaseUrl } from '../../configVariables';
 import { ImageUtil } from '../../utility/imageutility';
 import { TFunction } from "i18next";
+import draftMessages from '../DraftMessages/draftMessages';
 
 type dropdownItem = {
     key: string,
@@ -41,7 +42,8 @@ export interface IDraftMessage {
     teams: any[],
     rosters: any[],
     groups: any[],
-    allUsers: boolean
+    allUsers: boolean,
+    ack: boolean
 }
 
 export interface formState {
@@ -75,6 +77,7 @@ export interface formState {
     selectedGroups: dropdownItem[],
     errorImageUrlMessage: string,
     errorButtonUrlMessage: string,
+    selectedRequestReadReceipt?: boolean
 }
 
 export interface INewMessageProps extends RouteComponentProps, WithTranslation {
@@ -118,6 +121,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             selectedTeams: [],
             selectedRosters: [],
             selectedGroups: [],
+            selectedRequestReadReceipt: false,
             errorImageUrlMessage: "",
             errorButtonUrlMessage: "",
         }
@@ -288,7 +292,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                 selectedRadioBtn: selectedRadioButton,
                 selectedTeams: draftMessageDetail.teams,
                 selectedRosters: draftMessageDetail.rosters,
-                selectedGroups: draftMessageDetail.groups
+                selectedGroups: draftMessageDetail.groups,
+                selectedRequestReadReceipt: draftMessageDetail.ack,
             });
 
             setCardTitle(this.card, draftMessageDetail.title);
@@ -527,6 +532,10 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                         >
 
                                         </RadioGroup>
+
+                                        <h3>Options</h3>
+                                        <Checkbox label="Request a read receipt"  checked={this.state.selectedRequestReadReceipt}
+                                            onChange={this.onRequestReadReceiptChanged} />
                                     </Flex>
                                 </Flex.Item>
                                 <Flex.Item size="size.half">
@@ -565,6 +574,13 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             selectedGroups: data.value === 'groups' ? this.state.selectedGroups : [],
             selectedGroupsNum: data.value === 'groups' ? this.state.selectedGroupsNum : 0,
         });
+    }
+
+    private onRequestReadReceiptChanged = (event: any, data: any) => {
+        this.setState({
+            selectedRequestReadReceipt: data.checked,
+        });
+        console.log(data);
     }
 
     private isSaveBtnDisabled = () => {
@@ -717,7 +733,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             teams: selectedTeams,
             rosters: selctedRosters,
             groups: selectedGroups,
-            allUsers: this.state.allUsersOptionSelected
+            allUsers: this.state.allUsersOptionSelected,
+            ack: this.state.selectedRequestReadReceipt,
         };
 
         if (this.state.exists) {

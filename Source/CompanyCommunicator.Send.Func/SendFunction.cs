@@ -7,6 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 {
     using System;
     using System.Threading.Tasks;
+    using AdaptiveCards;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Schema;
@@ -38,6 +39,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
         private readonly int maxNumberOfAttempts;
         private readonly double sendRetryDelayNumberOfSeconds;
+        private readonly string appBaseUri;
+        private readonly bool trackViewClickPII;
         private readonly INotificationService notificationService;
         private readonly ISendingNotificationDataRepository notificationRepo;
         private readonly IMessageService messageService;
@@ -68,6 +71,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             this.maxNumberOfAttempts = options.Value.MaxNumberOfAttempts;
             this.sendRetryDelayNumberOfSeconds = options.Value.SendRetryDelayNumberOfSeconds;
+            this.appBaseUri = options.Value.AppBaseUri;
+            this.trackViewClickPII = options.Value.TrackViewClickPII;
 
             this.notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
             this.messageService = messageService ?? throw new ArgumentNullException(nameof(messageService));
@@ -118,6 +123,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 {
                     await this.notificationService.UpdateSentNotification(
                         notificationId: messageContent.NotificationId,
+                        activityId: string.Empty,
                         recipientId: messageContent.RecipientData.RecipientId,
                         totalNumberOfSendThrottles: 0,
                         statusCode: SentNotificationDataEntity.FinalFaultedStatusCode,
@@ -168,6 +174,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 // Update sent notification table.
                 await this.notificationService.UpdateSentNotification(
                     notificationId: messageContent.NotificationId,
+                    activityId: string.Empty,
                     recipientId: messageContent.RecipientData.RecipientId,
                     totalNumberOfSendThrottles: 0,
                     statusCode: statusCode,
@@ -204,6 +211,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             await this.notificationService.UpdateSentNotification(
                     notificationId: messageContent.NotificationId,
+                    activityId: sendMessageResponse.ActivityId,
                     recipientId: messageContent.RecipientData.RecipientId,
                     totalNumberOfSendThrottles: sendMessageResponse.TotalNumberOfSendThrottles,
                     statusCode: sendMessageResponse.StatusCode,
@@ -228,13 +236,52 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 NotificationDataTableNames.SendingNotificationsPartition,
                 message.NotificationId);
 
+            var parsedResult = AdaptiveCard.FromJson(notification.Content);
+            var card = parsedResult.Card;
+
+            if (message.RecipientData.RecipientType == RecipientDataType.User)
+            {
+                var uniqueUser = this.trackViewClickPII ? message.RecipientData.RecipientId : Guid.NewGuid().ToString();
+
+                // TODO: do we need to encode this URI?
+                // TODO: use & istead of custom delimiter? or it will be fail for Teams AC ????
+                var trackImageUrl = $"{this.appBaseUri}/track?url={message.NotificationId}-{uniqueUser}.gif";
+
+                var pixel = new AdaptiveImage()
+                {
+                    Url = new Uri(trackImageUrl, UriKind.RelativeOrAbsolute),
+                    Spacing = AdaptiveSpacing.None,
+                    AltText = string.Empty,
+                };
+                pixel.AdditionalProperties.Add("width", "1px");
+                pixel.AdditionalProperties.Add("height", "1px");
+                card.Body.Add(pixel);
+
+                for (var i = 0; i < card.Actions.Count; i++)
+                {
+                    AdaptiveOpenUrlAction action = card.Actions[i] as AdaptiveOpenUrlAction;
+                    if (action != null)
+                    {
+                        var buttonUrl = $"{this.appBaseUri}/redirect?url={action.Url}&id={message.NotificationId}&userId={uniqueUser}";
+                        action.Url = new Uri(buttonUrl, UriKind.RelativeOrAbsolute);
+                    }
+                }
+            }
+
             var adaptiveCardAttachment = new Attachment()
             {
-                ContentType = AdaptiveCardContentType,
-                Content = JsonConvert.DeserializeObject(notification.Content),
+                ContentType = AdaptiveCard.ContentType,
+                Content = card,
             };
 
-            return MessageFactory.Attachment(adaptiveCardAttachment);
+            var messageActivity = MessageFactory.Attachment(adaptiveCardAttachment);
+            //var title = card.Body[0] as AdaptiveTextBlock;
+            //if (title != null)
+            //{
+            //    messageActivity.Summary = title.Text;
+            //}
+
+            return messageActivity;
         }
     }
 }

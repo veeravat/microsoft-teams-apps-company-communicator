@@ -87,6 +87,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     Rosters = draftNotificationEntity.Rosters,
                     Groups = draftNotificationEntity.Groups,
                     AllUsers = draftNotificationEntity.AllUsers,
+                    Ack = draftNotificationEntity.Ack,
                     MessageVersion = draftNotificationEntity.MessageVersion,
                     Succeeded = 0,
                     Failed = 0,
@@ -137,6 +138,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     Groups = notificationEntity.Groups,
                     Rosters = notificationEntity.Rosters,
                     AllUsers = notificationEntity.AllUsers,
+                    Ack = notificationEntity.Ack,
                 };
 
                 await this.CreateOrUpdateAsync(newNotificationEntity);

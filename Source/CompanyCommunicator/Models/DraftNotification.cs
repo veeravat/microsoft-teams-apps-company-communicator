@@ -47,6 +47,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// </summary>
         public bool AllUsers { get; set; }
 
+        public bool Ack { get; set; }
+
         /// <summary>
         /// Validates a draft notification.
         /// Teams and Rosters property should not contain more than 20 items.

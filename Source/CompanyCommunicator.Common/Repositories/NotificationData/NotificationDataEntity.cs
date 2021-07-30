@@ -76,6 +76,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// </summary>
         public bool IsDraft { get; set; }
 
+        public bool Ack { get; set; }
+
         /// <summary>
         /// Gets or sets the TeamsInString value.
         /// This property helps to save the Teams data in the Azure Table storage.

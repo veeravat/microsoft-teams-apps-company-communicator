@@ -37,6 +37,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// </summary>
         public string Author { get; set; }
 
+        public bool Ack { get; set; }
+
         /// <summary>
         /// Gets or sets the Button Title value.
         /// </summary>

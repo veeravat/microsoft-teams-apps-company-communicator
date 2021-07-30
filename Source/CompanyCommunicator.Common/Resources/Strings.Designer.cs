@@ -61,6 +61,33 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An author requested a read receipt be sent when message is read. Please click the ✔️ acknowledge button below to send a read receipt..
+        /// </summary>
+        public static string AckAlert {
+            get {
+                return ResourceManager.GetString("AckAlert", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ✔️ acknowledge.
+        /// </summary>
+        public static string AckButtonTitle {
+            get {
+                return ResourceManager.GetString("AckButtonTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Thanks for the confirmation!.
+        /// </summary>
+        public static string AckConfirmation {
+            get {
+                return ResourceManager.GetString("AckConfirmation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Contact your IT admin for permission to view this data..
         /// </summary>
         public static string AdminConsentError {

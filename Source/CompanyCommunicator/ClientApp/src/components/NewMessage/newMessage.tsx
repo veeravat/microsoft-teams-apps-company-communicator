@@ -19,7 +19,6 @@ import {
 import { getBaseUrl } from '../../configVariables';
 import { ImageUtil } from '../../utility/imageutility';
 import { TFunction } from "i18next";
-import draftMessages from '../DraftMessages/draftMessages';
 
 type dropdownItem = {
     key: string,
@@ -43,7 +42,7 @@ export interface IDraftMessage {
     rosters: any[],
     groups: any[],
     allUsers: boolean,
-    ack: boolean
+    ack?: boolean
 }
 
 export interface formState {
@@ -531,8 +530,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                             ]}
                                         >
                                         </RadioGroup>
-                                        <h3>Options</h3>
-                                        <Checkbox label="Request a read receipt" checked={this.state.selectedRequestReadReceipt}
+                                        <h3>{this.localize("SendOptions")}</h3>
+                                        <Checkbox label={this.localize("RequestReadReceipt")} checked={this.state.selectedRequestReadReceipt}
                                             onChange={this.onRequestReadReceiptChanged} />
                                     </Flex>
                                 </Flex.Item>

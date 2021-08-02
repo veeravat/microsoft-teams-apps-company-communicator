@@ -37,22 +37,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 acknowledged);
         }
 
-        public AdaptiveCard CreateMessageDetailsAdaptiveCard(string summary)
-        {
-            var version = new AdaptiveSchemaVersion(1, 2);
-            AdaptiveCard card = new AdaptiveCard(version);
-            if (!string.IsNullOrWhiteSpace(summary))
-            {
-                card.Body.Add(new AdaptiveTextBlock()
-                {
-                    Text = summary,
-                    Wrap = true,
-                });
-            }
-
-            return card;
-        }
-
         /// <summary>
         /// Create an adaptive card instance.
         /// </summary>
@@ -95,9 +79,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                     AltText = string.Empty,
 
                 };
-
-                // Image enlarge support for Teams web/desktop client.
-                img.AdditionalProperties.Add("msteams", new { AllowExpand = true });
                 card.Body.Add(img);
             }
 

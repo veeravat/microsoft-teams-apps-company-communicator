@@ -48,6 +48,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public Task UpdateSentNotification(
             string notificationId,
+            string activityId,
             string recipientId,
             int totalNumberOfSendThrottles,
             int statusCode,

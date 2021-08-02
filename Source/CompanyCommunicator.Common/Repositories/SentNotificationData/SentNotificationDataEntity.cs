@@ -86,6 +86,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// </summary>
         public static readonly string Retrying = "Retrying";
 
+        public string ActivityId { get; set; }
+
         /// <summary>
         /// Gets or sets a value indicating which type of recipient the notification was sent to
         /// using the recipient type strings at the top of this class.

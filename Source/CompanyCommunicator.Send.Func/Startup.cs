@@ -41,6 +41,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                     companyCommunicatorSendFunctionOptions.SendRetryDelayNumberOfSeconds =
                         configuration.GetValue<double>("SendRetryDelayNumberOfSeconds", 660);
+
+                    companyCommunicatorSendFunctionOptions.AppBaseUri =
+                        configuration.GetValue<string>("AppBaseUri");
+
+                    companyCommunicatorSendFunctionOptions.TrackViewClickPII =
+                        configuration.GetValue<bool>("TrackViewClickPII", false);
                 });
             builder.Services.AddOptions<BotOptions>()
                 .Configure<IConfiguration>((botOptions, configuration) =>

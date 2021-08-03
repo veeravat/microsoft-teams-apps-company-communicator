@@ -53,32 +53,14 @@
             var query = string.Format(this.uniqueViewsKustoQuery, notificationId);
             var uri = string.Format(Host, this.appInsightsId, query, this.timespan);
 
-            var result = await this.GetKustoQueryResultAsync(query, uri, cancellationToken);
-
             try
             {
-                var row = result?.Tables?[0]?.Rows?[0];
-                if (row.Count < 2)
-                {
-                    return 0;
-                }
-
-                var count = row[1];
-                if (count != null)
-                {
-                    return Convert.ToInt32(count);
-                }
-                else
-                {
-                    return 0;
-                }
+                var result = await this.GetKustoQueryResultAsync(query, uri, cancellationToken);
+                return this.GetCountFromResult(result);
             }
             catch (Exception ex)
             {
-                this.logger.LogCritical($"notificationId={notificationId}");
-                this.logger.LogCritical($"query={query}");
-                this.logger.LogCritical($"uri={uri}");
-                this.logger.LogError(ex, $"Error getting result from Application Insights.");
+                this.logger.LogError(ex, $"GetUniqueViewsCountByNotificationIdAsync. Error getting result from Application Insights. notificationId={notificationId}, query ={query}, uri={uri}");
                 return 0;
             }
         }
@@ -89,32 +71,14 @@
             var query = string.Format(this.uniqueClicksKustoQuery, notificationId);
             var uri = string.Format(Host, this.appInsightsId, query, this.timespan);
 
-            var result = await this.GetKustoQueryResultAsync(query, uri, cancellationToken);
-
             try
             {
-                var row = result?.Tables?[0]?.Rows?[0];
-                if (row.Count < 2)
-                {
-                    return 0;
-                }
-
-                var count = row[1];
-                if (count != null)
-                {
-                    return Convert.ToInt32(count);
-                }
-                else
-                {
-                    return 0;
-                }
+                var result = await this.GetKustoQueryResultAsync(query, uri, cancellationToken);
+                return this.GetCountFromResult(result);
             }
             catch (Exception ex)
             {
-                this.logger.LogCritical($"notificationId={notificationId}");
-                this.logger.LogCritical($"query={query}");
-                this.logger.LogCritical($"uri={uri}");
-                this.logger.LogError(ex, $"GetUniqueClicksCountByNotificationIdAsync Error getting result from Application Insights.");
+                this.logger.LogError(ex, $"GetUniqueClicksCountByNotificationIdAsync. Error getting result from Application Insights. notificationId={notificationId}, query ={query}, uri={uri}");
                 return 0;
             }
         }
@@ -125,32 +89,14 @@
             var query = string.Format(this.acknowledgementsCountKustoQuery, notificationId);
             var uri = string.Format(Host, this.appInsightsId, query, this.timespan);
 
-            var result = await this.GetKustoQueryResultAsync(query, uri, cancellationToken);
-
             try
             {
-                var row = result?.Tables?[0]?.Rows?[0];
-                if (row.Count < 2)
-                {
-                    return 0;
-                }
-
-                var count = row[1];
-                if (count != null)
-                {
-                    return Convert.ToInt32(count);
-                }
-                else
-                {
-                    return 0;
-                }
+                var result = await this.GetKustoQueryResultAsync(query, uri, cancellationToken);
+                return this.GetCountFromResult(result);
             }
             catch (Exception ex)
             {
-                this.logger.LogCritical($"notificationId={notificationId}");
-                this.logger.LogCritical($"query={query}");
-                this.logger.LogCritical($"uri={uri}");
-                this.logger.LogError(ex, $"GetAcknowledgementsCountByNotificationIdAsync. Error getting result from Application Insights.");
+                this.logger.LogError(ex, $"GetAcknowledgementsCountByNotificationIdAsync. Error getting result from Application Insights. notificationId={notificationId}, query ={query}, uri={uri}");
                 return 0;
             }
         }
@@ -161,32 +107,14 @@
             var query = string.Format(this.totalViewsKustoQuery, notificationId);
             var uri = string.Format(Host, this.appInsightsId, query, this.timespan);
 
-            var result = await this.GetKustoQueryResultAsync(query, uri, cancellationToken);
-
             try
             {
-                var row = result?.Tables?[0]?.Rows?[0];
-                if (row.Count < 2)
-                {
-                    return 0;
-                }
-
-                var count = row[1];
-                if (count != null)
-                {
-                    return Convert.ToInt32(count);
-                }
-                else
-                {
-                    return 0;
-                }
+                var result = await this.GetKustoQueryResultAsync(query, uri, cancellationToken);
+                return this.GetCountFromResult(result);
             }
             catch (Exception ex)
             {
-                this.logger.LogCritical($"notificationId={notificationId}");
-                this.logger.LogCritical($"query={query}");
-                this.logger.LogCritical($"uri={uri}");
-                this.logger.LogError(ex, $"GetTotalViewsCountByNotification. Error getting result from Application Insights.");
+                this.logger.LogError(ex, $"GetTotalViewsCountByNotificationIdAsync. Error getting result from Application Insights. notificationId={notificationId}, query ={query}, uri={uri}");
                 return 0;
             }
         }
@@ -207,6 +135,18 @@
             var responseBody = await response.Content.ReadAsStringAsync();
             this.logger.LogCritical($"GetKustoQueryResult {responseBody}");
             return JsonConvert.DeserializeObject<KustoQueryResult>(responseBody);
+        }
+
+        private int GetCountFromResult(KustoQueryResult result)
+        {
+            var rows = result.Tables[0].Rows;
+            if (rows.Count == 0)
+            {
+                return 0;
+            }
+
+            var count = rows[0][1];
+            return Convert.ToInt32(count);
         }
     }
 }

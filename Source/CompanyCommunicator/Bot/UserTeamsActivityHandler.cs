@@ -14,8 +14,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     using Microsoft.Bot.Schema;
     using Microsoft.Bot.Schema.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Translator;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// Company Communicator User Bot.
@@ -26,7 +28,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         private static readonly string TeamRenamedEventType = "teamRenamed";
 
         private readonly TeamsDataCapture teamsDataCapture;
-        private readonly INotificationDataRepository notificationDataRepository;
+        private readonly ISendingNotificationDataRepository sendingNotificationRepo;
         private readonly AdaptiveCardCreator adaptiveCardCreator;
         private readonly ITranslator translator;
 
@@ -36,12 +38,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// <param name="teamsDataCapture">Teams data capture service.</param>
         public UserTeamsActivityHandler(TeamsDataCapture teamsDataCapture,
             ITranslator translator,
-            INotificationDataRepository notificationDataRepository,
+            ISendingNotificationDataRepository sendingNotificationRepo,
             AdaptiveCardCreator adaptiveCardCreator)
         {
+            this.sendingNotificationRepo = sendingNotificationRepo ?? throw new ArgumentNullException(nameof(sendingNotificationRepo));
             this.teamsDataCapture = teamsDataCapture ?? throw new ArgumentNullException(nameof(teamsDataCapture));
             this.translator = translator ?? throw new ArgumentException(nameof(translator));
-            this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentException(nameof(notificationDataRepository));
             this.adaptiveCardCreator = adaptiveCardCreator ?? throw new ArgumentException(nameof(adaptiveCardCreator));
         }
 
@@ -95,7 +97,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                     string notificationId = value["notificationId"];
                     bool translation = Convert.ToBoolean(value["translation"]);
 
-                    var notificationEntity = await this.notificationDataRepository.GetAsync(NotificationDataTableNames.SentNotificationsPartition, notificationId);
+                    // Download serialized AC from blob storage.
+                    var jsonAC = await this.sendingNotificationRepo.GetAdaptiveCardAsync(notificationId);
+                    var acResult = AdaptiveCard.FromJson(jsonAC);
+                    var card = acResult.Card;
+
+                    AdaptiveSubmitAction translateButton = null;
+                    AdaptiveOpenUrlAction openUrlButton = null;
+                    for (int i = 0; i < card.Actions.Count; i++)
+                    {
+                        var action = card.Actions[i];
+                        if (action is AdaptiveSubmitAction)
+                        {
+                            translateButton = action as AdaptiveSubmitAction;
+                        }
+                        else if (action is AdaptiveOpenUrlAction)
+                        {
+                            openUrlButton = action as AdaptiveOpenUrlAction;
+                        }
+                    }
 
                     if (translation)
                     {
@@ -104,20 +124,34 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                         if (detectedUserLocale.Contains('-'))
                         {
                             userLanguage = detectedUserLocale.Split('-')[0];
-                            notificationEntity.Title = await this.translator.TranslateAsync(notificationEntity.Title, userLanguage);
-                            if (!string.IsNullOrWhiteSpace(notificationEntity.Summary))
-                            {
-                                notificationEntity.Summary = await this.translator.TranslateAsync(notificationEntity.Summary, userLanguage);
-                            }
-
-                            if (!string.IsNullOrWhiteSpace(notificationEntity.ButtonTitle))
-                            {
-                                notificationEntity.ButtonTitle = await this.translator.TranslateAsync(notificationEntity.ButtonTitle, userLanguage);
-                            }
                         }
+
+                        var title = card.Body[0] as AdaptiveTextBlock;
+                        if (title != null)
+                        {
+                            title.Text = await this.translator.TranslateAsync(title.Text, userLanguage);
+                        }
+
+                        var summary = card.Body[1] as AdaptiveTextBlock;
+                        if (summary != null)
+                        {
+                            summary.Text = await this.translator.TranslateAsync(summary.Text, userLanguage);
+                        }
+
+                        openUrlButton.Title = await this.translator.TranslateAsync(openUrlButton.Title, userLanguage);
                     }
 
-                    var card = this.adaptiveCardCreator.CreateAdaptiveCard(notificationEntity, translation);
+                    if (translateButton != null && translation)
+                    {
+                        translateButton.Title = Strings.ShowOriginalButton;
+                        translateButton.DataJson = JsonConvert.SerializeObject(new { notificationId = notificationId, translation = false });
+                    }
+                    else
+                    {
+                        translateButton.Title = Strings.TranslateButton;
+                        translateButton.DataJson = JsonConvert.SerializeObject(new { notificationId = notificationId, translation = true });
+                    }
+
 
                     var adaptiveCardAttachment = new Attachment()
                     {
@@ -129,10 +163,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                     activity.Id = turnContext.Activity.ReplyToId;
                     await turnContext.UpdateActivityAsync(activity, cancellationToken);
                 }
-            }
-            else
-            {
-                await base.OnMessageActivityAsync(turnContext, cancellationToken);
             }
         }
 

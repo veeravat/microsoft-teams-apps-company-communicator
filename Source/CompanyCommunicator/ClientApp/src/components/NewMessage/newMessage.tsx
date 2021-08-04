@@ -359,6 +359,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                                 placeholder={this.localize("Summary")}
                                                 value={this.state.summary}
                                                 onChange={this.onSummaryChanged}
+                                                id="summaryTextArea"
                                                 fluid />
                                         </div>
 
@@ -537,6 +538,9 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                             <Flex className="footerContainer" vAlign="end" hAlign="end">
                                 <Flex className="buttonContainer" gap="gap.small">
                                     <Flex.Item push>
+                                        <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label={this.localize("PreparingMessageLabel")} labelPosition="end" />
+                                    </Flex.Item>
+                                    <Flex.Item push>
                                         <Button content={this.localize("Back")} onClick={this.onBack} secondary />
                                     </Flex.Item>
                                     <Button content={this.localize("SaveAsDraft")} disabled={this.isSaveBtnDisabled()} id="saveBtn" onClick={this.onSave} primary />
@@ -699,6 +703,9 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
     }
 
     private onSave = () => {
+        let spanner = document.getElementsByClassName("sendingLoader");
+        spanner[0].classList.remove("hiddenLoader");
+
         const selectedTeams: string[] = [];
         const selctedRosters: string[] = [];
         const selectedGroups: string[] = [];

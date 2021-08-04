@@ -51,6 +51,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common
         public const string BlobContainerName = "exportdatablobs";
 
         /// <summary>
+        /// prefix for data uri image.
+        /// </summary>
+        public const string ImageBase64Format = "data:image/";
+
+        /// <summary>
         /// get the group type Hidden Membership.
         /// </summary>
         public const string HiddenMembership = "HiddenMembership";

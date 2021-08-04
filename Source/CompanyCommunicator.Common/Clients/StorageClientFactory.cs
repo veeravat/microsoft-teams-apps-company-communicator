@@ -22,13 +22,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients
         /// Initializes a new instance of the <see cref="StorageClientFactory"/> class.
         /// </summary>
         /// <param name="repositoryOptions">User data repository.</param>
-        public StorageClientFactory(IOptions<RepositoryOptions> repositoryOptions)
+        public StorageClientFactory(IOptions<RepositoryOptions> repositoryOptions
+            /*, BlobServiceClient blobServiceClient*/)
         {
             this.storageConnectionString = repositoryOptions.Value.StorageAccountConnectionString;
         }
 
         /// <inheritdoc/>
-        public BlobContainerClient CreateBlobContainerClient()
+        public BlobContainerClient CreateBlobContainerClient(string blobContainerName)
         {
             var options = new BlobClientOptions();
 
@@ -39,7 +40,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients
 
             return new BlobContainerClient(
                 this.storageConnectionString,
-                Constants.BlobContainerName,
+                blobContainerName,
                 options);
         }
     }

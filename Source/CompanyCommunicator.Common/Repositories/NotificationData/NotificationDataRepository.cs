@@ -10,19 +10,24 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
     using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Blob;
 
     /// <summary>
     /// Repository of the notification data in the table storage.
     /// </summary>
     public class NotificationDataRepository : BaseRepository<NotificationDataEntity>, INotificationDataRepository
     {
+        private readonly IBlobStorageProvider storageProvider;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="NotificationDataRepository"/> class.
         /// </summary>
+        /// <param name="storageProvider">The blob storage provider.</param>
         /// <param name="logger">The logging service.</param>
         /// <param name="repositoryOptions">Options used to create the repository.</param>
         /// <param name="tableRowKeyGenerator">Table row key generator service.</param>
         public NotificationDataRepository(
+            IBlobStorageProvider storageProvider,
             ILogger<NotificationDataRepository> logger,
             IOptions<RepositoryOptions> repositoryOptions,
             TableRowKeyGenerator tableRowKeyGenerator)
@@ -33,6 +38,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                   defaultPartitionKey: NotificationDataTableNames.DraftNotificationsPartition,
                   ensureTableExists: repositoryOptions.Value.EnsureTableExists)
         {
+            this.storageProvider = storageProvider ?? throw new ArgumentNullException(nameof(storageProvider));
             this.TableRowKeyGenerator = tableRowKeyGenerator;
         }
 
@@ -75,6 +81,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     Id = newSentNotificationId,
                     Title = draftNotificationEntity.Title,
                     ImageLink = draftNotificationEntity.ImageLink,
+                    ImageBase64BlobName = draftNotificationEntity.ImageBase64BlobName,
                     Summary = draftNotificationEntity.Summary,
                     Author = draftNotificationEntity.Author,
                     ButtonTitle = draftNotificationEntity.ButtonTitle,
@@ -95,6 +102,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     SendingStartedDate = DateTime.UtcNow,
                     Status = NotificationStatus.Queued.ToString(),
                 };
+
                 await this.CreateOrUpdateAsync(sentNotificationEntity);
 
                 // Delete the draft notification.
@@ -138,6 +146,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     Rosters = notificationEntity.Rosters,
                     AllUsers = notificationEntity.AllUsers,
                 };
+
+                if (!string.IsNullOrEmpty(notificationEntity.ImageBase64BlobName))
+                {
+                    await this.storageProvider.CopyImageBlobAsync(notificationEntity.ImageBase64BlobName, newId);
+                    newNotificationEntity.ImageBase64BlobName = newId;
+                }
 
                 await this.CreateOrUpdateAsync(newNotificationEntity);
             }
@@ -205,6 +219,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 this.Logger.LogError(ex, ex.Message);
                 throw;
             }
+        }
+
+        /// <inheritdoc/>
+        public async Task<string> SaveImageAsync(string blobName, string base64Image)
+        {
+            return await this.storageProvider.UploadBase64ImageAsync(blobName, base64Image);
+        }
+
+        /// <inheritdoc/>
+        public async Task<string> GetImageAsync(string prefix, string blobName)
+        {
+            // TODO: validate prefix.
+            return prefix + await this.storageProvider.DownloadBase64ImageAsync(blobName);
         }
 
         private string AppendNewLine(string originalString, string newString)

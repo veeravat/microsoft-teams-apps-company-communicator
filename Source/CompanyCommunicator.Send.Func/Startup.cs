@@ -95,6 +95,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             // Add the Notification service.
             builder.Services.AddTransient<INotificationService, NotificationService>();
+
+            builder.Services.AddTransient<IStorageClientFactory, StorageClientFactory>();
+            builder.Services.AddTransient<IBlobStorageProvider, BlobStorageProvider>();
         }
     }
 }

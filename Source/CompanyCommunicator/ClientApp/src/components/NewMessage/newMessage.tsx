@@ -372,12 +372,13 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         fileReader.onerror = (error) => {
             //reject(error);
         }
+    }
 
     handleUploadClick = (event: any) => {
         if (this.fileInput.current) {
             this.fileInput.current.click();
         }
-    };
+    }
 
     public render(): JSX.Element {
         if (this.state.loader) {

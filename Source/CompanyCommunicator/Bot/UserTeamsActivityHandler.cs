@@ -6,6 +6,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 {
     using System;
+    using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
     using AdaptiveCards;
@@ -18,6 +19,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Translator;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
 
     /// <summary>
     /// Company Communicator User Bot.
@@ -99,6 +101,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 
                     // Download serialized AC from blob storage.
                     var jsonAC = await this.sendingNotificationRepo.GetAdaptiveCardAsync(notificationId);
+
+                    // remove base64 encoding as it is too verbose and will not meet message size limit of 64kb from audit service
+                    // ex: "imagePath": "data:image/png;name=..png;base64,iVBORw0KGgoAAAANS" -> "imagePath": "data:image/png;name=..png;base64,<encoded>"
+                    var regex = new Regex(";base64,([^\"]+)\"", RegexOptions.Compiled);
+                    jsonAC = regex.Replace(jsonAC, ";base64,<encoded>\"");
+
                     var acResult = AdaptiveCard.FromJson(jsonAC);
                     var card = acResult.Card;
 

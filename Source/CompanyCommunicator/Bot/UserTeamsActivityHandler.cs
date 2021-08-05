@@ -146,7 +146,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                             summary.Text = await this.translator.TranslateAsync(summary.Text, userLanguage);
                         }
 
-                        openUrlButton.Title = await this.translator.TranslateAsync(openUrlButton.Title, userLanguage);
+                        if (openUrlButton != null)
+                        {
+                            openUrlButton.Title = await this.translator.TranslateAsync(openUrlButton.Title, userLanguage);
+                        }
                     }
 
                     if (translateButton != null && translation)

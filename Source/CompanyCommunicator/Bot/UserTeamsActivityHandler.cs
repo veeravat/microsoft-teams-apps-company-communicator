@@ -31,6 +31,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 
         private readonly TeamsDataCapture teamsDataCapture;
         private readonly ISendingNotificationDataRepository sendingNotificationRepo;
+        private readonly INotificationDataRepository notificationDataRepository;
         private readonly AdaptiveCardCreator adaptiveCardCreator;
         private readonly ITranslator translator;
 
@@ -41,9 +42,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         public UserTeamsActivityHandler(TeamsDataCapture teamsDataCapture,
             ITranslator translator,
             ISendingNotificationDataRepository sendingNotificationRepo,
+            INotificationDataRepository notificationDataRepository,
             AdaptiveCardCreator adaptiveCardCreator)
         {
             this.sendingNotificationRepo = sendingNotificationRepo ?? throw new ArgumentNullException(nameof(sendingNotificationRepo));
+            this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentException(nameof(notificationDataRepository));
             this.teamsDataCapture = teamsDataCapture ?? throw new ArgumentNullException(nameof(teamsDataCapture));
             this.translator = translator ?? throw new ArgumentException(nameof(translator));
             this.adaptiveCardCreator = adaptiveCardCreator ?? throw new ArgumentException(nameof(adaptiveCardCreator));
@@ -99,31 +102,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                     string notificationId = value["notificationId"];
                     bool translation = Convert.ToBoolean(value["translation"]);
 
-                    // Download serialized AC from blob storage.
-                    var jsonAC = await this.sendingNotificationRepo.GetAdaptiveCardAsync(notificationId);
-
-                    // remove base64 encoding as it is too verbose and will not meet message size limit of 64kb from audit service
-                    // ex: "imagePath": "data:image/png;name=..png;base64,iVBORw0KGgoAAAANS" -> "imagePath": "data:image/png;name=..png;base64,<encoded>"
-                    var regex = new Regex(";base64,([^\"]+)\"", RegexOptions.Compiled);
-                    jsonAC = regex.Replace(jsonAC, ";base64,<encoded>\"");
-
-                    var acResult = AdaptiveCard.FromJson(jsonAC);
-                    var card = acResult.Card;
-
-                    AdaptiveSubmitAction translateButton = null;
-                    AdaptiveOpenUrlAction openUrlButton = null;
-                    for (int i = 0; i < card.Actions.Count; i++)
-                    {
-                        var action = card.Actions[i];
-                        if (action is AdaptiveSubmitAction)
-                        {
-                            translateButton = action as AdaptiveSubmitAction;
-                        }
-                        else if (action is AdaptiveOpenUrlAction)
-                        {
-                            openUrlButton = action as AdaptiveOpenUrlAction;
-                        }
-                    }
+                    var notificationEntity = await this.notificationDataRepository.GetAsync(NotificationDataTableNames.SentNotificationsPartition, notificationId);
 
                     if (translation)
                     {
@@ -134,35 +113,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                             userLanguage = detectedUserLocale.Split('-')[0];
                         }
 
-                        var title = card.Body[0] as AdaptiveTextBlock;
-                        if (title != null)
+                        notificationEntity.Title = await this.translator.TranslateAsync(notificationEntity.Title, userLanguage);
+                        if (!string.IsNullOrWhiteSpace(notificationEntity.Summary))
                         {
-                            title.Text = await this.translator.TranslateAsync(title.Text, userLanguage);
+                            notificationEntity.Summary = await this.translator.TranslateAsync(notificationEntity.Summary, userLanguage);
                         }
 
-                        var summary = card.Body[1] as AdaptiveTextBlock;
-                        if (summary != null)
+                        if (!string.IsNullOrWhiteSpace(notificationEntity.ButtonTitle))
                         {
-                            summary.Text = await this.translator.TranslateAsync(summary.Text, userLanguage);
-                        }
-
-                        if (openUrlButton != null)
-                        {
-                            openUrlButton.Title = await this.translator.TranslateAsync(openUrlButton.Title, userLanguage);
+                            notificationEntity.ButtonTitle = await this.translator.TranslateAsync(notificationEntity.ButtonTitle, userLanguage);
                         }
                     }
 
-                    if (translateButton != null && translation)
+                    // Download base64 data from blob convert to base64 string.
+                    if (!string.IsNullOrEmpty(notificationEntity.ImageBase64BlobName))
                     {
-                        translateButton.Title = Strings.ShowOriginalButton;
-                        translateButton.DataJson = JsonConvert.SerializeObject(new { notificationId = notificationId, translation = false });
-                    }
-                    else
-                    {
-                        translateButton.Title = Strings.TranslateButton;
-                        translateButton.DataJson = JsonConvert.SerializeObject(new { notificationId = notificationId, translation = true });
+                        notificationEntity.ImageLink = await this.notificationDataRepository.GetImageAsync(notificationEntity.ImageLink, notificationEntity.ImageBase64BlobName);
                     }
 
+                    var card = this.adaptiveCardCreator.CreateAdaptiveCard(notificationEntity, translation);
 
                     var adaptiveCardAttachment = new Attachment()
                     {

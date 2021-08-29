@@ -10,6 +10,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
     /// </summary>
     public class SendMessageResponse
     {
+        public string ActivityId { get; set; }
+
         /// <summary>
         /// Gets or sets the status code.
         /// </summary>

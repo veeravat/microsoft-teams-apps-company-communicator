@@ -9,6 +9,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Bot.Builder;
+    using Microsoft.Bot.Builder.Teams;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
@@ -40,7 +41,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         private readonly int maxNumberOfAttempts;
         private readonly double sendRetryDelayNumberOfSeconds;
         private readonly INotificationService notificationService;
-        private readonly ISendingNotificationDataRepository notificationRepo;
+        private readonly ISendingNotificationDataRepository sendingNotificationDataRepository;
+        private readonly INotificationDataRepository notificationDataRepository;
         private readonly IMessageService messageService;
         private readonly ISendQueue sendQueue;
         private readonly IStringLocalizer<Strings> localizer;
@@ -58,7 +60,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             IOptions<SendFunctionOptions> options,
             INotificationService notificationService,
             IMessageService messageService,
-            ISendingNotificationDataRepository notificationRepo,
+            ISendingNotificationDataRepository sendingNotificationDataRepository,
+            INotificationDataRepository notificationDataRepository,
             ISendQueue sendQueue,
             IStringLocalizer<Strings> localizer)
         {
@@ -72,7 +75,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             this.notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
             this.messageService = messageService ?? throw new ArgumentNullException(nameof(messageService));
-            this.notificationRepo = notificationRepo ?? throw new ArgumentNullException(nameof(notificationRepo));
+            this.sendingNotificationDataRepository = sendingNotificationDataRepository ?? throw new ArgumentNullException(nameof(sendingNotificationDataRepository));
+            this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
             this.sendQueue = sendQueue ?? throw new ArgumentNullException(nameof(sendQueue));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
@@ -243,16 +247,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         private async Task<IMessageActivity> GetMessageActivity(SendQueueMessageContent message)
         {
             // Download serialized AC from blob storage.
-            var jsonAC = await this.notificationRepo.GetAdaptiveCardAsync(message.NotificationId);
-
+            var jsonAC = await this.sendingNotificationDataRepository.GetAdaptiveCardAsync(message.NotificationId);
 
             var adaptiveCardAttachment = new Attachment()
             {
                 ContentType = AdaptiveCardContentType,
                 Content = JsonConvert.DeserializeObject(jsonAC),
             };
+            var messageActivity = MessageFactory.Attachment(adaptiveCardAttachment);
 
-            return MessageFactory.Attachment(adaptiveCardAttachment);
+            var notification = await this.notificationDataRepository.GetAsync(
+                NotificationDataTableNames.SentNotificationsPartition,
+                message.NotificationId);
+            //messageActivity.TeamsNotifyUser();
+            messageActivity.Summary = notification.Title;
+
+            return messageActivity;
         }
     }
 }

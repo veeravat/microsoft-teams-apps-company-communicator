@@ -19,6 +19,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Blob;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
@@ -43,6 +44,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                     companyCommunicatorSendFunctionOptions.SendRetryDelayNumberOfSeconds =
                         configuration.GetValue<double>("SendRetryDelayNumberOfSeconds", 660);
+
+                    companyCommunicatorSendFunctionOptions.AppBaseUri =
+                        configuration.GetValue<string>("AppBaseUri");
+
+                    companyCommunicatorSendFunctionOptions.TrackViewClickPII =
+                        configuration.GetValue<bool>("TrackViewClickPII", false);
                 });
             builder.Services.AddOptions<BotOptions>()
                 .Configure<IConfiguration>((botOptions, configuration) =>
@@ -86,6 +93,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             // Add teams services.
             builder.Services.AddTransient<IMessageService, MessageService>();
+            builder.Services.AddTransient<AdaptiveCardCreator>();
 
             // Add repositories.
             builder.Services.AddSingleton<ISendingNotificationDataRepository, SendingNotificationDataRepository>();

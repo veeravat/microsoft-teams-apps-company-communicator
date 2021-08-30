@@ -62,6 +62,8 @@
   "Duration": "Duration",
   "Results": "Results",
   "Success": "Success : {{SuccessCount}}",
+  "Views": "Unique Views : {{ViewsCount}}",
+  "Clicks": "Unique Clicks : {{ClicksCount}}",
   "Failure": "Failure : {{FailureCount}}",
   "Unknown": "Unknown : {{UnknownCount}}",
   "Throttled": "Throttled : ",

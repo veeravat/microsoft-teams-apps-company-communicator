@@ -22,6 +22,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Analytics;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
@@ -37,6 +38,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     {
         private readonly INotificationDataRepository notificationDataRepository;
         private readonly ISentNotificationDataRepository sentNotificationDataRepository;
+        private readonly IAnalyticsService analyticsService;
         private readonly ITeamDataRepository teamDataRepository;
         private readonly IPrepareToSendQueue prepareToSendQueue;
         private readonly IDataQueue dataQueue;
@@ -66,6 +68,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         public SentNotificationsController(
             INotificationDataRepository notificationDataRepository,
             ISentNotificationDataRepository sentNotificationDataRepository,
+            IAnalyticsService analyticsService,
             ITeamDataRepository teamDataRepository,
             IPrepareToSendQueue prepareToSendQueue,
             IDataQueue dataQueue,
@@ -84,6 +87,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
             this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
+            this.analyticsService = analyticsService ?? throw new ArgumentNullException(nameof(analyticsService));
             this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
             this.prepareToSendQueue = prepareToSendQueue ?? throw new ArgumentNullException(nameof(prepareToSendQueue));
             this.dataQueue = dataQueue ?? throw new ArgumentNullException(nameof(dataQueue));
@@ -208,6 +212,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             var userId = this.HttpContext.User.FindFirstValue(Common.Constants.ClaimTypeUserId);
             var userNotificationDownload = await this.exportDataRepository.GetAsync(userId, id);
 
+            var uniqueViews = await this.analyticsService.GetUniqueViewsCountByNotificationIdAsync(id);
+            var uniqueClicks = await this.analyticsService.GetUniqueClicksCountByNotificationIdAsync(id);
+
             var result = new SentNotification
             {
                 Id = notificationEntity.Id,
@@ -221,6 +228,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 CreatedDateTime = notificationEntity.CreatedDate,
                 SentDate = notificationEntity.SentDate,
                 Succeeded = notificationEntity.Succeeded,
+                ViewsCount = uniqueViews,
+                ClicksCount = uniqueClicks,
                 Failed = notificationEntity.Failed,
                 Unknown = this.GetUnknownCount(notificationEntity),
                 TeamNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Teams),

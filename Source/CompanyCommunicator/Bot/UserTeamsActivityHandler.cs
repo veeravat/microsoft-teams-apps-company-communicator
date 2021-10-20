@@ -62,8 +62,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                 if (string.IsNullOrEmpty(txt) && value != null)
                 {
                     string notificationId = value["notificationId"];
-
                     var notificationEntity = await this.notificationDataRepository.GetAsync(NotificationDataTableNames.SentNotificationsPartition, notificationId);
+                    if (string.IsNullOrWhiteSpace(notificationEntity.ButtonLink))
+                    {
+                        notificationEntity.ButtonLink = value["trackClickUrl"];
+                    }
 
                     var card = this.adaptiveCardCreator.CreateAdaptiveCard(notificationEntity, true);
 

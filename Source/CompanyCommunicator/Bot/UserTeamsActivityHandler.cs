@@ -63,7 +63,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                 {
                     string notificationId = value["notificationId"];
                     var notificationEntity = await this.notificationDataRepository.GetAsync(NotificationDataTableNames.SentNotificationsPartition, notificationId);
-                    if (string.IsNullOrWhiteSpace(notificationEntity.ButtonLink))
+                    if (!string.IsNullOrWhiteSpace(notificationEntity.ButtonLink))
                     {
                         notificationEntity.ButtonLink = value["trackClickUrl"];
                     }

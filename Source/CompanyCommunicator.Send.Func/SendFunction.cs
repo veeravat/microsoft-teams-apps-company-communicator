@@ -282,6 +282,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                         var buttonUrl = $"{this.appBaseUri}/redirect?url={action.Url}&id={message.NotificationId}&userId={uniqueUser}";
                         action.Url = new Uri(buttonUrl, UriKind.RelativeOrAbsolute);
                     }
+                    else
+                    {
+                        AdaptiveSubmitAction submitAction = card.Actions[i] as AdaptiveSubmitAction;
+                        if (submitAction != null)
+                        {
+                            submitAction.DataJson = JsonConvert.SerializeObject(
+                            new { notificationId = notification.NotificationId, trackClickUrl = action.Url });
+                        }
+                    }
                 }
             }
 

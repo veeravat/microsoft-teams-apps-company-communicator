@@ -274,21 +274,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 pixel.AdditionalProperties.Add("height", "1px");
                 card.Body.Add(pixel);
 
+                string buttonUrl = string.Empty;
                 for (var i = 0; i < card.Actions.Count; i++)
                 {
                     AdaptiveOpenUrlAction action = card.Actions[i] as AdaptiveOpenUrlAction;
                     if (action != null)
                     {
-                        var buttonUrl = $"{this.appBaseUri}/redirect?url={action.Url}&id={message.NotificationId}&userId={uniqueUser}";
+                        buttonUrl = $"{this.appBaseUri}/redirect?url={action.Url}&id={message.NotificationId}&userId={uniqueUser}";
                         action.Url = new Uri(buttonUrl, UriKind.RelativeOrAbsolute);
                     }
-                    else
+                }
+
+                if (!string.IsNullOrWhiteSpace(buttonUrl))
+                {
+                    for (var i = 0; i < card.Actions.Count; i++)
                     {
                         AdaptiveSubmitAction submitAction = card.Actions[i] as AdaptiveSubmitAction;
                         if (submitAction != null)
                         {
                             submitAction.DataJson = JsonConvert.SerializeObject(
-                            new { notificationId = notification.NotificationId, trackClickUrl = action.Url });
+                            new { notificationId = notification.NotificationId, trackClickUrl = buttonUrl });
                         }
                     }
                 }

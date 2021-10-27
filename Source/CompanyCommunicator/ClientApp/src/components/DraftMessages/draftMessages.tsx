@@ -102,8 +102,18 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
                 key: keyCount,
                 content: (
                     <Flex vAlign="center" fill gap="gap.small">
-                        <Flex.Item shrink={0} grow={1}>
-                            <Text>{message.title}</Text>
+                        <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} grow={1}>
+                            <Text
+                                truncated
+                                content={message.title}
+                            >
+                            </Text>
+                        </Flex.Item>
+                        <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} shrink={false}>
+                            <Text truncated className="semiBold" content={message.author} />
+                        </Flex.Item>
+                        <Flex.Item size="size.quarter" variables={{'size.quarter': '24%'}}>
+                            <Text truncated className="semiBold" content={message.scheduledDateTime}/>
                         </Flex.Item>
                         <Flex.Item shrink={0} align="end">
                             <Overflow message={message} title="" />
@@ -142,13 +152,35 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
             key: "labels",
             content: (
                 <Flex vAlign="center" fill gap="gap.small">
-                    <Flex.Item>
+                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} grow={1}>
                         <Text
                             truncated
                             weight="bold"
                             content={this.localize("TitleText")}
                         >
                         </Text>
+                    </Flex.Item>
+                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }}>
+                        <Text></Text>
+                    </Flex.Item>
+                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} shrink={false}>
+                        <Text
+                            truncated
+                            weight="bold"
+                            content={this.localize("Author")}
+                        >
+                        </Text>
+                    </Flex.Item>
+                    <Flex.Item size="size.quarter" variables={{'size.quarter': '24%'}}>
+                        <Text
+                            truncated
+                            weight="bold"
+                            content={this.localize("ScheduledDateTimeText")}
+                        >
+                        </Text>
+                    </Flex.Item>
+                    <Flex.Item shrink={0} >
+                        <Text></Text>
                     </Flex.Item>
                 </Flex>
             ),

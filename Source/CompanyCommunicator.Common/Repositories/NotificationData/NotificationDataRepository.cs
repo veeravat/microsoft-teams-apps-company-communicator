@@ -90,6 +90,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     CreatedDate = draftNotificationEntity.CreatedDate,
                     SentDate = null,
                     IsDraft = false,
+                    Ack = draftNotificationEntity.Ack,
+                    InlineTranslation = draftNotificationEntity.InlineTranslation,
+                    ScheduledDateTime = draftNotificationEntity.ScheduledDateTime,
                     Teams = draftNotificationEntity.Teams,
                     Rosters = draftNotificationEntity.Rosters,
                     Groups = draftNotificationEntity.Groups,
@@ -145,6 +148,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     Groups = notificationEntity.Groups,
                     Rosters = notificationEntity.Rosters,
                     AllUsers = notificationEntity.AllUsers,
+                    Ack = notificationEntity.Ack,
+                    InlineTranslation = notificationEntity.InlineTranslation,
+                    ScheduledDateTime = notificationEntity.ScheduledDateTime,
+                    FullWidth = notificationEntity.FullWidth,
+                    NotifyUser = notificationEntity.NotifyUser,
                 };
 
                 if (!string.IsNullOrEmpty(notificationEntity.ImageBase64BlobName))

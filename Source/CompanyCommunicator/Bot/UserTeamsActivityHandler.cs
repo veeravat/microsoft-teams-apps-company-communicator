@@ -6,6 +6,8 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
@@ -15,6 +17,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     using Microsoft.Bot.Schema;
     using Microsoft.Bot.Schema.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Translator;
@@ -30,25 +33,29 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         private static readonly string TeamRenamedEventType = "teamRenamed";
 
         private readonly TeamsDataCapture teamsDataCapture;
-        private readonly ISendingNotificationDataRepository sendingNotificationRepo;
+        private readonly IBotTelemetryClient botTelemetryClient;
+        //private readonly ISendingNotificationDataRepository sendingNotificationRepo;
+        //private readonly ISentNotificationDataRepository sentNotificationDataRepository;
         private readonly INotificationDataRepository notificationDataRepository;
         private readonly AdaptiveCardCreator adaptiveCardCreator;
-        private readonly ITranslator translator;
+        //private readonly ITranslator translator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserTeamsActivityHandler"/> class.
         /// </summary>
         /// <param name="teamsDataCapture">Teams data capture service.</param>
         public UserTeamsActivityHandler(TeamsDataCapture teamsDataCapture,
-            ITranslator translator,
-            ISendingNotificationDataRepository sendingNotificationRepo,
+            IBotTelemetryClient botTelemetryClient,
+            //ITranslator translator,
+            //ISentNotificationDataRepository sentNotificationDataRepository,
             INotificationDataRepository notificationDataRepository,
             AdaptiveCardCreator adaptiveCardCreator)
         {
-            this.sendingNotificationRepo = sendingNotificationRepo ?? throw new ArgumentNullException(nameof(sendingNotificationRepo));
+            this.botTelemetryClient = botTelemetryClient ?? throw new ArgumentNullException(nameof(botTelemetryClient));
+            //this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentException(nameof(notificationDataRepository));
             this.teamsDataCapture = teamsDataCapture ?? throw new ArgumentNullException(nameof(teamsDataCapture));
-            this.translator = translator ?? throw new ArgumentException(nameof(translator));
+            //this.translator = translator ?? throw new ArgumentException(nameof(translator));
             this.adaptiveCardCreator = adaptiveCardCreator ?? throw new ArgumentException(nameof(adaptiveCardCreator));
         }
 
@@ -100,30 +107,34 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                 if (string.IsNullOrEmpty(txt) && value != null)
                 {
                     string notificationId = value["notificationId"];
-                    bool translation = Convert.ToBoolean(value["translation"]);
+                    //bool translation = Convert.ToBoolean(value["translation"]);
 
                     var notificationEntity = await this.notificationDataRepository.GetAsync(NotificationDataTableNames.SentNotificationsPartition, notificationId);
-
-                    if (translation)
+                    if (!string.IsNullOrWhiteSpace(notificationEntity.ButtonLink))
                     {
-                        var detectedUserLocale = turnContext.Activity.Locale;
-                        string userLanguage = string.Empty;
-                        if (detectedUserLocale.Contains('-'))
-                        {
-                            userLanguage = detectedUserLocale.Split('-')[0];
-                        }
-
-                        notificationEntity.Title = await this.translator.TranslateAsync(notificationEntity.Title, userLanguage);
-                        if (!string.IsNullOrWhiteSpace(notificationEntity.Summary))
-                        {
-                            notificationEntity.Summary = await this.translator.TranslateAsync(notificationEntity.Summary, userLanguage);
-                        }
-
-                        if (!string.IsNullOrWhiteSpace(notificationEntity.ButtonTitle))
-                        {
-                            notificationEntity.ButtonTitle = await this.translator.TranslateAsync(notificationEntity.ButtonTitle, userLanguage);
-                        }
+                        notificationEntity.ButtonLink = value["trackClickUrl"];
                     }
+
+                    //if (translation)
+                    //{
+                    //    var detectedUserLocale = turnContext.Activity.Locale;
+                    //    string userLanguage = string.Empty;
+                    //    if (detectedUserLocale.Contains('-'))
+                    //    {
+                    //        userLanguage = detectedUserLocale.Split('-')[0];
+                    //    }
+
+                    //    notificationEntity.Title = await this.translator.TranslateAsync(notificationEntity.Title, userLanguage);
+                    //    if (!string.IsNullOrWhiteSpace(notificationEntity.Summary))
+                    //    {
+                    //        notificationEntity.Summary = await this.translator.TranslateAsync(notificationEntity.Summary, userLanguage);
+                    //    }
+
+                    //    if (!string.IsNullOrWhiteSpace(notificationEntity.ButtonTitle))
+                    //    {
+                    //        notificationEntity.ButtonTitle = await this.translator.TranslateAsync(notificationEntity.ButtonTitle, userLanguage);
+                    //    }
+                    //}
 
                     // Download base64 data from blob convert to base64 string.
                     if (!string.IsNullOrEmpty(notificationEntity.ImageBase64BlobName))
@@ -131,7 +142,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                         notificationEntity.ImageLink = await this.notificationDataRepository.GetImageAsync(notificationEntity.ImageLink, notificationEntity.ImageBase64BlobName);
                     }
 
-                    var card = this.adaptiveCardCreator.CreateAdaptiveCard(notificationEntity, translation);
+                    var card = this.adaptiveCardCreator.CreateAdaptiveCard(notificationEntity, translate: false, acknowledged: true);
 
                     var adaptiveCardAttachment = new Attachment()
                     {
@@ -139,11 +150,56 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                         Content = card,
                     };
 
-                    var activity = MessageFactory.Attachment(adaptiveCardAttachment);
-                    activity.Id = turnContext.Activity.ReplyToId;
-                    await turnContext.UpdateActivityAsync(activity, cancellationToken);
+                    var activity = turnContext.Activity;
+                    var properties = new Dictionary<string, string>
+                    {
+                        { "notificationId", notificationId },
+                        { "notificationTitle", notificationEntity.Title },
+                        { "notificationUrl", notificationEntity.ButtonLink },
+                        { "notificationAuthor", notificationEntity.Author },
+                        { "notificationCreatedBy", notificationEntity.CreatedBy },
+                        { "notificationSendCompletedDate", notificationEntity.SentDate?.ToString() },
+                        { "userId", activity.From?.AadObjectId },
+                    };
+                    this.LogActivityTelemetry(activity, "TrackAck", properties);
+
+                    var newActivity = MessageFactory.Attachment(adaptiveCardAttachment);
+                    newActivity.Id = turnContext.Activity.ReplyToId;
+                    await turnContext.UpdateActivityAsync(newActivity, cancellationToken);
                 }
             }
+        }
+
+        /// <summary>
+        /// Log telemetry about the incoming activity.
+        /// </summary>
+        /// <param name="activity">The activity</param>
+        private void LogActivityTelemetry(IActivity activity, string eventName = "UserInfo", Dictionary<string, string> properties = null)
+        {
+            if (properties == null)
+            {
+                properties = new Dictionary<string, string>();
+            }
+
+            properties.Add("UserAadObjectId", activity.From?.AadObjectId);
+            properties.Add("UserName", activity.From?.Name);
+
+            // client info
+            var clientInfoEntity = activity.Entities?.Where(e => e.Type == "clientInfo")?.FirstOrDefault();
+            properties.Add("Locale", clientInfoEntity?.Properties["locale"]?.ToString());
+            properties.Add("Country", clientInfoEntity?.Properties["country"]?.ToString());
+            properties.Add("TimeZone", clientInfoEntity?.Properties["timezone"]?.ToString());
+            properties.Add("Platform", clientInfoEntity?.Properties["platform"]?.ToString());
+
+            properties.Add("ActivityId", activity.Id);
+            properties.Add("ActivityType", activity.Type);
+            properties.Add("ConversationType", string.IsNullOrWhiteSpace(activity.Conversation?.ConversationType) ? "personal" : activity.Conversation.ConversationType);
+            properties.Add("ConversationId", activity.Conversation?.Id);
+
+            var channelData = activity.GetChannelData<TeamsChannelData>();
+            properties.Add("TeamId", channelData?.Team?.Id);
+
+            this.botTelemetryClient.TrackEvent(eventName, properties);
         }
 
         private bool IsTeamInformationUpdated(IConversationUpdateActivity activity)

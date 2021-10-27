@@ -21,5 +21,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets Title value.
         /// </summary>
         public string Title { get; set; }
+
+        public DateTime? ScheduledDateTime { get; set; }
+
+        public string Author { get; set; }
     }
 }

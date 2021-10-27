@@ -35,6 +35,8 @@
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
   </ItemGroup>
 
+
+
   <ItemGroup>
     <AdditionalFiles Include="..\stylecop.json" Link="stylecop.json" />
   </ItemGroup>
@@ -42,6 +44,8 @@
   <ItemGroup>
     <ProjectReference Include="..\CompanyCommunicator.Common\Microsoft.Teams.Apps.CompanyCommunicator.Common.csproj" />
   </ItemGroup>
+
+
 
   <ItemGroup>
     <WCFMetadata Include="Connected Services" />
@@ -82,5 +86,6 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <AssemblyName>Microsoft.Teams.Apps.CompanyCommunicator</AssemblyName>
   </PropertyGroup>
+
 
 </Project>

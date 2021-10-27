@@ -5,7 +5,7 @@ import * as React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { withTranslation, WithTranslation } from "react-i18next";
 import * as AdaptiveCards from "adaptivecards";
-import { Loader, Button, Text, List, Image, Flex } from '@fluentui/react-northstar';
+import { Loader, Button, Text, List, Image, Flex, FilesPictureColoredIcon, ShiftActivityIcon } from '@fluentui/react-northstar';
 import * as microsoftTeams from "@microsoft/teams-js";
 
 import './sendConfirmationTaskModule.scss';
@@ -149,7 +149,7 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
 
                                     <div className="results">
                                         {this.renderAudienceSelection()}
-                                    </div>
+                                    </div>                                    
                                 </Flex>
                             </Flex.Item>
                             <Flex.Item size="size.half">

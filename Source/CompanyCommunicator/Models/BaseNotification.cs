@@ -56,5 +56,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets the Created DateTime value.
         /// </summary>
         public DateTime CreatedDateTime { get; set; }
+
+        public bool Ack { get; set; }
+
+        public bool InlineTranslation { get; set; }
+
+        ///// <summary>
+        ///// Gets or sets the Scheduled Date and Time value.
+        ///// </summary>
+        public DateTime? ScheduledDateTime { get; set; }
+
+        public bool NotifyUser { get; set; }
+
+        public bool FullWidth { get; set; }
     }
 }

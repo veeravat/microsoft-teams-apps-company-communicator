@@ -166,6 +166,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Rosters = notification.Rosters,
                 Groups = notification.Groups,
                 AllUsers = notification.AllUsers,
+
+                Ack = notification.Ack,
+                ScheduledDateTime = notification.ScheduledDateTime,
+                InlineTranslation = notification.InlineTranslation,
+                NotifyUser = notification.NotifyUser,
+                FullWidth = notification.FullWidth,
             };
 
             if (notification.ImageLink.StartsWith(Constants.ImageBase64Format))
@@ -224,6 +230,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 {
                     Id = notificationEntity.Id,
                     Title = notificationEntity.Title,
+                    ScheduledDateTime = notificationEntity.ScheduledDateTime,
+                    Author = notificationEntity.CreatedBy,
                 };
 
                 result.Add(summary);
@@ -270,6 +278,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Rosters = notificationEntity.Rosters,
                 Groups = notificationEntity.Groups,
                 AllUsers = notificationEntity.AllUsers,
+                Ack = notificationEntity.Ack,
+                InlineTranslation = notificationEntity.InlineTranslation,
+                ScheduledDateTime = notificationEntity.ScheduledDateTime,
+                NotifyUser = notificationEntity.NotifyUser,
+                FullWidth = notificationEntity.FullWidth,
             };
 
             // In case we have blob name instead of URL to public image.

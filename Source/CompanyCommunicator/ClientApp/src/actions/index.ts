@@ -37,5 +37,11 @@ export const getMessagesList = () => async (dispatch: any) => {
 
 export const getDraftMessagesList = () => async (dispatch: any) => {
     const response = await getDraftNotifications();
+    const notificationList: any[] = response.data;
+    notificationList.forEach(notification => {
+        if (notification.scheduledDateTime != null) {
+            notification.scheduledDateTime = formatDate(notification.scheduledDateTime);
+        }
+    });
     dispatch({ type: 'FETCH_DRAFTMESSAGES', payload: response.data });
 };

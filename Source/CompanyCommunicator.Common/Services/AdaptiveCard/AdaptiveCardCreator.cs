@@ -23,7 +23,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
         /// <param name="notificationDataEntity">Notification data entity.</param>
         /// <param name="translate">Translate equals true in case of the Translate Button is ready to translate message.</param>
         /// <returns>An adaptive card.</returns>
-        public virtual AdaptiveCard CreateAdaptiveCard(NotificationDataEntity notificationDataEntity, bool translate = false)
+        public virtual AdaptiveCard CreateAdaptiveCard(NotificationDataEntity notificationDataEntity, bool translate = false, bool acknowledged = false)
         {
             return this.CreateAdaptiveCard(
                 notificationDataEntity.Title,
@@ -33,7 +33,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 notificationDataEntity.ButtonTitle,
                 notificationDataEntity.ButtonLink,
                 notificationDataEntity.Id,
-                translate);
+                translate,
+                notificationDataEntity.Ack,
+                acknowledged
+                );
         }
 
         /// <summary>
@@ -56,7 +59,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
             string buttonTitle,
             string buttonUrl,
             string notificationId,
-            bool translate = false)
+            bool translate = false,
+            bool ack = false,
+            bool acknowledged = false)
         {
             var version = new AdaptiveSchemaVersion(1, 0);
             AdaptiveCard card = new AdaptiveCard(version);
@@ -115,15 +120,39 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 });
             }
 
-            if (!string.IsNullOrEmpty(notificationId))
+            //if (!string.IsNullOrEmpty(notificationId))
+            //{
+            //    card.Actions.Add(new AdaptiveSubmitAction()
+            //    {
+            //        Title = !translate ? Strings.TranslateButton : Strings.ShowOriginalButton,
+            //        Id = "translate",
+            //        Data = "translate",
+            //        DataJson = JsonConvert.SerializeObject(
+            //            new { notificationId = notificationId, translation = !translate }),
+            //    });
+            //}
+
+            if (ack && !string.IsNullOrWhiteSpace(notificationId))
+            {
+                card.Body.Add(new AdaptiveTextBlock()
+                {
+                    Text = acknowledged ? Strings.AckConfirmation : Strings.AckAlert,
+                    Size = AdaptiveTextSize.Small,
+                    Weight = AdaptiveTextWeight.Lighter,
+                    Wrap = true,
+                    Id = notificationId,
+                });
+            }
+
+            if (ack && !acknowledged)
             {
                 card.Actions.Add(new AdaptiveSubmitAction()
                 {
-                    Title = !translate ? Strings.TranslateButton : Strings.ShowOriginalButton,
-                    Id = "translate",
-                    Data = "translate",
+                    Title = Strings.AckButtonTitle,
+                    Id = "acknowledge",
+                    Data = "acknowledge",
                     DataJson = JsonConvert.SerializeObject(
-                        new { notificationId = notificationId, translation = !translate }),
+                        new { notificationId = notificationId }),
                 });
             }
 

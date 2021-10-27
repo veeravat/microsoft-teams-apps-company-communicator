@@ -6,7 +6,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { withTranslation, WithTranslation } from "react-i18next";
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import * as AdaptiveCards from "adaptivecards";
-import { Button, Loader, Dropdown, Text, Flex, Input, TextArea, RadioGroup } from '@fluentui/react-northstar'
+import { Button, Loader, Dropdown, Text, Flex, Input, TextArea, RadioGroup, Checkbox, Datepicker } from '@fluentui/react-northstar'
 import * as microsoftTeams from "@microsoft/teams-js";
 import { SimpleMarkdownEditor } from 'react-simple-markdown-editor';
 
@@ -20,6 +20,8 @@ import {
 import { getBaseUrl } from '../../configVariables';
 import { ImageUtil } from '../../utility/imageutility';
 import { TFunction } from "i18next";
+import TimePicker, { LanguageDirection } from '../common/TimePicker';
+import LocalizedDatePicker from '../common/LocalizedDatePicker';
 
 type dropdownItem = {
     key: string,
@@ -42,7 +44,14 @@ export interface IDraftMessage {
     teams: any[],
     rosters: any[],
     groups: any[],
-    allUsers: boolean
+    allUsers: boolean,
+
+    ack?: boolean,
+    delayDelivery?: boolean,
+    inlineTranslation?: boolean,
+    scheduledDateTime?: Date,
+    fullWidth?: boolean,
+    notifyUser?: boolean,
 }
 
 export interface formState {
@@ -76,6 +85,12 @@ export interface formState {
     selectedGroups: dropdownItem[],
     errorImageUrlMessage: string,
     errorButtonUrlMessage: string,
+    selectedRequestReadReceipt?: boolean,
+    selectedDelayDelivery?: boolean,
+    selectedInlineTranslation?: boolean,
+    selectedScheduledDateTime?: Date,
+    fullWidth?: boolean,
+    notifyUser?: boolean,
 }
 
 export interface INewMessageProps extends RouteComponentProps, WithTranslation {
@@ -120,6 +135,9 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             selectedTeams: [],
             selectedRosters: [],
             selectedGroups: [],
+            selectedRequestReadReceipt: false,
+            selectedInlineTranslation: false,
+            selectedScheduledDateTime: new Date(),
             errorImageUrlMessage: "",
             errorButtonUrlMessage: "",
         }
@@ -283,6 +301,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             else if (draftMessageDetail.allUsers) {
                 selectedRadioButton = "allUsers";
             }
+
+            console.log(draftMessageDetail.scheduledDateTime);
             this.setState({
                 teamsOptionSelected: draftMessageDetail.teams.length > 0,
                 selectedTeamsNum: draftMessageDetail.teams.length,
@@ -293,7 +313,16 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                 selectedRadioBtn: selectedRadioButton,
                 selectedTeams: draftMessageDetail.teams,
                 selectedRosters: draftMessageDetail.rosters,
-                selectedGroups: draftMessageDetail.groups
+                selectedGroups: draftMessageDetail.groups,
+
+                selectedRequestReadReceipt: draftMessageDetail.ack,
+                selectedInlineTranslation: draftMessageDetail.inlineTranslation,
+                selectedScheduledDateTime: draftMessageDetail.scheduledDateTime !== null ? new Date(draftMessageDetail.scheduledDateTime) : draftMessageDetail.scheduledDateTime,
+
+                selectedDelayDelivery: draftMessageDetail.scheduledDateTime !== null,
+                
+                fullWidth: draftMessageDetail.fullWidth,
+                notifyUser: draftMessageDetail.notifyUser,
             });
 
             setCardTitle(this.card, draftMessageDetail.title);
@@ -378,7 +407,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         if (this.fileInput.current) {
             this.fileInput.current.click();
         }
-    }
+    }    
 
     public render(): JSX.Element {
         if (this.state.loader) {
@@ -425,19 +454,19 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                                 ref={this.fileInput} />
                                             <Text className={(this.state.errorImageUrlMessage === "") ? "hide" : "show"} error size="small" content={this.state.errorImageUrlMessage} />
                                         </Flex>
-
-                                        <SimpleMarkdownEditor textAreaID={"summaryTextArea"}
-                                            enabledButtons={{
-                                                strike: false,
-                                                code: false,
-                                                quote: false,
-                                                h1: false,
-                                                h2: false,
-                                                h3: false,
-                                                image: false
-                                            }} />
+                                        
                                         <div className="textArea">
                                             <Text content={this.localize("Summary")} />
+                                            <SimpleMarkdownEditor textAreaID={"summaryTextArea"}
+                                                enabledButtons={{
+                                                    strike: false,
+                                                    code: false,
+                                                    quote: false,
+                                                    h1: false,
+                                                    h2: false,
+                                                    h3: false,
+                                                    image: false
+                                                }} />
                                             <TextArea
                                                 autoFocus
                                                 placeholder={this.localize("Summary")}
@@ -612,6 +641,31 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                         >
 
                                         </RadioGroup>
+                                        <h3>{this.localize("SendOptions")}</h3>
+                                        
+                                        <Checkbox label={this.localize("RequestReadReceipt")} checked={this.state.selectedRequestReadReceipt}
+                                            onChange={this.onRequestReadReceiptChanged} />
+                                        <Checkbox label={this.localize("DelayDelivery")} checked={this.state.selectedDelayDelivery}
+                                            onChange={this.onDelayDeliveryChanged} />
+                                        <Flex gap="gap.smaller">
+                                            <Flex.Item>
+                                                <LocalizedDatePicker
+                                                    screenWidth={500}
+                                                    selectedDate={this.state.selectedScheduledDateTime}
+                                                    minDate={new Date()}
+                                                    onDateSelect={this.onDeliveryDateChanged}
+                                                    disableSelection={!this.state.selectedDelayDelivery} theme={""}
+                                                />
+                                            </Flex.Item>
+                                            <Flex.Item>
+                                                <TimePicker
+                                                    hours={this.state.selectedScheduledDateTime === undefined ? 0 : new Date(this.state.selectedScheduledDateTime).getHours()}
+                                                    minutes={this.state.selectedScheduledDateTime === undefined ? 0 : new Date(this.state.selectedScheduledDateTime).getMinutes()}
+                                                    isDisabled={!this.state.selectedDelayDelivery}
+                                                    onPickerClose={this.onDeliveryTimeChange}
+                                                    dir={LanguageDirection.Ltr} />
+                                            </Flex.Item>                                                                                      
+                                        </Flex>
                                     </Flex>
                                 </Flex.Item>
                                 <Flex.Item size="size.half">
@@ -633,11 +687,52 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                         </Flex>
                     </div>
                 );
-            } else {
+            }
+            else {
                 return (<div>Error</div>);
             }
         }
     }
+
+    private onRequestReadReceiptChanged = (event: any, data: any) => {
+        this.setState({
+            selectedRequestReadReceipt: data.checked,
+        });
+    }
+
+    private onDelayDeliveryChanged = (event: any, data: any) => {
+        this.setState({
+            selectedDelayDelivery: data.checked,
+        })
+    }
+
+    private onInlineTranslationChanged = (event: any, data: any) => {
+        this.setState({
+            selectedInlineTranslation: data.checked,
+        })
+    }
+
+
+    /**
+    * Event handler on start time change
+    */
+    private onDeliveryTimeChange = (hours: number, min: number) => {
+        var date = this.state.selectedScheduledDateTime === undefined ?
+            new Date(new Date().setHours(hours, min)) : new Date(new Date(this.state.selectedScheduledDateTime).setHours(hours, min));
+        this.setState({ selectedScheduledDateTime: date });
+    }
+
+    private onDeliveryDateChangedOld = (e: any, v: any) => {
+        console.log(this.state.selectedScheduledDateTime);
+        console.log(v.value);
+        this.setState({ selectedScheduledDateTime: v.value });
+    }
+
+    private onDeliveryDateChanged = (date: Date) => {
+        console.log(date);
+        this.setState({ selectedScheduledDateTime: date });
+    }
+
 
     private onGroupSelected = (event: any, data: any) => {
         this.setState({
@@ -808,7 +903,13 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             teams: selectedTeams,
             rosters: selctedRosters,
             groups: selectedGroups,
-            allUsers: this.state.allUsersOptionSelected
+            allUsers: this.state.allUsersOptionSelected,
+
+            ack: this.state.selectedRequestReadReceipt,
+            inlineTranslation: this.state.selectedInlineTranslation,
+            scheduledDateTime: this.state.selectedDelayDelivery ? this.state.selectedScheduledDateTime : undefined,
+            fullWidth: this.state.fullWidth,
+            notifyUser: this.state.notifyUser,
         };
 
         if (this.state.exists) {

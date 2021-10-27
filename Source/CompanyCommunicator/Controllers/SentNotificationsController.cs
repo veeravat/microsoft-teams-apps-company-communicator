@@ -214,6 +214,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 
             var uniqueViews = await this.analyticsService.GetUniqueViewsCountByNotificationIdAsync(id);
             var uniqueClicks = await this.analyticsService.GetUniqueClicksCountByNotificationIdAsync(id);
+            var acknowledgementsClicks = await this.analyticsService.GetAcknowledgementsCountByNotificationIdAsync(id);
 
             var result = new SentNotification
             {
@@ -230,6 +231,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Succeeded = notificationEntity.Succeeded,
                 ViewsCount = uniqueViews,
                 ClicksCount = uniqueClicks,
+                AcknowledgementsCount = acknowledgementsClicks,
                 Failed = notificationEntity.Failed,
                 Unknown = this.GetUnknownCount(notificationEntity),
                 TeamNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Teams),

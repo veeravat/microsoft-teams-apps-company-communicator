@@ -47,6 +47,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
                 Rosters = notification.Rosters,
                 Groups = notification.Groups,
                 AllUsers = notification.AllUsers,
+                Ack = notification.Ack,
+                InlineTranslation = notification.InlineTranslation,
+                ScheduledDateTime = notification.ScheduledDateTime,
+                NotifyUser = notification.NotifyUser,
+                FullWidth = notification.FullWidth,
             };
 
             if (notification.ImageLink.StartsWith(Constants.ImageBase64Format))

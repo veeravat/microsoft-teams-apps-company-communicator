@@ -284,17 +284,29 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 };
                 pixel.PixelHeight = 1;
                 pixel.PixelWidth = 1;
-                //pixel.AdditionalProperties.Add("width", "1px");
-                //pixel.AdditionalProperties.Add("height", "1px");
                 card.Body.Add(pixel);
 
+                string buttonUrl = string.Empty;
                 for (var i = 0; i < card.Actions.Count; i++)
                 {
                     AdaptiveOpenUrlAction action = card.Actions[i] as AdaptiveOpenUrlAction;
                     if (action != null)
                     {
-                        var buttonUrl = $"{this.appBaseUri}/redirect?url={action.Url}&id={message.NotificationId}&userId={uniqueUser}";
+                        buttonUrl = $"{this.appBaseUri}/redirect?url={action.Url}&id={message.NotificationId}&userId={uniqueUser}";
                         action.Url = new Uri(buttonUrl, UriKind.RelativeOrAbsolute);
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(buttonUrl))
+                {
+                    for (var i = 0; i < card.Actions.Count; i++)
+                    {
+                        AdaptiveSubmitAction submitAction = card.Actions[i] as AdaptiveSubmitAction;
+                        if (submitAction != null)
+                        {
+                            submitAction.DataJson = JsonConvert.SerializeObject(
+                            new { notificationId = notification.Id, trackClickUrl = buttonUrl });
+                        }
                     }
                 }
             }
@@ -305,7 +317,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 Content = JsonConvert.DeserializeObject(card.ToJson()),
             };
             var messageActivity = MessageFactory.Attachment(adaptiveCardAttachment);
-            //messageActivity.TeamsNotifyUser();
+            if (notification.NotifyUser)
+            {
+                messageActivity.TeamsNotifyUser();
+            }
+
             messageActivity.Summary = notification.Title;
 
             return messageActivity;

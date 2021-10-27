@@ -36,6 +36,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public int ClicksCount { get; set; }
 
         /// <summary>
+        /// Gets or sets the number of recipients who have acknowledged the notification successfully.
+        /// </summary>
+        public int AcknowledgementsCount { get; set; }
+
+        /// <summary>
         /// Gets or sets the number of recipients who failed in receiving the notification.
         /// </summary>
         public int Failed { get; set; }

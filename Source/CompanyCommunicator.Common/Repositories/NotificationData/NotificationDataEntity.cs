@@ -213,5 +213,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// Gets or sets notification status.
         /// </summary>
         public string Status { get; set; }
+
+        public bool Ack { get; set; }
+
+        public DateTime? ScheduledDateTime { get; set; }
+
+        public bool InlineTranslation { get; set; }
+
+        public bool NotifyUser { get; set; }
+
+        public bool FullWidth { get; set; }
+
     }
 }

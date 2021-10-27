@@ -197,7 +197,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddScoped<IGroupsService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetGroupsService());
             services.AddScoped<IAppCatalogService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetAppCatalogService());
 
-            services.AddSingleton<ITranslator, MicrosoftTranslator>();
+            //services.AddSingleton<ITranslator, MicrosoftTranslator>();
 
             // Add Application Insights services into service collection
             services.AddApplicationInsightsTelemetry();

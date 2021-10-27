@@ -23,6 +23,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Blob;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services;
@@ -78,6 +80,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     messageQueueOptions.ServiceBusConnection =
                         configuration.GetValue<string>("ServiceBusConnection");
                 });
+            //builder.Services.AddOptions<DataQueueMessageOptions>()
+            //    .Configure<IConfiguration>((dataQueueMessageOptions, configuration) =>
+            //    {
+            //        dataQueueMessageOptions.ForceCompleteMessageDelayInSeconds =
+            //            configuration.GetValue<double>("ForceCompleteMessageDelayInSeconds", 86400);
+            //    });
 
             builder.Services.AddLocalization();
 
@@ -93,16 +101,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             // Add teams services.
             builder.Services.AddTransient<IMessageService, MessageService>();
+            builder.Services.AddTransient<TableRowKeyGenerator>();
             builder.Services.AddTransient<AdaptiveCardCreator>();
 
             // Add repositories.
+            builder.Services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
             builder.Services.AddSingleton<ISendingNotificationDataRepository, SendingNotificationDataRepository>();
             builder.Services.AddSingleton<IGlobalSendingNotificationDataRepository, GlobalSendingNotificationDataRepository>();
             builder.Services.AddSingleton<ISentNotificationDataRepository, SentNotificationDataRepository>();
-            builder.Services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
 
             // Add service bus message queues.
             builder.Services.AddSingleton<ISendQueue, SendQueue>();
+            builder.Services.AddSingleton<IPrepareToSendQueue, PrepareToSendQueue>();
+            builder.Services.AddSingleton<IDataQueue, DataQueue>();
 
             // Add the Notification service.
             builder.Services.AddTransient<INotificationService, NotificationService>();

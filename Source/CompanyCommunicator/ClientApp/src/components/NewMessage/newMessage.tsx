@@ -643,8 +643,9 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                         </RadioGroup>
                                         <h3>{this.localize("SendOptions")}</h3>
                                         
-                                        <Checkbox label={this.localize("RequestReadReceipt")} checked={this.state.selectedRequestReadReceipt}
-                                            onChange={this.onRequestReadReceiptChanged} />
+                                        <Checkbox label={this.localize("RequestReadReceipt")}
+                                            checked={this.state.teamsOptionSelected ? false: this.state.selectedRequestReadReceipt}
+                                            onChange={this.onRequestReadReceiptChanged} disabled={this.state.teamsOptionSelected} />
                                         <Checkbox label={this.localize("DelayDelivery")} checked={this.state.selectedDelayDelivery}
                                             onChange={this.onDelayDeliveryChanged} />
                                         <Flex gap="gap.smaller">

@@ -259,4 +259,13 @@
   <data name="GuestUserNotSupported" xml:space="preserve">
     <value>Гостевой пользователь не поддерживается</value>
   </data>
+  <data name="AckAlert" xml:space="preserve">
+    <value>Автор запросил подтвердение о прочтении. После ознакомления, пожалуйста нажмите на кнопку ✔️ Подтвердить прочтение.</value>
+  </data>
+  <data name="AckButtonTitle" xml:space="preserve">
+    <value>✔️ Подтвердить прочтение</value>
+  </data>
+  <data name="AckConfirmation" xml:space="preserve">
+    <value>Спасибо за подтверждение!</value>
+  </data>
 </root>

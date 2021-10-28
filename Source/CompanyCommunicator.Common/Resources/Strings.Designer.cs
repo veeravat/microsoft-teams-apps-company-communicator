@@ -70,7 +70,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Acknowledge.
+        ///   Looks up a localized string similar to ✔️ Acknowledge.
         /// </summary>
         public static string AckButtonTitle {
             get {

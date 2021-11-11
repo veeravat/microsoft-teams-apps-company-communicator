@@ -35,6 +35,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.ExportQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Recipients;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.User;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams;
@@ -130,6 +131,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddTransient<IAppSettingsService, AppSettingsService>();
             builder.Services.AddTransient<IStorageClientFactory, StorageClientFactory>();
             builder.Services.AddTransient<IUserTypeService, UserTypeService>();
+            builder.Services.AddTransient<IRecipientsService, RecipientsService>();
 
             // Add Teams services.
             builder.Services.AddTransient<ITeamMembersService, TeamMembersService>();

@@ -80,12 +80,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     repositoryOptions.EnsureTableExists =
                         !configuration.GetValue<bool>("IsItExpectedThatTableAlreadyExists", true);
                 });
-            builder.Services.AddOptions<MessageQueueOptions>()
-                .Configure<IConfiguration>((messageQueueOptions, configuration) =>
-                {
-                    messageQueueOptions.ServiceBusConnection =
-                        configuration.GetValue<string>("ServiceBusConnection");
-                });
+            //builder.Services.AddOptions<MessageQueueOptions>()
+            //    .Configure<IConfiguration>((messageQueueOptions, configuration) =>
+            //    {
+            //        messageQueueOptions.ServiceBusConnection =
+            //            configuration.GetValue<string>("ServiceBusConnection");
+            //    });
             //builder.Services.AddOptions<DataQueueMessageOptions>()
             //    .Configure<IConfiguration>((dataQueueMessageOptions, configuration) =>
             //    {

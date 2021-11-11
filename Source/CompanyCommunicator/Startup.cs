@@ -28,18 +28,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Analytics;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Blob;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.ExportQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
@@ -63,7 +65,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
         /// <param name="configuration">IConfiguration instance.</param>
         public Startup(IConfiguration configuration)
         {
-            this.Configuration = configuration;
+            this.Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
         /// <summary>
@@ -87,9 +89,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                 .Configure<IConfiguration>((botOptions, configuration) =>
                 {
                     botOptions.UserAppId = configuration.GetValue<string>("UserAppId");
-                    botOptions.UserAppPassword = configuration.GetValue<string>("UserAppPassword");
+                    botOptions.UserAppPassword = configuration.GetValue<string>("UserAppPassword", string.Empty);
                     botOptions.AuthorAppId = configuration.GetValue<string>("AuthorAppId");
-                    botOptions.AuthorAppPassword = configuration.GetValue<string>("AuthorAppPassword");
+                    botOptions.AuthorAppPassword = configuration.GetValue<string>("AuthorAppPassword", string.Empty);
+                    botOptions.UseCertificate = configuration.GetValue<bool>("UseCertificate", false);
+                    botOptions.AuthorAppCertName = configuration.GetValue<string>("AuthorAppCertName", string.Empty);
+                    botOptions.UserAppCertName = configuration.GetValue<string>("UserAppCertName", string.Empty);
+                    botOptions.GraphAppId = configuration.GetValue<string>("GraphAppId");
+                    botOptions.GraphAppCertName = configuration.GetValue<string>("GraphAppCertName", string.Empty);
                 });
             services.AddOptions<BotFilterMiddlewareOptions>()
                 .Configure<IConfiguration>((botFilterMiddlewareOptions, configuration) =>
@@ -108,12 +115,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                     // Setting this to true because the main application should ensure that all
                     // tables exist.
                     repositoryOptions.EnsureTableExists = true;
-                });
-            services.AddOptions<MessageQueueOptions>()
-                .Configure<IConfiguration>((messageQueueOptions, configuration) =>
-                {
-                    messageQueueOptions.ServiceBusConnection =
-                        configuration.GetValue<string>("ServiceBusConnection");
                 });
             services.AddOptions<DataQueueMessageOptions>()
                 .Configure<IConfiguration>((dataQueueMessageOptions, configuration) =>
@@ -150,10 +151,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                 configuration.RootPath = "ClientApp/build";
             });
 
-            // Add blob client.
-            services.AddSingleton(sp => new BlobContainerClient(
-                sp.GetService<IConfiguration>().GetValue<string>("StorageAccountConnectionString"),
-                Common.Constants.BlobContainerName));
+            var useManagedIdentity = this.Configuration.GetValue<bool>("UseManagedIdentity");
+            services.AddBlobClient(useManagedIdentity);
+            services.AddServiceBusClient(useManagedIdentity);
 
             services.AddSingleton<FileContentResult>(new FileContentResult(
                     Convert.FromBase64String("R0lGODlhAQABAPcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAP8ALAAAAAABAAEAAAgEAP8FBAA7"),
@@ -189,6 +189,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
 
             // Add draft notification preview services.
             services.AddSingleton<IDraftNotificationPreviewService, DraftNotificationPreviewService>();
+
+            string keyVaultUrl = this.Configuration.GetValue<string>("KeyVault:Url");
+            services.AddSecretsProvider(keyVaultUrl);
 
             // Add microsoft graph services.
             services.AddScoped<IAuthenticationProvider, GraphTokenProvider>();
@@ -228,6 +231,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
 
             services.AddTransient<IStorageClientFactory, StorageClientFactory>();
             services.AddTransient<IBlobStorageProvider, BlobStorageProvider>();
+            services.AddTransient<ICCBotFrameworkHttpAdapter, CCBotFrameworkHttpAdapter>();
         }
 
         /// <summary>

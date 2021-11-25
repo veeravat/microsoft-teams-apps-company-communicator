@@ -32,9 +32,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         }
 
         /// <inheritdoc/>
-        public IGroupsService GetGroupsService()
+        public IGroupsService GetGroupsService(int graphMaxResultCount)
         {
-            return new GroupsService(this.serviceClient);
+            return new GroupsService(this.serviceClient, graphMaxResultCount);
         }
 
         /// <inheritdoc/>

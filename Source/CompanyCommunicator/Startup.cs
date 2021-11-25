@@ -190,7 +190,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddScoped<IAuthenticationProvider, GraphTokenProvider>();
             services.AddScoped<IGraphServiceClient, GraphServiceClient>();
             services.AddScoped<IGraphServiceFactory, GraphServiceFactory>();
-            services.AddScoped<IGroupsService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetGroupsService());
+            
+            int graphMaxResultCount = this.Configuration.GetValue<int>("GraphMaxResultCount", 25);
+            services.AddScoped<IGroupsService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetGroupsService(graphMaxResultCount));
+            
             services.AddScoped<IAppCatalogService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetAppCatalogService());
 
             // Add Application Insights services into service collection

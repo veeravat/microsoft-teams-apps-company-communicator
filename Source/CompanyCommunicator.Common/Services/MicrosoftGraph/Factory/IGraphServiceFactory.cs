@@ -20,7 +20,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// Creates an instance of <see cref="IGroupsService"/> implementation.
         /// </summary>
         /// <returns>Returns an implementation of <see cref="IGroupsService"/>.</returns>
-        public IGroupsService GetGroupsService();
+        public IGroupsService GetGroupsService(int graphMaxResultCount);
 
         /// <summary>
         /// Creates an instance of <see cref="IGroupMembersService"/> implementation.

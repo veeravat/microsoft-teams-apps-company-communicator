@@ -23,12 +23,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// Initializes a new instance of the <see cref="GroupsService"/> class.
         /// </summary>
         /// <param name="graphServiceClient">graph service client.</param>
-        internal GroupsService(IGraphServiceClient graphServiceClient)
+        internal GroupsService(IGraphServiceClient graphServiceClient, int graphMaxResultCount)
         {
             this.graphServiceClient = graphServiceClient ?? throw new ArgumentNullException(nameof(graphServiceClient));
+            this.MaxResultCount = graphMaxResultCount;
         }
 
-        private int MaxResultCount { get; set; } = 25;
+        private int MaxResultCount { get; set; }
 
         private int MaxRetry { get; set; } = 2;
 

@@ -7,6 +7,7 @@ on:
         description: 'Release Name'
         required: true
 env:  
+  CI: ""
   botapp_path: ".\\Source\\CompanyCommunicator\\Microsoft.Teams.Apps.CompanyCommunicator.csproj"    
   send_func_path: ".\\Source\\CompanyCommunicator.Send.Func\\Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.csproj"
   prep_func_path: ".\\Source\\CompanyCommunicator.Prep.Func\\Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.csproj"

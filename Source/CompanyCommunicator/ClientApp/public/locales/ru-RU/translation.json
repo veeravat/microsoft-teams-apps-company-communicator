@@ -64,6 +64,7 @@
   "Views": "Уникальные просмотры : {{ViewsCount}}",
   "Clicks": "Уникальные переходы : {{ClicksCount}}",
   "Acknowledgements": "Поддтвержения о прочтении : {{AcknowledgementsCount}}",
+  "Reactions": "Реакции : {{ReactionsCount}}",
   "ScheduledDateTimeText": "Запланированное время отправки",
   "RequestReadReceipt": "Запросить уведомление о прочтении",
   "DelayDelivery": "Запланированное время отправки",

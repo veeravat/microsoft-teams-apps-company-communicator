@@ -12,5 +12,7 @@
         Task<int> GetUniqueClicksCountByNotificationIdAsync(string notificationId, CancellationToken cancellationToken = default(CancellationToken));
 
         Task<int> GetAcknowledgementsCountByNotificationIdAsync(string notificationId, CancellationToken cancellationToken = default(CancellationToken));
+
+        Task<int> GetReactionsCountByNotificationIdAsync(string notificationId, CancellationToken cancellationToken = default(CancellationToken));
     }
 }

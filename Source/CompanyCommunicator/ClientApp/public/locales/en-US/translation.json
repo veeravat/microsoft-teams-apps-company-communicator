@@ -66,6 +66,7 @@
   "Views": "Unique Views : {{ViewsCount}}",
   "Clicks": "Unique Clicks : {{ClicksCount}}",
   "Acknowledgements": "Acknowledgements : {{AcknowledgementsCount}}",
+  "Reactions": "Reactions : {{ReactionsCount}}",
   "ScheduledDateTimeText": "Scheduled date",
   "Failure": "Failure : {{FailureCount}}",
   "Unknown": "Unknown : {{UnknownCount}}",

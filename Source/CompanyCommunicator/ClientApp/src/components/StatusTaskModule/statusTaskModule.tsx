@@ -37,6 +37,7 @@ export interface IMessage {
     failed?: string;
     unknown?: string;
     sentDate?: string;
+    sentBy?: string;
     imageLink?: string;
     summary?: string;
     author?: string;
@@ -174,6 +175,10 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                                         <div className="contentField">
                                             <h3>{this.localize("TitleText")}</h3>
                                             <span>{this.state.message.title}</span>
+                                        </div>
+                                        <div className="contentField">
+                                            <h3>{this.localize("SentBy")}</h3>
+                                            <span>{this.state.message.sentBy}</span>
                                         </div>
                                         <div className="contentField">
                                             <h3>{this.localize("SendingStarted")}</h3>

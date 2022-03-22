@@ -167,7 +167,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
                         <Text
                             truncated
                             weight="bold"
-                            content={this.localize("Author")}
+                            content={this.localize("ModifiedBy")}
                         >
                         </Text>
                     </Flex.Item>

@@ -76,6 +76,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// </summary>
         public DateTime? SentDate { get; set; }
 
+        public string SentBy { get; set; }
+
         /// <summary>
         /// Gets or sets a value indicating whether the notification is a draft.
         /// </summary>

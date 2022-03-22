@@ -26,6 +26,8 @@
   "ImageURL": "Image URL",
   "Summary": "Summary",
   "Author": "Author",
+  "ModifiedBy": "Modified By",
+  "SentBy": "Sent By",
   "Author1": "- Author",
   "ButtonTitle": "Button title",
   "ButtonURL": "Button URL",

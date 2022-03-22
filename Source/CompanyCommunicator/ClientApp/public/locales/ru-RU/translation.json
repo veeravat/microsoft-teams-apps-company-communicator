@@ -24,6 +24,8 @@
   "ImageURL": "URL-адрес изображения",
   "Summary": "Сводка",
   "Author": "Автор",
+  "ModifiedBy": "Изменен",
+  "SentBy":  "Отправлен",
   "Author1": "- Автор",
   "ButtonTitle": "Название кнопки",
   "ButtonURL": "URL-адрес кнопки",

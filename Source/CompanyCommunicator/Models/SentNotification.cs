@@ -23,6 +23,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// </summary>
         public DateTime? SentDate { get; set; }
 
+        public string SentBy { get; set; }
+
         /// <summary>
         /// Gets or sets the number of recipients who have received the notification successfully.
         /// </summary>

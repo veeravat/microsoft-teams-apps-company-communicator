@@ -48,7 +48,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     log.LogInformation($"that means shceduledDateTime less than now: {draftNotificationDataEntity.ScheduledDateTime}");
 
                     var newSentNotificationId =
-                    await this.notificationDataRepository.MoveDraftToSentPartitionAsync(draftNotificationDataEntity);
+                    await this.notificationDataRepository.MoveDraftToSentPartitionAsync(draftNotificationDataEntity, "Scheduler");
                     log.LogInformation($"newSentNotificationId {newSentNotificationId}");
 
                     // Ensure the data table needed by the Azure Functions to send the notifications exist in Azure storage.

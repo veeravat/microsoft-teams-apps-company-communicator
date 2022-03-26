@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { withTranslation, WithTranslation } from "react-i18next";
 import './statusTaskModule.scss';
-import { getSentNotification, exportNotification } from '../../apis/messageListApi';
+import { getSentNotification, exportNotification, getReactionsCount } from '../../apis/messageListApi';
 import { RouteComponentProps } from 'react-router-dom';
 import * as AdaptiveCards from "adaptivecards";
 import { TooltipHost } from 'office-ui-fabric-react';
@@ -33,9 +33,11 @@ export interface IMessage {
     viewsCount?: string;
     clicksCount?: string;
     acknowledgementsCount?: string;
+    reactionsCount?: string;
     failed?: string;
     unknown?: string;
     sentDate?: string;
+    sentBy?: string;
     imageLink?: string;
     summary?: string;
     author?: string;
@@ -58,6 +60,7 @@ export interface IStatusState {
     loader: boolean;
     page: string;
     teamId?: string;
+    reactionsCount: number;
 }
 
 interface StatusTaskModuleProps extends RouteComponentProps, WithTranslation { }
@@ -83,6 +86,7 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
             loader: true,
             page: "ViewStatus",
             teamId: '',
+            reactionsCount: 0,
         };
     }
 
@@ -117,6 +121,19 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                     adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); }
                 });
             });
+            this.getReactionsCount(id);
+        }
+    }
+
+    private getReactionsCount = async (id: number) => {
+        try {
+            const response = await getReactionsCount(id);
+            response.data = formatNumber(response.data);
+            this.setState({
+                reactionsCount: response.data
+            });
+        } catch (error) {
+            return error;
         }
     }
 
@@ -160,6 +177,10 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                                             <span>{this.state.message.title}</span>
                                         </div>
                                         <div className="contentField">
+                                            <h3>{this.localize("SentBy")}</h3>
+                                            <span>{this.state.message.sentBy}</span>
+                                        </div>
+                                        <div className="contentField">
                                             <h3>{this.localize("SendingStarted")}</h3>
                                             <span>{this.state.message.sendingStartedDate}</span>
                                         </div>
@@ -180,6 +201,9 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                                             <label>{this.localize("Clicks", { "ClicksCount": this.state.message.clicksCount })}</label>
                                             <br />
                                             <label>{this.localize("Acknowledgements", { "AcknowledgementsCount": this.state.message.acknowledgementsCount })}</label>
+                                            <br />
+                                            <label>{this.localize("Reactions", { "ReactionsCount": this.state.reactionsCount })}</label>
+
                                             <br />
                                             <label>{this.localize("Failure", { "FailureCount": this.state.message.failed })}</label>
                                             <br />

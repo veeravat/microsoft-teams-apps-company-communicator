@@ -69,7 +69,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         }
 
         /// <inheritdoc/>
-        public async Task<string> MoveDraftToSentPartitionAsync(NotificationDataEntity draftNotificationEntity)
+        public async Task<string> MoveDraftToSentPartitionAsync(NotificationDataEntity draftNotificationEntity, string userName)
         {
             try
             {
@@ -96,6 +96,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     CreatedBy = draftNotificationEntity.CreatedBy,
                     CreatedDate = draftNotificationEntity.CreatedDate,
                     SentDate = null,
+                    SentBy = userName,
                     IsDraft = false,
                     Ack = draftNotificationEntity.Ack,
                     InlineTranslation = draftNotificationEntity.InlineTranslation,
@@ -157,7 +158,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     AllUsers = notificationEntity.AllUsers,
                     Ack = notificationEntity.Ack,
                     InlineTranslation = notificationEntity.InlineTranslation,
-                    ScheduledDateTime = notificationEntity.ScheduledDateTime,
+                    //ScheduledDateTime = notificationEntity.ScheduledDateTime,
                     FullWidth = notificationEntity.FullWidth,
                     NotifyUser = notificationEntity.NotifyUser,
                 };

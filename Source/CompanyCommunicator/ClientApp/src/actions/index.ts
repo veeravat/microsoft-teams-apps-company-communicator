@@ -10,6 +10,7 @@ type Notification = {
     id: string,
     isCompleted: boolean,
     sentDate: string,
+    sentBy: string,
     sendingStartedDate: string,
     sendingDuration: string,
     succeeded: number,

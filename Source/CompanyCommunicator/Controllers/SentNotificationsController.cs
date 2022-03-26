@@ -123,7 +123,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             }
 
             var newSentNotificationId =
-                await this.notificationDataRepository.MoveDraftToSentPartitionAsync(draftNotificationDataEntity);
+                await this.notificationDataRepository.MoveDraftToSentPartitionAsync(draftNotificationDataEntity, this.HttpContext.User?.Identity?.Name);
 
             // Ensure the data table needed by the Azure Functions to send the notifications exist in Azure storage.
             await this.sentNotificationDataRepository.EnsureSentNotificationDataTableExistsAsync();
@@ -169,6 +169,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     Title = notificationEntity.Title,
                     CreatedDateTime = notificationEntity.CreatedDate,
                     SentDate = notificationEntity.SentDate,
+                    SentBy = notificationEntity.SentBy,
                     Succeeded = notificationEntity.Succeeded,
                     Failed = notificationEntity.Failed,
                     Unknown = this.GetUnknownCount(notificationEntity),
@@ -228,6 +229,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 ButtonLink = notificationEntity.ButtonLink,
                 CreatedDateTime = notificationEntity.CreatedDate,
                 SentDate = notificationEntity.SentDate,
+                SentBy = notificationEntity.SentBy,
                 Succeeded = notificationEntity.Succeeded,
                 ViewsCount = uniqueViews,
                 ClicksCount = uniqueClicks,

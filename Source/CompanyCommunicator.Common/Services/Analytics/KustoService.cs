@@ -29,6 +29,9 @@
         private readonly string acknowledgementsCountKustoQuery = "customEvents| extend notificationId = tostring(customDimensions['notificationId']), userId = tostring(customDimensions['userId'])"
                           + "| where name == 'TrackAck'  and notificationId == '{0}' | summarize Count= count() by notificationId";
 
+        private readonly string reactionsKustoQuery = "customEvents| extend notificationId = tostring(customDimensions['notificationId']), userId = tostring(customDimensions['userId'])"
+                          + "| where name == 'TrackReaction'  and notificationId == '{0}' | summarize Count=dcount(userId) by notificationId";
+
         private readonly string timespan = "P90D";
 
         /// <summary>
@@ -79,6 +82,24 @@
             catch (Exception ex)
             {
                 this.logger.LogError(ex, $"GetUniqueClicksCountByNotificationIdAsync. Error getting result from Application Insights. notificationId={notificationId}, query ={query}, uri={uri}");
+                return 0;
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<int> GetReactionsCountByNotificationIdAsync(string notificationId, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var query = string.Format(this.reactionsKustoQuery, notificationId);
+            var uri = string.Format(Host, this.appInsightsId, query, this.timespan);
+
+            try
+            {
+                var result = await this.GetKustoQueryResultAsync(query, uri, cancellationToken);
+                return this.GetCountFromResult(result);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"GetReactionsCountByNotificationIdAsync. Error getting result from Application Insights. notificationId={notificationId}, query ={query}, uri={uri}");
                 return 0;
             }
         }

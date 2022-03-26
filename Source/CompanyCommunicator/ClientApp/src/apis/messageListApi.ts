@@ -41,6 +41,11 @@ export const getSentNotification = async (id: number): Promise<any> => {
     return await axios.get(url);
 }
 
+export const getReactionsCount = async (id: number): Promise<any> => {
+    let url = baseAxiosUrl + "/analytics/reactionscount/" + id;
+    return await axios.get(url);
+}
+
 export const getDraftNotification = async (id: number): Promise<any> => {
     let url = baseAxiosUrl + "/draftnotifications/" + id;
     return await axios.get(url);

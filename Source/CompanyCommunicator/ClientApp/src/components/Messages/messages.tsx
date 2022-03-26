@@ -28,6 +28,7 @@ export interface ITaskInfo {
 export interface IMessage {
     title: string;
     sentDate: string;
+    sentby: string;
     recipients: string;
     acknowledgements?: string;
     reactions?: string;
@@ -131,14 +132,22 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
                         >
                         </Text>
                     </Flex.Item>
-                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }}>
+                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '12%' }}>
                         <Text></Text>
                     </Flex.Item>
-                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} shrink={false}>
+                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '12%' }} shrink={false}>
                         <Text
                             truncated
                             content={this.localize("Recipients")}
                             weight="bold"
+                        >
+                        </Text>
+                    </Flex.Item>
+                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} shrink={false}>
+                        <Text
+                            truncated
+                            weight="bold"
+                            content={this.localize("SentBy")}
                         >
                         </Text>
                     </Flex.Item>
@@ -198,10 +207,10 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
                     >
                     </Text>
                 </Flex.Item>
-                <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }}>
+                <Flex.Item size="size.quarter" variables={{ 'size.quarter': '12%' }}>
                     {this.renderSendingText(message)}
                 </Flex.Item>
-                <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} shrink={false}>
+                <Flex.Item size="size.quarter" variables={{ 'size.quarter': '12%' }} shrink={false}>
                     <div>
                         <TooltipHost content={this.props.t("TooltipSuccess")} calloutProps={{ gapSpace: 0 }}>
                             <AcceptIcon xSpacing="after" className="succeeded" outline />
@@ -219,6 +228,13 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
                             </TooltipHost>
                         }
                     </div>
+                </Flex.Item>
+                <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} >
+                    <Text
+                        truncated
+                        className="semiBold"
+                        content={message.sentBy}
+                    />
                 </Flex.Item>
                 <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} >
                     <Text

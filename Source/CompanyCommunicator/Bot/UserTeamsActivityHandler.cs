@@ -12,6 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     using System.Threading;
     using System.Threading.Tasks;
     using AdaptiveCards;
+    using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Teams;
     using Microsoft.Bot.Schema;
@@ -35,7 +36,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         private readonly TeamsDataCapture teamsDataCapture;
         private readonly IBotTelemetryClient botTelemetryClient;
         //private readonly ISendingNotificationDataRepository sendingNotificationRepo;
-        //private readonly ISentNotificationDataRepository sentNotificationDataRepository;
+        private readonly ISentNotificationDataRepository sentNotificationDataRepository;
         private readonly INotificationDataRepository notificationDataRepository;
         private readonly AdaptiveCardCreator adaptiveCardCreator;
         //private readonly ITranslator translator;
@@ -47,12 +48,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         public UserTeamsActivityHandler(TeamsDataCapture teamsDataCapture,
             IBotTelemetryClient botTelemetryClient,
             //ITranslator translator,
-            //ISentNotificationDataRepository sentNotificationDataRepository,
+            ISentNotificationDataRepository sentNotificationDataRepository,
             INotificationDataRepository notificationDataRepository,
             AdaptiveCardCreator adaptiveCardCreator)
         {
             this.botTelemetryClient = botTelemetryClient ?? throw new ArgumentNullException(nameof(botTelemetryClient));
-            //this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
+            this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentException(nameof(notificationDataRepository));
             this.teamsDataCapture = teamsDataCapture ?? throw new ArgumentNullException(nameof(teamsDataCapture));
             //this.translator = translator ?? throw new ArgumentException(nameof(translator));
@@ -167,6 +168,28 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                     newActivity.Id = turnContext.Activity.ReplyToId;
                     await turnContext.UpdateActivityAsync(newActivity, cancellationToken);
                 }
+            }
+        }
+
+        protected override async Task OnReactionsAddedAsync(IList<MessageReaction> messageReactions, ITurnContext<IMessageReactionActivity> turnContext, CancellationToken cancellationToken)
+        {
+            foreach (var reaction in messageReactions)
+            {
+                // The ReplyToId property of the inbound MessageReaction will correspond to a Message Activity
+                // which had previosly been sent from this bot.
+                var originalActivityId = turnContext.Activity.ReplyToId;
+
+                string filterQuery = TableQuery.GenerateFilterCondition("ActivityId", QueryComparisons.Equal, originalActivityId);
+                var result = await this.sentNotificationDataRepository.GetWithFilterWithoutPartitionAsync(filterQuery);
+                var sentNotificationDataEntity = result?.FirstOrDefault();
+                string notificationId = sentNotificationDataEntity?.PartitionKey;
+
+                var properties = new Dictionary<string, string>
+                {
+                    { "notificationId", notificationId },
+                    { "reactionType", reaction.Type },
+                };
+                this.LogActivityTelemetry(turnContext.Activity, "TrackReaction", properties);
             }
         }
 

@@ -32,6 +32,9 @@
         private readonly string reactionsKustoQuery = "customEvents| extend notificationId = tostring(customDimensions['notificationId']), userId = tostring(customDimensions['userId'])"
                           + "| where name == 'TrackReaction'  and notificationId == '{0}' | summarize Count=dcount(userId) by notificationId";
 
+        private readonly string pollVoteResult = "customEvents| extend notificationId = tostring(customDimensions['notificationId']), userId = tostring(customDimensions['userId']), vote = tostring(customDimensions['vote'])"
+                          + "| where name == 'TrackPollVote' and notificationId == '{0}'  | summarize count() by vote";
+
         private readonly string timespan = "P90D";
 
         /// <summary>
@@ -48,6 +51,23 @@
             this.apiKey = key ?? throw new ArgumentNullException(nameof(key));
 
             this.logger = logger ?? throw new ArgumentException(nameof(logger));
+        }
+
+        /// <inheritdoc/>
+        public async Task<KustoQueryResult> GetPollVoteResultByNotificationIdAsync(string notificationId, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var query = string.Format(this.pollVoteResult, notificationId);
+            var uri = string.Format(Host, this.appInsightsId, query, this.timespan);
+
+            try
+            {
+                return await this.GetKustoQueryResultAsync(query, uri, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"GetUniqueViewsCountByNotificationIdAsync. Error getting result from Application Insights. notificationId={notificationId}, query ={query}, uri={uri}");
+                return new KustoQueryResult();
+            }
         }
 
         /// <inheritdoc/>

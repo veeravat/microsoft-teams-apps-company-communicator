@@ -69,5 +69,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public bool NotifyUser { get; set; }
 
         public bool FullWidth { get; set; }
+
+        public string PollOptions { get; set; }
+
+        public string MessageType { get; set; }
     }
 }

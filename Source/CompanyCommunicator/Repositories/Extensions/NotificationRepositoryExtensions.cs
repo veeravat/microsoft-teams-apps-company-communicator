@@ -52,6 +52,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
                 ScheduledDateTime = notification.ScheduledDateTime,
                 NotifyUser = notification.NotifyUser,
                 FullWidth = notification.FullWidth,
+                PollOptions = notification.PollOptions,
+                MessageType = notification.MessageType,
             };
 
             if (notification.ImageLink.StartsWith(Constants.ImageBase64Format))

@@ -475,6 +475,24 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please select an option..
+        /// </summary>
+        public static string PollErrorMessageSelectOption {
+            get {
+                return ResourceManager.GetString("PollErrorMessageSelectOption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Submit Vote.
+        /// </summary>
+        public static string PollSubmitVote {
+            get {
+                return ResourceManager.GetString("PollSubmitVote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Recipient Not Found.
         /// </summary>
         public static string RecipientNotFound {

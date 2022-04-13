@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Translator
+﻿namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Translator
 {
     using System.Collections.Generic;
     using Newtonsoft.Json;

@@ -176,6 +176,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     TotalMessageCount = notificationEntity.TotalMessageCount,
                     SendingStartedDate = notificationEntity.SendingStartedDate,
                     Status = notificationEntity.GetStatus(),
+                    MessageType = notificationEntity.MessageType,
+                    AllUsers = notificationEntity.AllUsers,
                 };
 
                 result.Add(summary);
@@ -245,6 +247,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 WarningMessage = notificationEntity.WarningMessage,
                 CanDownload = userNotificationDownload == null,
                 SendingCompleted = notificationEntity.IsCompleted(),
+                MessageType = notificationEntity.MessageType,
+                PollOptions = notificationEntity.PollOptions,
             };
 
             // In case we have blob name instead of URL to public image.

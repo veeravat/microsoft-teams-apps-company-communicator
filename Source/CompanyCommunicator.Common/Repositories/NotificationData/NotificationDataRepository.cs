@@ -112,6 +112,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     TotalMessageCount = draftNotificationEntity.TotalMessageCount,
                     SendingStartedDate = DateTime.UtcNow,
                     Status = NotificationStatus.Queued.ToString(),
+                    PollOptions = draftNotificationEntity.PollOptions,
+                    MessageType = draftNotificationEntity.MessageType,
                 };
 
                 await this.CreateOrUpdateAsync(sentNotificationEntity);
@@ -158,9 +160,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     AllUsers = notificationEntity.AllUsers,
                     Ack = notificationEntity.Ack,
                     InlineTranslation = notificationEntity.InlineTranslation,
-                    //ScheduledDateTime = notificationEntity.ScheduledDateTime,
+                    // ScheduledDateTime = notificationEntity.ScheduledDateTime,
                     FullWidth = notificationEntity.FullWidth,
                     NotifyUser = notificationEntity.NotifyUser,
+                    PollOptions = notificationEntity.PollOptions,
+                    MessageType = notificationEntity.MessageType,
                 };
 
                 if (!string.IsNullOrEmpty(notificationEntity.ImageBase64BlobName))

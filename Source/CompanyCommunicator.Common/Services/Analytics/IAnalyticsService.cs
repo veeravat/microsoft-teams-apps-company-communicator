@@ -14,5 +14,7 @@
         Task<int> GetAcknowledgementsCountByNotificationIdAsync(string notificationId, CancellationToken cancellationToken = default(CancellationToken));
 
         Task<int> GetReactionsCountByNotificationIdAsync(string notificationId, CancellationToken cancellationToken = default(CancellationToken));
+
+        Task<KustoQueryResult> GetPollVoteResultByNotificationIdAsync(string notificationId, CancellationToken cancellationToken = default(CancellationToken));
     }
 }

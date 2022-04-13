@@ -102,20 +102,39 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             if (!string.IsNullOrEmpty(turnContext.Activity.ReplyToId))
             {
                 var txt = turnContext.Activity.Text;
-                dynamic value = turnContext.Activity.Value;
+                var value = turnContext.Activity.Value;
 
                 // Check if the activity came from a submit action
                 if (string.IsNullOrEmpty(txt) && value != null)
                 {
-                    string notificationId = value["notificationId"];
-                    //bool translation = Convert.ToBoolean(value["translation"]);
+                    var properties2 = new Dictionary<string, string>();
+                    properties2.Add("value", turnContext.Activity.Value.ToString());
+                    this.LogActivityTelemetry(turnContext.Activity, "TrackValue", properties2);
+
+                    JObject jValue = value as JObject;
+                    string notificationId = jValue.ContainsKey("notificationId") ? jValue.Value<string>("notificationId") : string.Empty;
+
+                    string selectedChoice = jValue.ContainsKey("PollChoices") ? jValue.Value<string>("PollChoices") : string.Empty;
+                    if (!string.IsNullOrEmpty(selectedChoice))
+                    {
+                        var activity2 = turnContext.Activity;
+                        var vote = new Dictionary<string, string>
+                        {
+                            { "notificationId", notificationId },
+                            { "userId", activity2.From?.AadObjectId },
+                            { "vote", selectedChoice },
+                        };
+                        this.LogActivityTelemetry(turnContext.Activity, "TrackPollVote", vote);
+                        return;
+                    }
 
                     var notificationEntity = await this.notificationDataRepository.GetAsync(NotificationDataTableNames.SentNotificationsPartition, notificationId);
                     if (!string.IsNullOrWhiteSpace(notificationEntity.ButtonLink))
                     {
-                        notificationEntity.ButtonLink = value["trackClickUrl"];
+                        notificationEntity.ButtonLink = jValue.ContainsKey("trackClickUrl") ? jValue.Value<string>("trackClickUrl") : string.Empty;
                     }
 
+                    //bool translation = Convert.ToBoolean(value["translation"]);
                     //if (translation)
                     //{
                     //    var detectedUserLocale = turnContext.Activity.Locale;

@@ -338,3 +338,6 @@ ASALocalRun/
 
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
+/Source/CompanyCommunicator.Send.Func/Properties/ServiceDependencies/miboncc502-function - Web Deploy/profile.arm.json
+/Source/CompanyCommunicator.Prep.Func/Properties/ServiceDependencies/miboncc502-prep-function - Web Deploy/profile.arm.json
+/Source/CompanyCommunicator/Properties/ServiceDependencies/miboncc502 - Web Deploy/profile.arm.json

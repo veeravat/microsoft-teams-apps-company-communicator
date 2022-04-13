@@ -1,0 +1,59 @@
+﻿@mixin resolve-dir($property, $value) {
+    @at-root {
+        body[dir="ltr"]#{&},
+        body[dir="ltr"] & {
+            #{$property}: $value;
+        }
+
+        body[dir="rtl"]#{&},
+        body[dir="rtl"] & {
+            #{swap-property-dir($property)}: $value;
+        }
+    }
+}
+
+.choice-item {
+    display: flex;
+    flex-direction: column;
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+.choice-container {
+    padding-top: 16px;
+}
+
+.add-options {
+    margin-top: 8px;
+    align-items: center;
+    display: flex;
+    cursor: pointer;
+}
+
+.plus-icon {
+    @include resolve-dir(margin-right, 8px);
+}
+
+.item-content {
+    font-size: 14px;
+
+    .client-mobile & {
+        font-size: 16px;
+    }
+}
+
+$trash-icon-padding: 10px;
+$trash-icon-size: 16px; // size of default icon size
+.icon-padding {
+    @include resolve-dir(padding-right, calc(#{$trash-icon-size} + 2 * #{$trash-icon-padding}) !important);
+}
+
+.choice-trash-can {
+    @include resolve-dir(right, 0px !important);
+    //padding: $trash-icon-padding;
+    &:focus {
+        outline-width: 1px !important;
+    }
+
+    cursor: pointer !important;
+}

@@ -8,7 +8,7 @@ import DraftMessages from '../DraftMessages/draftMessages';
 import './tabContainer.scss';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { getBaseUrl } from '../../configVariables';
-import { Accordion, Button, Flex } from '@fluentui/react-northstar';
+import { Accordion, Button, Flex, SplitButton } from '@fluentui/react-northstar';
 import { getDraftMessagesList } from '../../actions';
 import { connect } from 'react-redux';
 import { TFunction } from "i18next";
@@ -29,6 +29,7 @@ export interface ITaskInfoProps extends WithTranslation {
 
 export interface ITabContainerState {
     url: string;
+    urlPoll: string;
 }
 
 class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
@@ -37,7 +38,8 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
         super(props);
         this.localize = this.props.t;
         this.state = {
-            url: getBaseUrl() + "/newmessage?locale={locale}"
+            url: getBaseUrl() + "/newmessage?locale={locale}",
+            urlPoll: getBaseUrl() + "/newpoll?locale={locale}"
         }
         this.escFunction = this.escFunction.bind(this);
     }
@@ -82,7 +84,34 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
         return (
             <Flex className="tabContainer" column fill gap="gap.small">
                 <Flex className="newPostBtn" hAlign="end" vAlign="end">
-                    <Button content={this.localize("NewMessage")} onClick={this.onNewMessage} primary />
+                   {/* <Button content={this.localize("NewMessage")} onClick={this.onNewMessage} primary />*/}
+                    <SplitButton
+                        menu={[
+                            {
+                                key: 'newMessage',
+                                content: this.localize("NewMessage"),
+                            },
+                            {
+                                key: 'newPoll',
+                                content: 'New Poll',
+                            },
+                            {
+                                key: 'uploadContentPack',
+                                content: 'Upload content pack',
+                            },
+                        ]}
+                        button={{
+                            content: this.localize("NewMessage"),
+                            'aria-roledescription': 'splitbutton',
+                            'aria-describedby': 'instruction-message-primary-button',
+                        }}
+                        primary
+                        toggleButton={{
+                            'aria-label': 'more options',
+                        }}
+                        onMainButtonClick={this.onNewMessage}
+                        onMenuItemClick={this.onNewPoll}
+                    />
                 </Flex>
                 <Flex className="messageContainer">
                     <Flex.Item grow={1} >
@@ -97,6 +126,22 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
         let taskInfo: ITaskInfo = {
             url: this.state.url,
             title: this.localize("NewMessage"),
+            height: 530,
+            width: 1000,
+            fallbackUrl: this.state.url,
+        }
+
+        let submitHandler = (err: any, result: any) => {
+            this.props.getDraftMessagesList();
+        };
+
+        microsoftTeams.tasks.startTask(taskInfo, submitHandler);
+    }
+
+    public onNewPoll = () => {
+        let taskInfo: ITaskInfo = {
+            url: this.state.urlPoll,
+            title: 'New Poll',
             height: 530,
             width: 1000,
             fallbackUrl: this.state.url,

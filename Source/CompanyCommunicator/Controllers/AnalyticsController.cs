@@ -37,6 +37,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             return await this.analyticsService.GetReactionsCountByNotificationIdAsync(id);
         }
 
+        [HttpGet("pollresult/{id}")]
+        public async Task<KustoQueryResult> GetPollResult(string id)
+        {
+            return await this.analyticsService.GetPollVoteResultByNotificationIdAsync(id);
+        }
+
         [HttpGet("ackcount/{id}")]
         public async Task<int> GetAckCount(string id)
         {

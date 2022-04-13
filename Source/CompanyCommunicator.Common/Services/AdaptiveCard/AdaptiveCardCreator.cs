@@ -6,6 +6,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
 {
     using System;
+    using System.Collections.Generic;
     using AdaptiveCards;
     using Microsoft.Bot.Schema;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
@@ -33,6 +34,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 notificationDataEntity.ButtonTitle,
                 notificationDataEntity.ButtonLink,
                 notificationDataEntity.Id,
+                notificationDataEntity.PollOptions,
                 translate,
                 notificationDataEntity.Ack,
                 acknowledged
@@ -59,11 +61,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
             string buttonTitle,
             string buttonUrl,
             string notificationId,
+            string pollOptions,
             bool translate = false,
             bool ack = false,
             bool acknowledged = false)
         {
-            var version = new AdaptiveSchemaVersion(1, 0);
+            var version = new AdaptiveSchemaVersion(1, 3);
             AdaptiveCard card = new AdaptiveCard(version);
 
             card.Body.Add(new AdaptiveTextBlock()
@@ -110,6 +113,37 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 });
             }
 
+            if (!string.IsNullOrWhiteSpace(pollOptions) && pollOptions != "[]")
+            {
+                string[] options = JsonConvert.DeserializeObject<string[]>(pollOptions);
+                var adaptiveCoices = new List<AdaptiveChoice>();
+                for (int i = 0; i < options.Length; i++)
+                {
+                    adaptiveCoices.Add(new AdaptiveChoice() { Title = options[i], Value = i.ToString() });
+                }
+
+                var choiceSet = new AdaptiveChoiceSetInput
+                {
+                    Type = AdaptiveChoiceSetInput.TypeName,
+                    Id = "PollChoices",
+                    IsRequired = true,
+                    ErrorMessage = Strings.PollErrorMessageSelectOption,
+                    Style = AdaptiveChoiceInputStyle.Expanded,
+                    IsMultiSelect = false,
+                    Choices = adaptiveCoices,
+                };
+                card.Body.Add(choiceSet);
+
+                card.Actions.Add(new AdaptiveSubmitAction()
+                {
+                    Title = "Vote Poll",
+                    Id = "votePoll",
+                    Data = "votePoll",
+                    DataJson = JsonConvert.SerializeObject(
+                        new { notificationId = notificationId }),
+                });
+            }
+
             if (!string.IsNullOrWhiteSpace(buttonTitle)
                 && !string.IsNullOrWhiteSpace(buttonUrl))
             {
@@ -120,8 +154,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 });
             }
 
-            //if (!string.IsNullOrEmpty(notificationId))
-            //{
+            // if (!string.IsNullOrEmpty(notificationId))
+            // {
             //    card.Actions.Add(new AdaptiveSubmitAction()
             //    {
             //        Title = !translate ? Strings.TranslateButton : Strings.ShowOriginalButton,
@@ -130,7 +164,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
             //        DataJson = JsonConvert.SerializeObject(
             //            new { notificationId = notificationId, translation = !translate }),
             //    });
-            //}
 
             if (ack && !string.IsNullOrWhiteSpace(notificationId))
             {
@@ -157,7 +190,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
             }
 
             // Full width Adaptive card.
-            card.AdditionalProperties.Add("msteams", new { width = "full" });
+            // card.AdditionalProperties.Add("msteams", new { width = "full" });
 
             return card;
         }

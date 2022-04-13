@@ -172,6 +172,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 InlineTranslation = notification.InlineTranslation,
                 NotifyUser = notification.NotifyUser,
                 FullWidth = notification.FullWidth,
+                PollOptions = notification.PollOptions,
+                MessageType = notification.MessageType,
             };
 
             if (notification.ImageLink.StartsWith(Constants.ImageBase64Format))
@@ -232,6 +234,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     Title = notificationEntity.Title,
                     ScheduledDateTime = notificationEntity.ScheduledDateTime,
                     Author = notificationEntity.CreatedBy,
+                    MessageType = notificationEntity.MessageType,
                 };
 
                 result.Add(summary);
@@ -283,6 +286,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 ScheduledDateTime = notificationEntity.ScheduledDateTime,
                 NotifyUser = notificationEntity.NotifyUser,
                 FullWidth = notificationEntity.FullWidth,
+                PollOptions = notificationEntity.PollOptions,
+                MessageType = notificationEntity.MessageType,
             };
 
             // In case we have blob name instead of URL to public image.

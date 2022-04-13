@@ -122,8 +122,14 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
                 ),
                 styles: { margin: '0.2rem 0.2rem 0 0' },
                 onClick: (): void => {
-                    let url = getBaseUrl() + "/newmessage/" + message.id + "?locale={locale}";
-                    this.onOpenTaskModule(null, url, this.localize("EditMessage"));
+                    if (message.messageType === 'Poll') {
+                        let url = getBaseUrl() + "/newpoll/" + message.id + "?locale={locale}";
+                        this.onOpenTaskModule(null, url, this.localize("EditMessage"));  
+                    }
+                    else {
+                        let url = getBaseUrl() + "/newmessage/" + message.id + "?locale={locale}";
+                        this.onOpenTaskModule(null, url, this.localize("EditMessage"));
+                    }
                 },
             };
             return out;

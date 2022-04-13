@@ -96,5 +96,11 @@
   "ExportErrorMessage": "Try exporting the results again. If the problem persists, contact your IT admin for help.",
   "ExportButtonText": "Export detailed results",
   "ExportButtonProgressText": "Export in progress",
-  "ErrorURLMessage": "URL must start with https://"
+  "ErrorURLMessage": "URL must start with https://",
+  "PollAnonymousVoting": "Anonymous Voting",
+  "PollOptions": "Poll options",
+  "PollQuizMode": "Quiz Mode",
+  "PollMultipleChoice": "Multiple Choice",
+  "PollAddChoice": "Add Choice",
+  "PollSubmitVote":  "Submit Vote"
 }

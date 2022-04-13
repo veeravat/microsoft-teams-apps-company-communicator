@@ -35,6 +35,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
 
         public string SentBy { get; set; }
 
+        public bool AllUsers { get; set; }
+
+        public string MessageType { get; set; }
+
         /// <summary>
         /// Gets or sets the number of recipients who have received the notification successfully.
         /// </summary>

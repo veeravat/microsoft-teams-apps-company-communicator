@@ -25,5 +25,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public DateTime? ScheduledDateTime { get; set; }
 
         public string Author { get; set; }
+
+        public string MessageType { get; set; }
     }
 }

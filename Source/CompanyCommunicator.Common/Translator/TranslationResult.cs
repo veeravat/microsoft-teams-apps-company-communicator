@@ -1,6 +1,4 @@
-﻿
-
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Translator
+﻿namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Translator
 {
     using Newtonsoft.Json;
 

@@ -4,16 +4,17 @@
 import * as React from 'react';
 import { withTranslation, WithTranslation } from "react-i18next";
 import './statusTaskModule.scss';
-import { getSentNotification, exportNotification, getReactionsCount } from '../../apis/messageListApi';
+import { getSentNotification, exportNotification, getReactionsCount, getPollResult } from '../../apis/messageListApi';
 import { RouteComponentProps } from 'react-router-dom';
 import * as AdaptiveCards from "adaptivecards";
 import { TooltipHost } from 'office-ui-fabric-react';
 import { Loader, List, Image, Button, DownloadIcon, AcceptIcon, Flex } from '@fluentui/react-northstar';
+import { Chart, EChartTypes, Provider, themeNames } from "@fluentui/react-teams";
 import * as microsoftTeams from "@microsoft/teams-js";
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
-    setCardAuthor, setCardBtn
-} from '../AdaptiveCard/adaptiveCard';
+    setCardAuthor, setCardBtn, setCardPollOptions
+} from '../AdaptiveCard/adaptiveCardPoll';
 import { ImageUtil } from '../../utility/imageutility';
 import { formatDate, formatDuration, formatNumber } from '../../i18n';
 import { TFunction } from "i18next";
@@ -53,6 +54,8 @@ export interface IMessage {
     warningMessage?: string;
     canDownload?: boolean;
     sendingCompleted?: boolean;
+    messageType?: string;
+    pollOptions?: string,
 }
 
 export interface IStatusState {
@@ -61,6 +64,7 @@ export interface IStatusState {
     page: string;
     teamId?: string;
     reactionsCount: number;
+    pollResultsChartData?: any;
 }
 
 interface StatusTaskModuleProps extends RouteComponentProps, WithTranslation { }
@@ -113,15 +117,70 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                         setCardBtn(this.card, this.state.message.buttonTitle, this.state.message.buttonLink);
                     }
 
+                    if (this.state.message.pollOptions) {
+                        const options: string[] = JSON.parse(this.state.message.pollOptions);
+                        console.log(options);
+                        setCardPollOptions(this.card, options);
+
+                        this.getPollResult(id).then((response) => {
+                            //if (this.state.message.pollOptions) {
+                                //const options: string[] = JSON.parse(this.state.message.pollOptions);
+                                let choiceOptions = new Map();
+
+                                let i = 0;
+                                options.forEach((option) => {
+                                    const choiceOption = {
+                                        title: option,
+                                        count: 0,
+                                    };
+                                    choiceOptions.set(i.toString(), choiceOption);
+                                    i++;
+                                });
+
+                                console.log('choiceOptions init');
+                                console.log(choiceOptions);
+
+
+                                let rows = response.data.tables[0].rows;
+                                if (rows) {
+                                    for (var j = 0; j < rows.length; j++) {
+                                        let optionNum = rows[j][0];
+                                        let optionCount = rows[j][1]
+                                        console.log("optionNum: " + optionNum + " optionCount: " + optionCount);
+                                        let current = choiceOptions.get(optionNum);
+                                        console.log(current);
+                                        current.count = optionCount;
+                                        choiceOptions.set(optionNum, current);
+                                    }
+                            }
+                            console.log('choiceOptions add counts');
+                            console.log(choiceOptions);
+                            const chartData = {
+                                labels: Array.from(choiceOptions.values()).map(x => x.title),
+                                    datasets: [
+                                        {
+                                            label: "Votes",
+                                            data: Array.from(choiceOptions.values()).map(x => x.count),
+                                        },
+                                    ],
+                            }
+                            this.setState({ pollResultsChartData: chartData });
+
+                            //}
+                        });
+                    }
+
                     let adaptiveCard = new AdaptiveCards.AdaptiveCard();
                     adaptiveCard.parse(this.card);
                     let renderedCard = adaptiveCard.render();
                     document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
                     let link = this.state.message.buttonLink;
-                    adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); }
+                    adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); }                    
                 });
             });
             this.getReactionsCount(id);
+
+            
         }
     }
 
@@ -132,6 +191,19 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
             this.setState({
                 reactionsCount: response.data
             });
+        } catch (error) {
+            return error;
+        }
+    }
+
+    
+
+    private getPollResult = async (id: number) => {
+        try {
+            const response = await getPollResult(id);
+            console.log(response.data);
+            return response;
+            
         } catch (error) {
             return error;
         }
@@ -149,6 +221,8 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
             response.data.acknowledgementsCount = formatNumber(response.data.acknowledgementsCount);
             response.data.failed = formatNumber(response.data.failed);
             response.data.unknown = response.data.unknown && formatNumber(response.data.unknown);
+            response.data.messageType = response.data.messageType;
+            response.data.pollOptions = response.data.pollOptions;
             this.setState({
                 message: response.data
             });
@@ -176,6 +250,15 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                                             <h3>{this.localize("TitleText")}</h3>
                                             <span>{this.state.message.title}</span>
                                         </div>
+                                        {this.state.message.messageType === 'Poll' && this.state.pollResultsChartData &&
+                                            <div className="contentField">
+                                                <h3>Poll results</h3>
+                                                <Provider themeName={themeNames.Default} lang="en-US">
+                                                    <Chart type={EChartTypes.BarHorizontal} data={this.state.pollResultsChartData} title="Poll results" />
+                                                </Provider>
+
+                                            </div>
+                                        }
                                         <div className="contentField">
                                             <h3>{this.localize("SentBy")}</h3>
                                             <span>{this.state.message.sentBy}</span>
@@ -198,10 +281,15 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                                             <br />
                                             <label>{this.localize("Views", { "ViewsCount": this.state.message.viewsCount })}</label>
                                             <br />
-                                            <label>{this.localize("Clicks", { "ClicksCount": this.state.message.clicksCount })}</label>
-                                            <br />
-                                            <label>{this.localize("Acknowledgements", { "AcknowledgementsCount": this.state.message.acknowledgementsCount })}</label>
-                                            <br />
+                                            { this.state.message.messageType !== 'Poll' && 
+                                                <>
+                                                <label>{this.localize("Clicks", { "ClicksCount": this.state.message.clicksCount })}</label>
+                                                <br />
+                                                <label>{this.localize("Acknowledgements", { "AcknowledgementsCount": this.state.message.acknowledgementsCount })}</label>
+                                                <br />
+                                                </>
+                                            }
+                                            
                                             <label>{this.localize("Reactions", { "ReactionsCount": this.state.reactionsCount })}</label>
 
                                             <br />
@@ -212,7 +300,8 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                                                     <label>{this.localize("Unknown", { "UnknownCount": this.state.message.unknown })}</label>
                                                 </>
                                             }
-                                        </div>
+                                        </div>                                        
+                                        
                                         <div className="contentField">
                                             {this.renderAudienceSelection()}
                                         </div>

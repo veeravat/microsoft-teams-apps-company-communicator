@@ -6,6 +6,7 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import Configuration from './components/config';
 import TabContainer from './components/TabContainer/tabContainer';
 import NewMessage from './components/NewMessage/newMessage';
+import NewPoll from './components/NewPoll/newPoll';
 import StatusTaskModule from './components/StatusTaskModule/statusTaskModule';
 import './App.scss';
 import { Provider, teamsTheme, teamsDarkTheme, teamsHighContrastTheme } from '@fluentui/react-northstar'
@@ -116,8 +117,10 @@ class App extends React.Component<{}, IAppState> {
                             <Switch>
                                 <Route exact path="/configtab" component={Configuration} />
                                 <Route exact path="/messages" component={TabContainer} />
-                                <Route exact path="/newmessage" component={NewMessage} />
+                                <Route exact path="/newmessage" component={NewMessage} />                                
                                 <Route exact path="/newmessage/:id" component={NewMessage} />
+                                <Route exact path="/newpoll" component={NewPoll} />
+                                <Route exact path="/newpoll/:id" component={NewPoll} />
                                 <Route exact path="/viewstatus/:id" component={StatusTaskModule} />
                                 <Route exact path="/sendconfirmation/:id" component={SendConfirmationTaskModule} />
                                 <Route exact path="/errorpage" component={ErrorPage} />

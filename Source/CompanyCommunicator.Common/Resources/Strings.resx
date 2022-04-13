@@ -274,4 +274,10 @@
   <data name="AckConfirmation" xml:space="preserve">
     <value>Thanks for the confirmation!</value>
   </data>
+  <data name="PollErrorMessageSelectOption" xml:space="preserve">
+    <value>Please select an option.</value>
+  </data>
+  <data name="PollSubmitVote" xml:space="preserve">
+    <value>Submit Vote</value>
+  </data>
 </root>

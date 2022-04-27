@@ -161,8 +161,7 @@ export const setCardPollOptions = (card: any, isMultiselect: boolean, values: st
     }
 }
 
-export const setCardPollQuizSelectedValue = (card: any, value: string) => {
-    console.log(card);
+export const setCardPollQuizSelectedValue = (card: any, value: string) => {    
     card.body[4].items[0].value = value;
     console.log(card);
 }

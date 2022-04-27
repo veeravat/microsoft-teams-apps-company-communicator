@@ -459,18 +459,33 @@ class NewPoll extends React.Component<INewPollProps, formState> {
         let answers = this.state.pollQuizAnswers;
         if (answers && checked) {
             answers.push(i);
-            this.setState({ pollQuizAnswers: answers });
-            let a: string = answers.map((answer: number): number => answer).join(',')
-            setCardPollQuizSelectedValue(this.state.card, a);
-            this.updateCard();
+            
+            
+            setCardTitle(this.card, this.state.title);
+            setCardImageLink(this.card, this.state.imageLink);
+            setCardSummary(this.card, this.state.summary);
+            setCardAuthor(this.card, this.state.author);
+            setCardPollOptions(this.card, this.state.isPollMultipleChoice, this.state.pollOptions);
+
+            let a: string = answers.join();
+            console.log('answers in string ');
+            console.log(a);
+            setCardPollQuizSelectedValue(this.card, a);            
+
+            this.setState({
+                pollQuizAnswers: answers,
+                card: this.card
+            }, () => {
+                this.updateCard();
+            });
         }
-        if (answers) {
-            let newAnswers = answers.filter(a => a !== i);
-            this.setState({ pollQuizAnswers: newAnswers });
-            let a: string = newAnswers.map((answer: number): number => answer).join(',')
-            setCardPollQuizSelectedValue(this.state.card, a);
-            this.updateCard();
-        }
+        //if (answers) {
+        //    let newAnswers = answers.filter(a => a !== i);
+        //    this.setState({ pollQuizAnswers: newAnswers });
+        //    let a: string = newAnswers.map((answer: number): number => answer).join(',')
+        //    setCardPollQuizSelectedValue(this.card, a);
+        //    this.updateCard();
+        //}
         console.log('onItemChecked');
         console.log(this.state.pollQuizAnswers);
     }
@@ -1093,7 +1108,7 @@ class NewPoll extends React.Component<INewPollProps, formState> {
             messageType: this.state.messageType,
             pollOptions: JSON.stringify(this.state.pollOptions),
             isPollQuizMode: this.state.isPollQuizMode,
-            pollQuizAnswers: getQuizAnswers(this.state.card),
+            pollQuizAnswers: this.state.isPollQuizMode ? JSON.stringify(this.state.pollQuizAnswers) : "[]",
             isPollMultipleChoice: this.state.isPollMultipleChoice,
         };
 

@@ -11,6 +11,12 @@ AdaptiveCards.AdaptiveCard.onProcessMarkdown = function (text, result) {
     result.didProcess = true;
 }
 
+AdaptiveCards.AdaptiveCard.onExecuteAction = function (action) { alert('Voted'); };
+AdaptiveCards.AdaptiveCard.onInputValueChanged = function (input: AdaptiveCards.Input) {
+    console.log(input);
+    console.log(input.value);
+};
+
 export const getInitAdaptiveCard = (t: TFunction) => {
     const titleTextAsString = t("TitleText");
     return (
@@ -126,9 +132,16 @@ export const setCardBtn = (card: any, buttonTitle?: string, buttonLink?: string)
     }
 }
 
-export const setCardPollOptions = (card: any, values: string[]) => {
-    if (values !== null) {
-       
+export const setCardHidePoll = (card: any) => {
+    card.body[4].isVisible = false;
+    delete card.actions;
+}
+
+export const setCardPollOptions = (card: any, isMultiselect: boolean, values: string[]) => {
+    console.log('setCardPollOptions');
+    console.log(values);
+
+    if (values) {
         let choiceOptions: any[] = [];
         let i = 0;
         values.forEach((option) => {
@@ -139,10 +152,47 @@ export const setCardPollOptions = (card: any, values: string[]) => {
             choiceOptions.push(choiceOption);
             i++;
         });
-        console.log(card.body[4].items[0].choices);
         card.body[4].items[0].choices = choiceOptions;
+        card.body[4].items[0].isMultiSelect = isMultiselect;
+        console.log('card.body[4].items[0].choices');
         console.log(card.body[4].items[0].choices);
     } else {
         delete card.body[4].items[0].choices;
     }
+}
+
+export const setCardPollQuizSelectedValue = (card: any, value: string) => {
+    console.log(card);
+    card.body[4].items[0].value = value;
+    console.log(card);
+}
+
+export const getCardPollQuizSelectedValue = (card: any) => {
+    console.log(card.body[4].items[0]);
+    return card.body[4].items[0].value;
+}
+
+export const getQuizAnswers = (card: any) => {
+    let adaptiveCard = new AdaptiveCards.AdaptiveCard();
+    adaptiveCard.parse(card);
+    console.log(adaptiveCard);
+    adaptiveCard.onExecuteAction = function (action) { alert('Voted'); };
+    let json = adaptiveCard.toJSON();
+    console.log("json");
+    console.log(json);
+
+    
+
+    let choices = card.body[4].items[0].choices;
+    let selectedChoices: any[] = [];
+    console.log(choices);
+    choices.forEach((c: any) => {
+        console.log(c);
+        if (c.isSelected) {
+           selectedChoices.push(c.value);
+        }
+    })
+    let answers = JSON.stringify(selectedChoices);
+    console.log(answers);
+    return answers;
 }

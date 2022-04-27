@@ -105,6 +105,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
 
         public string PollOptions { get; set; }
 
+        public string PollQuizAnswers { get; set; }
+
+        public bool IsPollQuizMode { get; set; }
+
+        public bool IsPollMultipleChoice { get; set; }
+
         /// <summary>
         /// Gets or sets the RostersInString value.
         /// This property helps to save the Rosters list in the Azure Table storage.

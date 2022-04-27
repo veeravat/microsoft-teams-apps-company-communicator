@@ -141,7 +141,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
                 draftNotificationEntity.ButtonTitle,
                 draftNotificationEntity.ButtonLink,
                 draftNotificationEntity.Id,
-                draftNotificationEntity.PollOptions);
+                draftNotificationEntity.PollOptions,
+                draftNotificationEntity.PollQuizAnswers);
 
             var attachment = new Attachment
             {

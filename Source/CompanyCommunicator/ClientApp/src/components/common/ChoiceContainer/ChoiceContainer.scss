@@ -19,6 +19,11 @@
     padding-bottom: 4px;
 }
 
+.choice-item-circle {
+    align-self: center;
+    padding: 2px;
+}
+
 .choice-container {
     padding-top: 16px;
 }
@@ -42,6 +47,32 @@
     }
 }
 
+.checklist-input-box {
+    flex-grow: 1;
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+}
+
+.checklist-item-container {
+    padding-bottom: 8px;
+}
+
+.checklist-container {
+    padding: 0;
+}
+
+.checklist-checkbox {
+    column-gap: unset !important;
+}
+
+.checkbox-gap {
+    @include resolve-dir(padding-right, 5px);
+}
+
+
 $trash-icon-padding: 10px;
 $trash-icon-size: 16px; // size of default icon size
 .icon-padding {
@@ -50,7 +81,7 @@ $trash-icon-size: 16px; // size of default icon size
 
 .choice-trash-can {
     @include resolve-dir(right, 0px !important);
-    //padding: $trash-icon-padding;
+    padding: $trash-icon-padding;
     &:focus {
         outline-width: 1px !important;
     }

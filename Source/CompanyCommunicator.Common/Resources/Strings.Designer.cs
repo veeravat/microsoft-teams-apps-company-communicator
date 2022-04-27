@@ -484,11 +484,29 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Submit Vote.
+        ///   Looks up a localized string similar to 👉.
+        /// </summary>
+        public static string PollQuizValidAnswer {
+            get {
+                return ResourceManager.GetString("PollQuizValidAnswer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Vote.
         /// </summary>
         public static string PollSubmitVote {
             get {
                 return ResourceManager.GetString("PollSubmitVote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Thanks👍.
+        /// </summary>
+        public static string PollThanks {
+            get {
+                return ResourceManager.GetString("PollThanks", resourceCulture);
             }
         }
         

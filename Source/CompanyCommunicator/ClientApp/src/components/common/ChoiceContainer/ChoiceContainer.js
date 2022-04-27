@@ -34,12 +34,12 @@ var ChoiceContainer = /** @class */ (function (_super) {
         return _this;
     }
     /**
-     * method that will add trash icon in input if count of choice is greater than 2 in Poll
+     * method that will add trash icon in input if count of choice is greater than 1 in Poll
      * @param i index of trash icon
      */
     ChoiceContainer.prototype.getDeleteIconProps = function (i) {
         var _this = this;
-        if (this.props.options.length > 2) {
+        if (this.props.options.length > 1) {
             return {
                 content: React.createElement(react_northstar_1.TrashCanIcon, { className: "choice-trash-can", outline: true, "aria-hidden": "false", title: this.props.options[i].deleteChoiceLabel, onClick: function () {
                         if (_this.currentFocus == _this.props.options.length - 1) {
@@ -65,28 +65,33 @@ var ChoiceContainer = /** @class */ (function (_super) {
                 this_1.currentFocus = i;
                 focusOnErrorSet = true;
             }
-            items.push(React.createElement("div", { key: "option" + i, className: "choice-item" },
-                React.createElement(InputBox_1.InputBox, { ref: function (inputBox) {
-                        if (inputBox && i == _this.currentFocus) {
-                            inputBox.focus();
-                        }
-                    }, fluid: true, input: { className: className }, maxLength: this_1.props.maxLength, icon: this_1.getDeleteIconProps(i), showError: errorString.length > 0, errorText: errorString, key: "option" + i, value: this_1.props.options[i].value, placeholder: this_1.props.options[i].choicePlaceholder, onKeyDown: function (e) {
-                        if (!e.repeat && (e.keyCode || e.which) == ChoiceContainer.CARRIAGE_RETURN_ASCII_VALUE
-                            && _this.props.options.length < maxOptions) {
-                            if (i == _this.props.options.length - 1) {
-                                _this.props.onAddChoice();
-                                _this.currentFocus = _this.props.options.length;
-                            }
-                            else {
-                                _this.currentFocus += 1;
-                                _this.forceUpdate();
-                            }
-                        }
-                    }, onFocus: function (e) {
-                        _this.currentFocus = i;
-                    }, onChange: function (e) {
-                        _this.props.onUpdateChoice(i, e.target.value);
-                    }, prefixJSX: this_1.props.options[i].choicePrefix })));
+            items.push(React.createElement("div", { key: "option" + i, className: "checklist-item-container" },
+                React.createElement("div", { className: "checklist-item" },
+                    React.createElement(react_northstar_1.Checkbox, { className: "checklist-checkbox", checked: this_1.props.options[i].checked, onChange: function (e, props) {
+                            _this.props.onItemChecked(i, props.checked);
+                        } }),
+                    React.createElement("div", { className: "checklist-input-box" },
+                        React.createElement(InputBox_1.InputBox, { ref: function (inputBox) {
+                                if (inputBox && i == _this.currentFocus) {
+                                    inputBox.focus();
+                                }
+                            }, fluid: true, input: { className: className }, maxLength: this_1.props.maxLength, icon: this_1.getDeleteIconProps(i), showError: errorString.length > 0, errorText: errorString, key: "option" + i, value: this_1.props.options[i].value, placeholder: this_1.props.options[i].choicePlaceholder, onKeyDown: function (e) {
+                                if (!e.repeat && (e.keyCode || e.which) == ChoiceContainer.CARRIAGE_RETURN_ASCII_VALUE
+                                    && _this.props.options.length < maxOptions) {
+                                    if (i == _this.props.options.length - 1) {
+                                        _this.props.onAddChoice();
+                                        _this.currentFocus = _this.props.options.length;
+                                    }
+                                    else {
+                                        _this.currentFocus += 1;
+                                        _this.forceUpdate();
+                                    }
+                                }
+                            }, onFocus: function (e) {
+                                _this.currentFocus = i;
+                            }, onChange: function (e) {
+                                _this.props.onUpdateChoice(i, e.target.value);
+                            } })))));
         };
         var this_1 = this;
         // if any input is blank while submitting action then there will be entry in optionError
@@ -104,12 +109,11 @@ var ChoiceContainer = /** @class */ (function (_super) {
                         _this.props.onAddChoice();
                         _this.currentFocus = _this.props.options.length;
                     } },
-                    React.createElement(react_northstar_1.AddIcon, { className: "plus-icon", outline: true, size: "medium" }),
-                    React.createElement(react_northstar_1.Text, { size: "medium", content: this.localize("PollAddChoice") }))));
+                    React.createElement(react_northstar_1.AddIcon, { className: "plus-icon", outline: true, size: "medium", color: "brand" }),
+                    React.createElement(react_northstar_1.Text, { size: "medium", content: this.localize("PollAddChoice"), color: "brand" }))));
     };
     ChoiceContainer.CARRIAGE_RETURN_ASCII_VALUE = 13;
     return ChoiceContainer;
 }(React.Component));
-//export default ChoiceContainer;
 exports.default = react_i18next_1.withTranslation()(ChoiceContainer);
 //# sourceMappingURL=ChoiceContainer.js.map

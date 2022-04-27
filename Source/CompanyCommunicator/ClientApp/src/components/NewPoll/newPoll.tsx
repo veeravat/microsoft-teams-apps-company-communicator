@@ -15,7 +15,7 @@ import './teamPoll.scss';
 import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, searchGroups, getGroups, verifyGroupAccess } from '../../apis/messageListApi';
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
-    setCardAuthor, setCardBtn, setCardPollOptions
+    setCardAuthor, setCardBtn, setCardPollOptions, getQuizAnswers, setCardPollQuizSelectedValue
 } from '../AdaptiveCard/adaptiveCardPoll';
 import { getBaseUrl } from '../../configVariables';
 import { ImageUtil } from '../../utility/imageutility';
@@ -57,6 +57,9 @@ export interface IDraftMessage {
     pollOptions: string,
     messageType: string,
     isAnonymousVoting?: boolean,
+    isPollMultipleChoice: boolean;
+    isPollQuizMode: boolean;
+    pollQuizAnswers?: string;
 }
 
 export interface formState {
@@ -98,6 +101,11 @@ export interface formState {
     selectedScheduledDateTime?: Date,
     fullWidth?: boolean,
     notifyUser?: boolean,
+
+    isPollMultipleChoice: boolean;
+    isPollQuizMode: boolean;
+    pollQuizAnswers?: number[];
+    choiceOptions: IChoiceContainerOption[];
 }
 
 export interface INewPollProps extends RouteComponentProps, WithTranslation {
@@ -146,9 +154,15 @@ class NewPoll extends React.Component<INewPollProps, formState> {
             selectedRequestReadReceipt: false,
             selectedInlineTranslation: false,
             selectedScheduledDateTime: new Date(),
+            selectedDelayDelivery: false, 
             errorImageUrlMessage: "",
             errorButtonUrlMessage: "",
+
             messageType: 'Poll',
+            isPollQuizMode: false,
+            isPollMultipleChoice: false,
+            pollQuizAnswers: [],
+            choiceOptions: [],
         }
 
         this.fileInput = React.createRef();
@@ -162,7 +176,7 @@ class NewPoll extends React.Component<INewPollProps, formState> {
         let params = this.props.match.params;
         this.setGroupAccess();
         this.getTeamList().then(() => {
-            if ('id' in params) {
+            if ('id' in params) { // existing message
                 let id = params['id'];
                 this.getItem(id).then(() => {
                     const selectedTeams = this.makeDropdownItemList(this.state.selectedTeams, this.state.teams);
@@ -172,7 +186,10 @@ class NewPoll extends React.Component<INewPollProps, formState> {
                         messageId: id,
                         selectedTeams: selectedTeams,
                         selectedRosters: selectedRosters,
-                    })
+                    });
+
+                    setCardPollOptions(this.state.card, this.state.isPollMultipleChoice, this.state.pollOptions);
+                    this.updateCard();
                 });
                 this.getGroupData(id).then(() => {
                     const selectedGroups = this.makeDropdownItems(this.state.groups);
@@ -181,27 +198,90 @@ class NewPoll extends React.Component<INewPollProps, formState> {
                     })
                 });
             } else {
-                let options: string[] = [ "option 1" ];
-                this.setState({ pollOptions: options });
+                // new message
+                //let options: string[] = [ this.localize("PollChoice", { "choiceNumber": 0 }) ];
+                
                 this.setState({
                     exists: false,
-                    loader: false,                    
+                    loader: false,
+                    //pollOptions: options
                 }, () => {
+                    //setCardPollOptions(this.state.card, this.state.isPollMultipleChoice, this.state.pollOptions);
+                    //this.updateCard();
                     let adaptiveCard = new AdaptiveCards.AdaptiveCard();
                     adaptiveCard.parse(this.state.card);
                     let renderedCard = adaptiveCard.render();
                     document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
-                    if (this.state.btnLink) {
-                        let link = this.state.btnLink;
-                        adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); };
-                    }
-                    if (this.state.pollOptions) {
-                        setCardPollOptions(this.state.card, this.state.pollOptions);
-                        this.updateCard();
-                    }
-                })
+                    this.addChoice();
+                });
             }
         });
+    }
+
+    private getItem = async (id: number) => {
+        try {
+            const response = await getDraftNotification(id);
+            const draftMessageDetail = response.data;
+            let selectedRadioButton = "teams";
+            if (draftMessageDetail.rosters.length > 0) {
+                selectedRadioButton = "rosters";
+            }
+            else if (draftMessageDetail.groups.length > 0) {
+                selectedRadioButton = "groups";
+            }
+            else if (draftMessageDetail.allUsers) {
+                selectedRadioButton = "allUsers";
+            }
+
+            this.setState({
+                teamsOptionSelected: draftMessageDetail.teams.length > 0,
+                selectedTeamsNum: draftMessageDetail.teams.length,
+                rostersOptionSelected: draftMessageDetail.rosters.length > 0,
+                selectedRostersNum: draftMessageDetail.rosters.length,
+                groupsOptionSelected: draftMessageDetail.groups.length > 0,
+                selectedGroupsNum: draftMessageDetail.groups.length,
+                selectedRadioBtn: selectedRadioButton,
+                selectedTeams: draftMessageDetail.teams,
+                selectedRosters: draftMessageDetail.rosters,
+                selectedGroups: draftMessageDetail.groups,
+
+                selectedRequestReadReceipt: draftMessageDetail.ack,
+                selectedInlineTranslation: draftMessageDetail.inlineTranslation,
+                selectedScheduledDateTime: draftMessageDetail.scheduledDateTime !== null ? new Date(draftMessageDetail.scheduledDateTime) : draftMessageDetail.scheduledDateTime,
+
+                selectedDelayDelivery: draftMessageDetail.scheduledDateTime !== null,
+
+                fullWidth: draftMessageDetail.fullWidth,
+                notifyUser: draftMessageDetail.notifyUser,
+
+                pollOptions: draftMessageDetail.pollOptions ? JSON.parse(draftMessageDetail.pollOptions) : [],
+                isPollMultipleChoice: draftMessageDetail.isPollMultipleChoice,
+                isPollQuizMode: draftMessageDetail.isPollQuizMode,
+                pollQuizAnswers: draftMessageDetail.pollQuizAnswers ? JSON.parse(draftMessageDetail.pollQuizAnswers) : [],
+            });
+
+            setCardTitle(this.card, draftMessageDetail.title);
+            setCardImageLink(this.card, draftMessageDetail.imageLink);
+            setCardSummary(this.card, draftMessageDetail.summary);
+            setCardAuthor(this.card, draftMessageDetail.author);
+            setCardPollOptions(this.card, this.state.isPollMultipleChoice, this.state.pollOptions);
+
+            this.setState({
+                title: draftMessageDetail.title,
+                summary: draftMessageDetail.summary,
+                btnLink: draftMessageDetail.buttonLink,
+                imageLink: draftMessageDetail.imageLink,
+                btnTitle: draftMessageDetail.buttonTitle,
+                author: draftMessageDetail.author,
+                allUsersOptionSelected: draftMessageDetail.allUsers,
+
+                loader: false
+            }, () => {
+                this.updateCard();
+            });
+        } catch (error) {
+            return error;
+        }
     }
 
     private makeDropdownItems = (items: any[] | undefined) => {
@@ -302,70 +382,6 @@ class NewPoll extends React.Component<INewPollProps, formState> {
         }
     }
 
-    private getItem = async (id: number) => {
-        try {
-            const response = await getDraftNotification(id);
-            const draftMessageDetail = response.data;
-            let selectedRadioButton = "teams";
-            if (draftMessageDetail.rosters.length > 0) {
-                selectedRadioButton = "rosters";
-            }
-            else if (draftMessageDetail.groups.length > 0) {
-                selectedRadioButton = "groups";
-            }
-            else if (draftMessageDetail.allUsers) {
-                selectedRadioButton = "allUsers";
-            }
-
-            console.log(draftMessageDetail.scheduledDateTime);
-            this.setState({
-                teamsOptionSelected: draftMessageDetail.teams.length > 0,
-                selectedTeamsNum: draftMessageDetail.teams.length,
-                rostersOptionSelected: draftMessageDetail.rosters.length > 0,
-                selectedRostersNum: draftMessageDetail.rosters.length,
-                groupsOptionSelected: draftMessageDetail.groups.length > 0,
-                selectedGroupsNum: draftMessageDetail.groups.length,
-                selectedRadioBtn: selectedRadioButton,
-                selectedTeams: draftMessageDetail.teams,
-                selectedRosters: draftMessageDetail.rosters,
-                selectedGroups: draftMessageDetail.groups,
-
-                selectedRequestReadReceipt: draftMessageDetail.ack,
-                selectedInlineTranslation: draftMessageDetail.inlineTranslation,
-                selectedScheduledDateTime: draftMessageDetail.scheduledDateTime !== null ? new Date(draftMessageDetail.scheduledDateTime) : draftMessageDetail.scheduledDateTime,
-
-                selectedDelayDelivery: draftMessageDetail.scheduledDateTime !== null,
-                
-                fullWidth: draftMessageDetail.fullWidth,
-                notifyUser: draftMessageDetail.notifyUser,
-                pollOptions: draftMessageDetail.pollOptions ? JSON.parse(draftMessageDetail.pollOptions) : [],
-            });
-
-            setCardTitle(this.card, draftMessageDetail.title);
-            setCardImageLink(this.card, draftMessageDetail.imageLink);
-            setCardSummary(this.card, draftMessageDetail.summary);
-            setCardAuthor(this.card, draftMessageDetail.author);
-            //setCardBtn(this.card, draftMessageDetail.buttonTitle, draftMessageDetail.buttonLink);
-            setCardPollOptions(this.card, this.state.pollOptions);
-
-            this.setState({
-                title: draftMessageDetail.title,
-                summary: draftMessageDetail.summary,
-                btnLink: draftMessageDetail.buttonLink,
-                imageLink: draftMessageDetail.imageLink,
-                btnTitle: draftMessageDetail.buttonTitle,
-                author: draftMessageDetail.author,
-                allUsersOptionSelected: draftMessageDetail.allUsers,
-                
-                loader: false
-            }, () => {
-                this.updateCard();
-            });
-        } catch (error) {
-            return error;
-        }
-    }
-
     public componentWillUnmount() {
         document.removeEventListener("keydown", this.escFunction, false);
     }
@@ -427,31 +443,122 @@ class NewPoll extends React.Component<INewPollProps, formState> {
         }
     }
 
+    
+
+    private deleteChoice(i: any) {
+        let options = [...this.state.pollOptions];
+        options.splice(i, 1);        
+        setCardPollOptions(this.card, this.state.isPollMultipleChoice, options);
+        this.updateCard();
+        this.setState({ pollOptions: options });
+    }
+
+    private onItemChecked(i: number, checked: boolean) {
+        //let checkedItem = this.state.pollOptions[i];
+
+        let answers = this.state.pollQuizAnswers;
+        if (answers && checked) {
+            answers.push(i);
+            this.setState({ pollQuizAnswers: answers });
+            let a: string = answers.map((answer: number): number => answer).join(',')
+            setCardPollQuizSelectedValue(this.state.card, a);
+            this.updateCard();
+        }
+        if (answers) {
+            let newAnswers = answers.filter(a => a !== i);
+            this.setState({ pollQuizAnswers: newAnswers });
+            let a: string = newAnswers.map((answer: number): number => answer).join(',')
+            setCardPollQuizSelectedValue(this.state.card, a);
+            this.updateCard();
+        }
+        console.log('onItemChecked');
+        console.log(this.state.pollQuizAnswers);
+    }
+
+    private updateChoiceText(i, value) {
+        let options = [...this.state.pollOptions];
+        options[i] = value;
+        setCardPollOptions(this.card, this.state.isPollMultipleChoice, options);
+        this.updateCard();
+        this.setState({ pollOptions: options });
+    }
+
+    private addChoice() {
+        const newValue = this.localize("PollChoice", { "choiceNumber": this.state.pollOptions.length + 1 });
+        const newPollOptions = [...this.state.pollOptions, newValue];
+        
+        setCardTitle(this.card, this.state.title);
+        setCardImageLink(this.card, this.state.imageLink);
+        setCardSummary(this.card, this.state.summary);
+        setCardAuthor(this.card, this.state.author);
+        setCardPollOptions(this.card, this.state.isPollMultipleChoice, newPollOptions);
+
+        this.setState({
+            pollOptions: newPollOptions,
+            card: this.card
+        }, () => {
+            this.updateCard();
+        });
+    }
+
+    private onPollMultipleChoiceChanged = (event: any, data: any) => {
+        setCardTitle(this.card, this.state.title);
+        setCardImageLink(this.card, this.state.imageLink);
+        setCardSummary(this.card, this.state.summary);
+        setCardAuthor(this.card, this.state.author);
+        setCardPollOptions(this.card, data.checked, this.state.pollOptions);
+
+        this.setState({
+            isPollMultipleChoice: data.checked,
+            card: this.card
+        }, () => {
+            this.updateCard();
+        });
+    }
+
+    private onPollQuizModeChanged = (event: any, data: any) => {
+        this.setState({
+            isPollQuizMode: data.checked,
+        });
+    }
+
     renderChoicesSection = () => {
         const choicePrefix = <CircleIcon outline size="small" className="choice-item-circle" disabled />;
         const options = this.state.pollOptions;
+
         let choiceOptions: any[] = [];
         let i = 0;
         options.forEach((option) => {
             const choiceOption: IChoiceContainerOption = {
                 value: option,
+                checked: false,
                 choicePrefix: choicePrefix,
-                choicePlaceholder: "Choice" + i + 1,
-                deleteChoiceLabel: "DeleteChoiceX" + i + 1,
+                choicePlaceholder: this.localize("PollChoice", { "choiceNumber": i + 1 }),
+                deleteChoiceLabel: this.localize("PollDeleteChoiceX", { "choiceNumber": i + 1 })
             };
             choiceOptions.push(choiceOption);
             i++;
         });
 
+        // in case we have quize mode
+        const answers = this.state.pollQuizAnswers;
+        console.log('const answers = this.state.pollQuizAnswers;');
+        console.log(answers)
+        if (answers) {
+            for (let j = 0; j < answers.length; j++) {
+                let answerNumber: number = answers[j];
+                choiceOptions[answerNumber].checked = true;
+            }
+            console.log(answers);
+        }
+
         return (
             <Flex column>
-                <Text content={this.localize("PollOptions")} />
-                <Checkbox label={this.localize("PollAnonymousVoting")} />
-                <Checkbox label={this.localize("PollMultipleChoice")} />
-                <Checkbox label={this.localize("PollQuizMode")} />
-
                 <div className="indentation">
                     <ChoiceContainer options={choiceOptions}
+                        onItemChecked={(i, checked: boolean) => {
+                            this.onItemChecked(i, checked);
+                        }}
                         onDeleteChoice={(item) => {
                             this.deleteChoice(item);
                         }}
@@ -462,34 +569,10 @@ class NewPoll extends React.Component<INewPollProps, formState> {
                             this.addChoice();
                         }} />
                 </div>
+
             </Flex>
 
         );
-    }
-
-    private deleteChoice(i: any) {
-        let options = [...this.state.pollOptions];
-        options.splice(i, 1);        
-        setCardPollOptions(this.card, options);
-        this.updateCard();
-        this.setState({ pollOptions: options });
-    }
-
-    private updateChoiceText(i, value) {
-        let options = [...this.state.pollOptions];
-        options[i] = value;
-        setCardPollOptions(this.card, options);
-        this.updateCard();
-        this.setState({ pollOptions: options });
-    }
-
-    private addChoice() {
-        const newValue = "";
-        this.setState({
-            pollOptions: [...this.state.pollOptions, newValue]
-        });
-        setCardPollOptions(this.card, this.state.pollOptions);
-        this.updateCard();
     }
 
     public render(): JSX.Element {
@@ -502,7 +585,7 @@ class NewPoll extends React.Component<INewPollProps, formState> {
         } else {
             if (this.state.page === "CardCreation") {
                 return (
-                    <div className="taskModule">
+                    <div className="taskModule">                        
                         <Flex column className="formContainer" vAlign="stretch" gap="gap.small">
                             <Flex className="scrollableContent">
                                 <Flex.Item size="size.half">
@@ -559,6 +642,7 @@ class NewPoll extends React.Component<INewPollProps, formState> {
                                                 fluid />
                                         </div>
 
+                                        
                                         <Input className="inputField"
                                             value={this.state.author}
                                             label={this.localize("Author")}
@@ -567,8 +651,7 @@ class NewPoll extends React.Component<INewPollProps, formState> {
                                             autoComplete="off"
                                             fluid
                                         />
-                                        {this.renderChoicesSection()}
-                                        
+
                                         <Text className={(this.state.errorButtonUrlMessage === "") ? "hide" : "show"} error size="small" content={this.state.errorButtonUrlMessage} />
                                     </Flex>
                                 </Flex.Item>
@@ -584,6 +667,43 @@ class NewPoll extends React.Component<INewPollProps, formState> {
                                 </Flex>
                             </Flex>
 
+                        </Flex>
+                    </div>
+                );
+            }
+            else if (this.state.page === "PollCreation") {
+                return (
+                    <div className="taskModule">
+                        <Flex column className="formContainer" vAlign="stretch" gap="gap.small">
+                            <Flex className="scrollableContent">
+                                <Flex.Item size="size.half">
+                                    <Flex column className="formContentContainer">
+                                        
+                                        <h3>{this.localize("PollOptions")}</h3>
+                                        {this.renderChoicesSection()}
+                                        <br />
+                                        {/*<Checkbox label={this.localize("PollAnonymousVoting")} />*/}
+                                        <Checkbox label={this.localize("PollMultipleChoice")} checked={this.state.isPollMultipleChoice} onChange={this.onPollMultipleChoiceChanged} />
+                                        <Checkbox label={this.localize("PollQuizMode")} checked={this.state.isPollQuizMode} onChange={this.onPollQuizModeChanged} />
+
+                                        <Text className={(this.state.errorButtonUrlMessage === "") ? "hide" : "show"} error size="small" content={this.state.errorButtonUrlMessage} />
+                                    </Flex>
+                                </Flex.Item>
+                                <Flex.Item size="size.half">
+                                    <div className="adaptiveCardContainer">
+                                    </div>
+                                </Flex.Item>
+                            </Flex>
+
+                            <Flex className="footerContainer" vAlign="end" hAlign="end">
+                                <Flex className="buttonContainer">
+                                    <Flex.Item push>
+                                        <Button content={this.localize("Back")} onClick={this.onBack} secondary />
+                                    </Flex.Item>
+                                    <Button content={this.localize("Next")} disabled={this.isNextBtnDisabled()} id="saveBtn" onClick={this.onNext} primary />
+                                    
+                                </Flex>
+                            </Flex>
                         </Flex>
                     </div>
                 );
@@ -741,7 +861,8 @@ class NewPoll extends React.Component<INewPollProps, formState> {
                                 <Flex.Item size="size.half">
                                     <div className="adaptiveCardContainer">
                                     </div>
-                                </Flex.Item>
+                                    
+                                </Flex.Item> 
                             </Flex>
                             <Flex className="footerContainer" vAlign="end" hAlign="end">
                                 <Flex className="buttonContainer" gap="gap.small">
@@ -776,26 +897,10 @@ class NewPoll extends React.Component<INewPollProps, formState> {
         })
     }
 
-    private onInlineTranslationChanged = (event: any, data: any) => {
-        this.setState({
-            selectedInlineTranslation: data.checked,
-        })
-    }
-
-
-    /**
-    * Event handler on start time change
-    */
     private onDeliveryTimeChange = (hours: number, min: number) => {
         var date = this.state.selectedScheduledDateTime === undefined ?
             new Date(new Date().setHours(hours, min)) : new Date(new Date(this.state.selectedScheduledDateTime).setHours(hours, min));
         this.setState({ selectedScheduledDateTime: date });
-    }
-
-    private onDeliveryDateChangedOld = (e: any, v: any) => {
-        console.log(this.state.selectedScheduledDateTime);
-        console.log(v.value);
-        this.setState({ selectedScheduledDateTime: v.value });
     }
 
     private onDeliveryDateChanged = (date: Date) => {
@@ -829,10 +934,14 @@ class NewPoll extends React.Component<INewPollProps, formState> {
     }
 
     private isNextBtnDisabled = () => {
+        const noSelectedChoices = (this.state.isPollQuizMode && !getQuizAnswers(this.card));
+
         const title = this.state.title;
         const btnTitle = this.state.btnTitle;
         const btnLink = this.state.btnLink;
-        return !(title && ((btnTitle && btnLink) || (!btnTitle && !btnLink)) && (this.state.errorImageUrlMessage === "") && (this.state.errorButtonUrlMessage === ""));
+        
+        return !(title && ((btnTitle && btnLink) || (!btnTitle && !btnLink)) && (this.state.errorImageUrlMessage === "")
+            && (this.state.errorButtonUrlMessage === "")) && noSelectedChoices;
     }
 
     private getItems = () => {
@@ -981,8 +1090,11 @@ class NewPoll extends React.Component<INewPollProps, formState> {
             fullWidth: this.state.fullWidth,
             notifyUser: this.state.notifyUser,
 
-            pollOptions: JSON.stringify(this.state.pollOptions),
             messageType: this.state.messageType,
+            pollOptions: JSON.stringify(this.state.pollOptions),
+            isPollQuizMode: this.state.isPollQuizMode,
+            pollQuizAnswers: getQuizAnswers(this.state.card),
+            isPollMultipleChoice: this.state.isPollMultipleChoice,
         };
 
         if (this.state.exists) {
@@ -1019,16 +1131,22 @@ class NewPoll extends React.Component<INewPollProps, formState> {
     }
 
     private onNext = (event: any) => {
+        const current = this.state.page;
+        let next: string = (current === "CardCreation") ? "PollCreation" : "AudienceSelection";
+
         this.setState({
-            page: "AudienceSelection"
+            page: next
         }, () => {
             this.updateCard();
         });
     }
 
     private onBack = (event: any) => {
+        const current = this.state.page;
+        let back: string = (current === "PollCreation") ? "CardCreation" : "PollCreation";
+
         this.setState({
-            page: "CardCreation"
+            page: back
         }, () => {
             this.updateCard();
         });
@@ -1040,7 +1158,6 @@ class NewPoll extends React.Component<INewPollProps, formState> {
         setCardImageLink(this.card, this.state.imageLink);
         setCardSummary(this.card, this.state.summary);
         setCardAuthor(this.card, this.state.author);
-        setCardBtn(this.card, this.state.btnTitle, this.state.btnLink);
         this.setState({
             title: event.target.value,
             card: this.card
@@ -1069,7 +1186,6 @@ class NewPoll extends React.Component<INewPollProps, formState> {
         setCardImageLink(this.card, event.target.value);
         setCardSummary(this.card, this.state.summary);
         setCardAuthor(this.card, this.state.author);
-        setCardBtn(this.card, this.state.btnTitle, this.state.btnLink);
         this.setState({
             imageLink: event.target.value,
             card: this.card
@@ -1087,7 +1203,6 @@ class NewPoll extends React.Component<INewPollProps, formState> {
         setCardImageLink(this.card, this.state.imageLink);
         setCardSummary(this.card, event.target.value);
         setCardAuthor(this.card, this.state.author);
-        setCardBtn(this.card, this.state.btnTitle, this.state.btnLink);
         this.setState({
             summary: event.target.value,
             card: this.card
@@ -1105,7 +1220,7 @@ class NewPoll extends React.Component<INewPollProps, formState> {
         setCardImageLink(this.card, this.state.imageLink);
         setCardSummary(this.card, this.state.summary);
         setCardAuthor(this.card, event.target.value);
-        setCardBtn(this.card, this.state.btnTitle, this.state.btnLink);
+
         this.setState({
             author: event.target.value,
             card: this.card
@@ -1117,75 +1232,7 @@ class NewPoll extends React.Component<INewPollProps, formState> {
         });
     }
 
-    private onBtnTitleChanged = (event: any) => {
-        const showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !this.state.author && !event.target.value && !this.state.btnLink);
-        setCardTitle(this.card, this.state.title);
-        setCardImageLink(this.card, this.state.imageLink);
-        setCardSummary(this.card, this.state.summary);
-        setCardAuthor(this.card, this.state.author);
-        if (event.target.value && this.state.btnLink) {
-            setCardBtn(this.card, event.target.value, this.state.btnLink);
-            this.setState({
-                btnTitle: event.target.value,
-                card: this.card
-            }, () => {
-                if (showDefaultCard) {
-                    this.setDefaultCard(this.card);
-                }
-                this.updateCard();
-            });
-        } else {
-            delete this.card.actions;
-            this.setState({
-                btnTitle: event.target.value,
-            }, () => {
-                if (showDefaultCard) {
-                    this.setDefaultCard(this.card);
-                }
-                this.updateCard();
-            });
-        }
-    }
-
-    private onBtnLinkChanged = (event: any) => {
-        if (!(event.target.value === "" || event.target.value.toLowerCase().startsWith("https://"))) {
-            this.setState({
-                errorButtonUrlMessage: this.localize("ErrorURLMessage")
-            });
-        } else {
-            this.setState({
-                errorButtonUrlMessage: ""
-            });
-        }
-
-        const showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !this.state.author && !this.state.btnTitle && !event.target.value);
-        setCardTitle(this.card, this.state.title);
-        setCardSummary(this.card, this.state.summary);
-        setCardAuthor(this.card, this.state.author);
-        setCardImageLink(this.card, this.state.imageLink);
-        if (this.state.btnTitle && event.target.value) {
-            setCardBtn(this.card, this.state.btnTitle, event.target.value);
-            this.setState({
-                btnLink: event.target.value,
-                card: this.card
-            }, () => {
-                if (showDefaultCard) {
-                    this.setDefaultCard(this.card);
-                }
-                this.updateCard();
-            });
-        } else {
-            delete this.card.actions;
-            this.setState({
-                btnLink: event.target.value
-            }, () => {
-                if (showDefaultCard) {
-                    this.setDefaultCard(this.card);
-                }
-                this.updateCard();
-            });
-        }
-    }
+    
 
     private updateCard = () => {
         const adaptiveCard = new AdaptiveCards.AdaptiveCard();
@@ -1197,8 +1244,6 @@ class NewPoll extends React.Component<INewPollProps, formState> {
         } else {
             document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
         }
-        const link = this.state.btnLink;
-        adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); }
     }
 }
 

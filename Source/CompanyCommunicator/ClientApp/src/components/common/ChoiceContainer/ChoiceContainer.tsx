@@ -3,19 +3,15 @@
 
 import * as React from "react";
 import "./ChoiceContainer.scss";
-import { Text, ShorthandValue, AddIcon, BoxProps, TrashCanIcon } from "@fluentui/react-northstar";
+import { Text, Checkbox, ShorthandValue, AddIcon, BoxProps, TrashCanIcon, Input } from "@fluentui/react-northstar";
 import { InputBox } from "../InputBox/InputBox";
 import { TFunction } from "i18next";
 import { withTranslation, WithTranslation } from "react-i18next";
-//import { UxUtils } from "./../../utils/UxUtils";
-//import { Constants } from "./../../utils/Constants";
-//import { Localizer } from "../../utils/Localizer";
-
-
 
 export interface IChoiceContainerOption {
     value: string;
     choicePrefix?: JSX.Element;
+    checked: boolean;
     choicePlaceholder: string;
     deleteChoiceLabel: string;
 }
@@ -26,12 +22,13 @@ export interface IChoiceContainerProps extends WithTranslation {
     optionsError?: string[];
     limit?: number;
     maxLength?: number;
-    renderForMobile?: boolean;
+    multiselect?: boolean;
     focusOnError?: boolean;
     inputClassName?: string;
     onUpdateChoice?: (i, value) => void;
     onDeleteChoice?: (i) => void;
     onAddChoice?: () => void;
+    onItemChecked?: (i, value: boolean) => void;
 }
 
 /**
@@ -49,11 +46,11 @@ class ChoiceContainer extends React.Component<IChoiceContainerProps> {
     }
 
     /**
-     * method that will add trash icon in input if count of choice is greater than 2 in Poll
+     * method that will add trash icon in input if count of choice is greater than 1 in Poll
      * @param i index of trash icon
      */
     getDeleteIconProps(i: number): ShorthandValue<BoxProps> {
-        if (this.props.options.length > 2) {
+        if (this.props.options.length > 1) {
             return {
                 content: <TrashCanIcon className="choice-trash-can" outline={true} aria-hidden="false"
                     title={this.props.options[i].deleteChoiceLabel}
@@ -85,45 +82,60 @@ class ChoiceContainer extends React.Component<IChoiceContainerProps> {
                 this.currentFocus = i;
                 focusOnErrorSet = true;
             }
+
             items.push(
-                <div key={"option" + i} className="choice-item">
-                    <InputBox
-                        ref={(inputBox) => {
-                            if (inputBox && i == this.currentFocus) {
-                                inputBox.focus();
-                            }
-                        }}
-                        fluid
-                        input={{ className }}
-                        maxLength={this.props.maxLength}
-                        icon={this.getDeleteIconProps(i)}
-                        showError={errorString.length > 0}
-                        errorText={errorString}
-                        key={"option" + i}
-                        value={this.props.options[i].value}
-                        placeholder={this.props.options[i].choicePlaceholder}
-                        onKeyDown={(e) => {
-                            if (!e.repeat && (e.keyCode || e.which) == ChoiceContainer.CARRIAGE_RETURN_ASCII_VALUE
-                                && this.props.options.length < maxOptions) {
-                                if (i == this.props.options.length - 1) {
-                                    this.props.onAddChoice();
-                                    this.currentFocus = this.props.options.length;
-                                } else {
-                                    this.currentFocus += 1;
-                                    this.forceUpdate();
-                                }
-                            }
-                        }}
-                        onFocus={(e) => {
-                            this.currentFocus = i;
-                        }}
-                        onChange={(e) => {
-                            this.props.onUpdateChoice(i, (e.target as HTMLInputElement).value);
-                        }}
-                        prefixJSX={this.props.options[i].choicePrefix}
-                    />
+                <div key={"option" + i} className="checklist-item-container">
+                    <div className="checklist-item">
+                        <Checkbox
+                            className="checklist-checkbox"
+                            checked={this.props.options[i].checked}
+                            onChange={(e, props) => {
+                                this.props.onItemChecked(i, props.checked);
+                            }}
+                        />
+                        <div className="checklist-input-box">
+                            <InputBox
+                                ref={(inputBox) => {
+                                    if (inputBox && i == this.currentFocus) {
+                                        inputBox.focus();
+                                    }
+                                }}
+                                fluid
+                                input={{ className }}
+                                maxLength={this.props.maxLength}
+                                icon={this.getDeleteIconProps(i)}
+                                showError={errorString.length > 0}
+                                errorText={errorString}
+                                key={"option" + i}
+                                value={this.props.options[i].value}
+                                placeholder={this.props.options[i].choicePlaceholder}
+                                onKeyDown={(e) => {
+                                    if (!e.repeat && (e.keyCode || e.which) == ChoiceContainer.CARRIAGE_RETURN_ASCII_VALUE
+                                        && this.props.options.length < maxOptions) {
+                                        if (i == this.props.options.length - 1) {
+                                            this.props.onAddChoice();
+                                            this.currentFocus = this.props.options.length;
+                                        } else {
+                                            this.currentFocus += 1;
+                                            this.forceUpdate();
+                                        }
+                                    }
+                                }}
+                                onFocus={(e) => {
+                                    this.currentFocus = i;
+                                }}
+                                onChange={(e) => {
+                                    this.props.onUpdateChoice(i, (e.target as HTMLInputElement).value);
+                                }}
+                            />
+                        </div>
+                    </div>
                 </div>
             );
+
+            
+
+
         }
         return (
             <div
@@ -144,14 +156,12 @@ class ChoiceContainer extends React.Component<IChoiceContainerProps> {
                             this.currentFocus = this.props.options.length;
                         }}
                     >
-                        <AddIcon className="plus-icon" outline size="medium"  />
-                    <Text size="medium" content={this.localize("PollAddChoice")} />
+                        <AddIcon className="plus-icon" outline size="medium" color="brand" />
+                        <Text size="medium" content={this.localize("PollAddChoice")} color="brand" />
                     </div>
                 }
             </div>
         );
     }
 }
-
-//export default ChoiceContainer;
 export default withTranslation()(ChoiceContainer);

@@ -117,14 +117,65 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                     string selectedChoice = jValue.ContainsKey("PollChoices") ? jValue.Value<string>("PollChoices") : string.Empty;
                     if (!string.IsNullOrEmpty(selectedChoice))
                     {
+                        // we have multiple selection
+                        if (selectedChoice.IndexOf(',') > -1)
+                        {
+                            var choices = selectedChoice.Split(',');
+                            foreach (var choice in choices)
+                            {
+                                var vote = new Dictionary<string, string>
+                                {
+                                    { "notificationId", notificationId },
+                                    { "userId", turnContext.Activity.From?.AadObjectId },
+                                    { "vote", choice },
+                                };
+                                this.LogActivityTelemetry(turnContext.Activity, "TrackPollVote", vote);
+                            }
+                        }
+                        else
+                        {
+                            var vote = new Dictionary<string, string>
+                                {
+                                    { "notificationId", notificationId },
+                                    { "userId", turnContext.Activity.From?.AadObjectId },
+                                    { "vote", selectedChoice },
+                                };
+                            this.LogActivityTelemetry(turnContext.Activity, "TrackPollVote", vote);
+                        }
+
+                        var notificationEntity2 = await this.notificationDataRepository.GetAsync(NotificationDataTableNames.SentNotificationsPartition, notificationId);
+
+                        // Download base64 data from blob convert to base64 string.
+                        if (!string.IsNullOrEmpty(notificationEntity2.ImageBase64BlobName))
+                        {
+                            notificationEntity2.ImageLink = await this.notificationDataRepository.GetImageAsync(notificationEntity2.ImageLink, notificationEntity2.ImageBase64BlobName);
+                        }
+
+                        var card2 = this.adaptiveCardCreator.CreateAdaptiveCard(notificationEntity2, translate: false, voted: true, selectedChoice: selectedChoice);
+
+                        var adaptiveCardAttachment2 = new Attachment()
+                        {
+                            ContentType = AdaptiveCard.ContentType,
+                            Content = card2,
+                        };
+
                         var activity2 = turnContext.Activity;
-                        var vote = new Dictionary<string, string>
+                        var properties3 = new Dictionary<string, string>
                         {
                             { "notificationId", notificationId },
+                            { "notificationTitle", notificationEntity2.Title },
+                            { "notificationUrl", notificationEntity2.ButtonLink },
+                            { "notificationAuthor", notificationEntity2.Author },
+                            { "notificationCreatedBy", notificationEntity2.CreatedBy },
+                            { "notificationSendCompletedDate", notificationEntity2.SentDate?.ToString() },
                             { "userId", activity2.From?.AadObjectId },
-                            { "vote", selectedChoice },
                         };
-                        this.LogActivityTelemetry(turnContext.Activity, "TrackPollVote", vote);
+                        this.LogActivityTelemetry(activity2, "TrackAck", properties3);
+
+                        var newActivity2 = MessageFactory.Attachment(adaptiveCardAttachment2);
+                        newActivity2.Id = turnContext.Activity.ReplyToId;
+                        newActivity2.Summary = notificationEntity2.Title;
+                        await turnContext.UpdateActivityAsync(newActivity2, cancellationToken);
                         return;
                     }
 
@@ -133,28 +184,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                     {
                         notificationEntity.ButtonLink = jValue.ContainsKey("trackClickUrl") ? jValue.Value<string>("trackClickUrl") : string.Empty;
                     }
-
-                    //bool translation = Convert.ToBoolean(value["translation"]);
-                    //if (translation)
-                    //{
-                    //    var detectedUserLocale = turnContext.Activity.Locale;
-                    //    string userLanguage = string.Empty;
-                    //    if (detectedUserLocale.Contains('-'))
-                    //    {
-                    //        userLanguage = detectedUserLocale.Split('-')[0];
-                    //    }
-
-                    //    notificationEntity.Title = await this.translator.TranslateAsync(notificationEntity.Title, userLanguage);
-                    //    if (!string.IsNullOrWhiteSpace(notificationEntity.Summary))
-                    //    {
-                    //        notificationEntity.Summary = await this.translator.TranslateAsync(notificationEntity.Summary, userLanguage);
-                    //    }
-
-                    //    if (!string.IsNullOrWhiteSpace(notificationEntity.ButtonTitle))
-                    //    {
-                    //        notificationEntity.ButtonTitle = await this.translator.TranslateAsync(notificationEntity.ButtonTitle, userLanguage);
-                    //    }
-                    //}
 
                     // Download base64 data from blob convert to base64 string.
                     if (!string.IsNullOrEmpty(notificationEntity.ImageBase64BlobName))
@@ -185,7 +214,30 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 
                     var newActivity = MessageFactory.Attachment(adaptiveCardAttachment);
                     newActivity.Id = turnContext.Activity.ReplyToId;
+                    newActivity.Summary = notificationEntity.Title;
                     await turnContext.UpdateActivityAsync(newActivity, cancellationToken);
+
+                    //bool translation = Convert.ToBoolean(value["translation"]);
+                    //if (translation)
+                    //{
+                    //    var detectedUserLocale = turnContext.Activity.Locale;
+                    //    string userLanguage = string.Empty;
+                    //    if (detectedUserLocale.Contains('-'))
+                    //    {
+                    //        userLanguage = detectedUserLocale.Split('-')[0];
+                    //    }
+
+                    //    notificationEntity.Title = await this.translator.TranslateAsync(notificationEntity.Title, userLanguage);
+                    //    if (!string.IsNullOrWhiteSpace(notificationEntity.Summary))
+                    //    {
+                    //        notificationEntity.Summary = await this.translator.TranslateAsync(notificationEntity.Summary, userLanguage);
+                    //    }
+
+                    //    if (!string.IsNullOrWhiteSpace(notificationEntity.ButtonTitle))
+                    //    {
+                    //        notificationEntity.ButtonTitle = await this.translator.TranslateAsync(notificationEntity.ButtonTitle, userLanguage);
+                    //    }
+                    //}
                 }
             }
         }

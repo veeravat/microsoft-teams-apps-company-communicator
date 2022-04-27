@@ -13,7 +13,7 @@ import { Chart, EChartTypes, Provider, themeNames } from "@fluentui/react-teams"
 import * as microsoftTeams from "@microsoft/teams-js";
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
-    setCardAuthor, setCardBtn, setCardPollOptions
+    setCardAuthor, setCardBtn, setCardPollOptions, setCardHidePoll
 } from '../AdaptiveCard/adaptiveCardPoll';
 import { ImageUtil } from '../../utility/imageutility';
 import { formatDate, formatDuration, formatNumber } from '../../i18n';
@@ -56,6 +56,7 @@ export interface IMessage {
     sendingCompleted?: boolean;
     messageType?: string;
     pollOptions?: string,
+    isPollMultipleChoice?: boolean;
 }
 
 export interface IStatusState {
@@ -65,6 +66,7 @@ export interface IStatusState {
     teamId?: string;
     reactionsCount: number;
     pollResultsChartData?: any;
+    isPollMultipleChoice: boolean;
 }
 
 interface StatusTaskModuleProps extends RouteComponentProps, WithTranslation { }
@@ -91,6 +93,7 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
             page: "ViewStatus",
             teamId: '',
             reactionsCount: 0,
+            isPollMultipleChoice: false
         };
     }
 
@@ -113,62 +116,69 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                     setCardImageLink(this.card, this.state.message.imageLink);
                     setCardSummary(this.card, this.state.message.summary);
                     setCardAuthor(this.card, this.state.message.author);
-                    if (this.state.message.buttonTitle !== "" && this.state.message.buttonLink !== "") {
-                        setCardBtn(this.card, this.state.message.buttonTitle, this.state.message.buttonLink);
-                    }
 
                     if (this.state.message.pollOptions) {
                         const options: string[] = JSON.parse(this.state.message.pollOptions);
                         console.log(options);
-                        setCardPollOptions(this.card, options);
+                        setCardPollOptions(this.card, this.state.isPollMultipleChoice, options);
 
                         this.getPollResult(id).then((response) => {
                             //if (this.state.message.pollOptions) {
-                                //const options: string[] = JSON.parse(this.state.message.pollOptions);
-                                let choiceOptions = new Map();
+                            //const options: string[] = JSON.parse(this.state.message.pollOptions);
+                            let choiceOptions = new Map();
 
-                                let i = 0;
-                                options.forEach((option) => {
-                                    const choiceOption = {
-                                        title: option,
-                                        count: 0,
-                                    };
-                                    choiceOptions.set(i.toString(), choiceOption);
-                                    i++;
-                                });
+                            let i = 0;
+                            options.forEach((option) => {
+                                const choiceOption = {
+                                    title: option,
+                                    count: 0,
+                                };
+                                choiceOptions.set(i.toString(), choiceOption);
+                                i++;
+                            });
 
-                                console.log('choiceOptions init');
-                                console.log(choiceOptions);
+                            console.log('choiceOptions init');
+                            console.log(choiceOptions);
 
 
-                                let rows = response.data.tables[0].rows;
-                                if (rows) {
-                                    for (var j = 0; j < rows.length; j++) {
-                                        let optionNum = rows[j][0];
-                                        let optionCount = rows[j][1]
-                                        console.log("optionNum: " + optionNum + " optionCount: " + optionCount);
-                                        let current = choiceOptions.get(optionNum);
-                                        console.log(current);
-                                        current.count = optionCount;
-                                        choiceOptions.set(optionNum, current);
-                                    }
+                            let rows = response.data.tables[0].rows;
+                            if (rows) {
+                                for (var j = 0; j < rows.length; j++) {
+                                    let optionNum = rows[j][0];
+                                    let optionCount = rows[j][1]
+                                    console.log("optionNum: " + optionNum + " optionCount: " + optionCount);
+                                    let current = choiceOptions.get(optionNum);
+                                    console.log(current);
+                                    current.count = optionCount;
+                                    choiceOptions.set(optionNum, current);
+                                }
                             }
                             console.log('choiceOptions add counts');
                             console.log(choiceOptions);
                             const chartData = {
                                 labels: Array.from(choiceOptions.values()).map(x => x.title),
-                                    datasets: [
-                                        {
-                                            label: "Votes",
-                                            data: Array.from(choiceOptions.values()).map(x => x.count),
-                                        },
-                                    ],
+                                datasets: [
+                                    {
+                                        label: "Votes",
+                                        data: Array.from(choiceOptions.values()).map(x => x.count),
+                                    },
+                                ],
                             }
                             this.setState({ pollResultsChartData: chartData });
 
                             //}
                         });
                     }
+                    else {
+                        setCardHidePoll(this.card);
+                    }
+
+
+                    if (this.state.message.buttonTitle !== "" && this.state.message.buttonLink !== "") {
+                        setCardBtn(this.card, this.state.message.buttonTitle, this.state.message.buttonLink);
+                    }
+
+                    
 
                     let adaptiveCard = new AdaptiveCards.AdaptiveCard();
                     adaptiveCard.parse(this.card);

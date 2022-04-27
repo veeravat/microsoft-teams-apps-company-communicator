@@ -112,8 +112,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     TotalMessageCount = draftNotificationEntity.TotalMessageCount,
                     SendingStartedDate = DateTime.UtcNow,
                     Status = NotificationStatus.Queued.ToString(),
+
                     PollOptions = draftNotificationEntity.PollOptions,
                     MessageType = draftNotificationEntity.MessageType,
+                    IsPollQuizMode = draftNotificationEntity.IsPollQuizMode,
+                    PollQuizAnswers = draftNotificationEntity.PollQuizAnswers,
+                    IsPollMultipleChoice = draftNotificationEntity.IsPollMultipleChoice,
                 };
 
                 await this.CreateOrUpdateAsync(sentNotificationEntity);
@@ -165,6 +169,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     NotifyUser = notificationEntity.NotifyUser,
                     PollOptions = notificationEntity.PollOptions,
                     MessageType = notificationEntity.MessageType,
+                    IsPollQuizMode = notificationEntity.IsPollQuizMode,
+                    PollQuizAnswers = notificationEntity.PollQuizAnswers,
+                    IsPollMultipleChoice = notificationEntity.IsPollMultipleChoice,
                 };
 
                 if (!string.IsNullOrEmpty(notificationEntity.ImageBase64BlobName))

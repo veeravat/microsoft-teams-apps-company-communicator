@@ -24,7 +24,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
         /// <param name="notificationDataEntity">Notification data entity.</param>
         /// <param name="translate">Translate equals true in case of the Translate Button is ready to translate message.</param>
         /// <returns>An adaptive card.</returns>
-        public virtual AdaptiveCard CreateAdaptiveCard(NotificationDataEntity notificationDataEntity, bool translate = false, bool acknowledged = false)
+        public virtual AdaptiveCard CreateAdaptiveCard(NotificationDataEntity notificationDataEntity, 
+            bool translate = false, bool acknowledged = false, 
+            bool voted = false, string selectedChoice = "")
         {
             return this.CreateAdaptiveCard(
                 notificationDataEntity.Title,
@@ -35,9 +37,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 notificationDataEntity.ButtonLink,
                 notificationDataEntity.Id,
                 notificationDataEntity.PollOptions,
+                notificationDataEntity.PollQuizAnswers,
                 translate,
                 notificationDataEntity.Ack,
-                acknowledged
+                acknowledged,
+                notificationDataEntity.IsPollMultipleChoice,
+                voted,
+                selectedChoice
                 );
         }
 
@@ -62,9 +68,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
             string buttonUrl,
             string notificationId,
             string pollOptions,
+            string pollQuizAnswers,
             bool translate = false,
             bool ack = false,
-            bool acknowledged = false)
+            bool acknowledged = false,
+            bool isMutipleChoice = false,
+            bool voted = false,
+            string selectedChoice = "")
         {
             var version = new AdaptiveSchemaVersion(1, 3);
             AdaptiveCard card = new AdaptiveCard(version);
@@ -116,10 +126,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
             if (!string.IsNullOrWhiteSpace(pollOptions) && pollOptions != "[]")
             {
                 string[] options = JsonConvert.DeserializeObject<string[]>(pollOptions);
+                string[] answers = JsonConvert.DeserializeObject<string[]>(pollQuizAnswers);
+
                 var adaptiveCoices = new List<AdaptiveChoice>();
                 for (int i = 0; i < options.Length; i++)
                 {
-                    adaptiveCoices.Add(new AdaptiveChoice() { Title = options[i], Value = i.ToString() });
+                    string optionTitle = options[i];
+                    var result = Array.Find(answers, element => element == i.ToString());
+                    if (voted && !string.IsNullOrWhiteSpace(result))
+                    {
+                        optionTitle = Strings.PollQuizValidAnswer + " " + optionTitle;
+                    }
+
+                    adaptiveCoices.Add(new AdaptiveChoice() { Title = optionTitle, Value = i.ToString() });
                 }
 
                 var choiceSet = new AdaptiveChoiceSetInput
@@ -129,19 +148,39 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                     IsRequired = true,
                     ErrorMessage = Strings.PollErrorMessageSelectOption,
                     Style = AdaptiveChoiceInputStyle.Expanded,
-                    IsMultiSelect = false,
+                    IsMultiSelect = isMutipleChoice,
                     Choices = adaptiveCoices,
                 };
+
+                if (voted)
+                {
+                    choiceSet.Value = selectedChoice;
+                }
+
                 card.Body.Add(choiceSet);
 
-                card.Actions.Add(new AdaptiveSubmitAction()
+                if (!voted)
                 {
-                    Title = "Vote Poll",
-                    Id = "votePoll",
-                    Data = "votePoll",
-                    DataJson = JsonConvert.SerializeObject(
+                    card.Actions.Add(new AdaptiveSubmitAction()
+                    {
+                        Title = Strings.PollSubmitVote,
+                        Id = "votePoll",
+                        Data = "votePoll",
+                        DataJson = JsonConvert.SerializeObject(
                         new { notificationId = notificationId }),
-                });
+                    });
+                }
+                else
+                {
+                    card.Body.Add(new AdaptiveTextBlock()
+                    {
+                        Text = Strings.PollThanks,
+                        Size = AdaptiveTextSize.ExtraLarge,
+                        Weight = AdaptiveTextWeight.Bolder,
+                        Color = AdaptiveTextColor.Good,
+                        Wrap = true,
+                    });
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(buttonTitle)

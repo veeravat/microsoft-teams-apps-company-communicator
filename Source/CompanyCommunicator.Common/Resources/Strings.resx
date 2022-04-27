@@ -278,6 +278,12 @@
     <value>Please select an option.</value>
   </data>
   <data name="PollSubmitVote" xml:space="preserve">
-    <value>Submit Vote</value>
+    <value>Vote</value>
+  </data>
+  <data name="PollQuizValidAnswer" xml:space="preserve">
+    <value>👉</value>
+  </data>
+  <data name="PollThanks" xml:space="preserve">
+    <value>Thanks👍</value>
   </data>
 </root>

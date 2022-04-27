@@ -14,6 +14,7 @@
   "Duplicate": "Duplicate",
   "Delete": "Delete",
   "EditMessage": "Edit message",
+  "EditPoll": "Edit poll",
   "NewMessage": "New message",
   "ViewStatus": "View status",
   "SendConfirmation": "Send confirmation",
@@ -102,5 +103,7 @@
   "PollQuizMode": "Quiz Mode",
   "PollMultipleChoice": "Multiple Choice",
   "PollAddChoice": "Add Choice",
-  "PollSubmitVote":  "Submit Vote"
+  "PollSubmitVote": "Submit Vote",
+  "PollChoice": "Choice {{choiceNumber}}",
+  "PollDeleteChoiceX": "Delete Choice {{choiceNumber}}"
 }

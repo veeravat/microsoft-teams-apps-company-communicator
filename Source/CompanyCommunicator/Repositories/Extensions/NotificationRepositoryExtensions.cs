@@ -54,6 +54,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
                 FullWidth = notification.FullWidth,
                 PollOptions = notification.PollOptions,
                 MessageType = notification.MessageType,
+                IsPollQuizMode = notification.IsPollQuizMode,
+                PollQuizAnswers = notification.PollQuizAnswers,
+                IsPollMultipleChoice = notification.IsPollMultipleChoice,
             };
 
             if (notification.ImageLink.StartsWith(Constants.ImageBase64Format))

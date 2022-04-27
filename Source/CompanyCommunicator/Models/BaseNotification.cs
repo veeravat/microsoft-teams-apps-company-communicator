@@ -73,5 +73,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public string PollOptions { get; set; }
 
         public string MessageType { get; set; }
+        public string PollQuizAnswers { get; set; }
+
+        public bool IsPollQuizMode { get; set; }
+
+        public bool IsPollMultipleChoice { get; set; }
     }
 }

@@ -106,8 +106,15 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
                                 this.setState({
                                     menuOpen: false,
                                 });
-                                let url = getBaseUrl() + "/newmessage/" + this.props.message.id + "?locale={locale}";
-                                this.onOpenTaskModule(null, url, this.localize("EditMessage"));
+
+                                if (this.props.message.messageType === 'Poll') {
+                                    let url = getBaseUrl() + "/newpoll/" + this.props.message.id + "?locale={locale}";
+                                    this.onOpenTaskModule(null, url, this.localize("EditPoll"));
+                                }
+                                else {
+                                    let url = getBaseUrl() + "/newmessage/" + this.props.message.id + "?locale={locale}";
+                                    this.onOpenTaskModule(null, url, this.localize("EditMessage"));
+                                }
                             }
                         },
                         {

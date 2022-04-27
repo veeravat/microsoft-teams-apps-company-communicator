@@ -174,6 +174,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 FullWidth = notification.FullWidth,
                 PollOptions = notification.PollOptions,
                 MessageType = notification.MessageType,
+                IsPollQuizMode = notification.IsPollQuizMode,
+                PollQuizAnswers = notification.PollQuizAnswers,
+                IsPollMultipleChoice = notification.IsPollMultipleChoice,
             };
 
             if (notification.ImageLink.StartsWith(Constants.ImageBase64Format))
@@ -288,6 +291,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 FullWidth = notificationEntity.FullWidth,
                 PollOptions = notificationEntity.PollOptions,
                 MessageType = notificationEntity.MessageType,
+                IsPollQuizMode = notificationEntity.IsPollQuizMode,
+                PollQuizAnswers = notificationEntity.PollQuizAnswers,
+                IsPollMultipleChoice = notificationEntity.IsPollMultipleChoice,
             };
 
             // In case we have blob name instead of URL to public image.

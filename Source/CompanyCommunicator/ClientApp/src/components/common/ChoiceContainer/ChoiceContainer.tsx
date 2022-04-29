@@ -96,6 +96,11 @@ class ChoiceContainer extends React.Component<IChoiceContainerProps> {
                         />}
                         {!this.props.multiselect &&
                             <Input
+                            onChange={(e, props) => {
+                                console.log(e.target.checked);
+                                this.props.onItemChecked(i, e.target.checked);
+                            }}
+                            checked={this.props.options[i].checked}
                             wrapper={{
                                 styles: { padding: '5px', backgroundColor: 'green' },
                             }}

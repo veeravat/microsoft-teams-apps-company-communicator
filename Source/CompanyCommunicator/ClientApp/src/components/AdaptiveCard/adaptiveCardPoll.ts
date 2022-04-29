@@ -56,7 +56,7 @@ export const getInitAdaptiveCard = (t: TFunction) => {
                     "items": [
                         {
                             "type": "Input.ChoiceSet",
-                            "id": "myColor2",
+                            "id": "PollChoices",
                             "style": "expanded",
                             "isMultiSelect": false,
                             "wrap": "true",
@@ -147,15 +147,19 @@ export const setCardPollOptions = (card: any, isMultiselect: boolean, values: st
         values.forEach((option) => {
             const choiceOption = {
                 title: option,
-                value: i,
+                value: i.toString(),
             };
             choiceOptions.push(choiceOption);
+            if (i === 0) {
+                console.log('option: ' + option + ' value: ' + i);
+            }
             i++;
         });
         card.body[4].items[0].choices = choiceOptions;
         card.body[4].items[0].isMultiSelect = isMultiselect;
         console.log('card.body[4].items[0].choices');
-        console.log(card.body[4].items[0].choices);
+        console.log(card);
+        console.log('end setCardPollOptions');
     } else {
         delete card.body[4].items[0].choices;
     }
@@ -171,27 +175,27 @@ export const getCardPollQuizSelectedValue = (card: any) => {
     return card.body[4].items[0].value;
 }
 
-export const getQuizAnswers = (card: any) => {
-    let adaptiveCard = new AdaptiveCards.AdaptiveCard();
-    adaptiveCard.parse(card);
-    console.log(adaptiveCard);
-    adaptiveCard.onExecuteAction = function (action) { alert('Voted'); };
-    let json = adaptiveCard.toJSON();
-    console.log("json");
-    console.log(json);
+//export const getQuizAnswers = (card: any) => {
+//    let adaptiveCard = new AdaptiveCards.AdaptiveCard();
+//    adaptiveCard.parse(card);
+//    console.log(adaptiveCard);
+//    adaptiveCard.onExecuteAction = function (action) { alert('Voted'); };
+//    let json = adaptiveCard.toJSON();
+//    console.log("json");
+//    console.log(json);
 
     
 
-    let choices = card.body[4].items[0].choices;
-    let selectedChoices: any[] = [];
-    console.log(choices);
-    choices.forEach((c: any) => {
-        console.log(c);
-        if (c.isSelected) {
-           selectedChoices.push(c.value);
-        }
-    })
-    let answers = JSON.stringify(selectedChoices);
-    console.log(answers);
-    return answers;
-}
+//    let choices = card.body[4].items[0].choices;
+//    let selectedChoices: any[] = [];
+//    console.log(choices);
+//    choices.forEach((c: any) => {
+//        console.log(c);
+//        if (c.isSelected) {
+//           selectedChoices.push(c.value);
+//        }
+//    })
+//    let answers = JSON.stringify(selectedChoices);
+//    console.log(answers);
+//    return answers;
+//}

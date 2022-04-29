@@ -454,9 +454,15 @@ class NewPoll extends React.Component<INewPollProps, formState> {
     }
 
     private onItemChecked(i: number, checked: boolean) {
-        //let checkedItem = this.state.pollOptions[i];
+        console.log('onItemChecked');
+        console.log('i: ' + i + ' checked: ' + checked);
 
         let answers = this.state.pollQuizAnswers;
+        if (!this.state.isPollMultipleChoice) {
+            answers = [];
+        }
+
+        
         if (answers && checked) {
             answers.push(i);
             
@@ -529,9 +535,10 @@ class NewPoll extends React.Component<INewPollProps, formState> {
         setCardSummary(this.card, this.state.summary);
         setCardAuthor(this.card, this.state.author);
         setCardPollOptions(this.card, data.checked, this.state.pollOptions);
-
+        
         this.setState({
             isPollMultipleChoice: data.checked,
+            pollQuizAnswers: [],
             card: this.card
         }, () => {
             this.updateCard();
@@ -541,6 +548,10 @@ class NewPoll extends React.Component<INewPollProps, formState> {
     private onPollQuizModeChanged = (event: any, data: any) => {
         this.setState({
             isPollQuizMode: data.checked,
+            pollQuizAnswers: [],
+            card: this.card
+        }, () => {
+            this.updateCard();
         });
     }
 
@@ -565,13 +576,13 @@ class NewPoll extends React.Component<INewPollProps, formState> {
         // in case we have quize mode
         const answers = this.state.pollQuizAnswers;
         console.log('const answers = this.state.pollQuizAnswers;');
-        console.log(answers)
+        console.log(answers);
         if (answers) {
             for (let j = 0; j < answers.length; j++) {
                 let answerNumber: number = answers[j];
+                console.log('answerNumber: ' + answerNumber);
                 choiceOptions[answerNumber].checked = true;
             }
-            console.log(answers);
         }
 
         return (
@@ -959,7 +970,7 @@ class NewPoll extends React.Component<INewPollProps, formState> {
     }
 
     private isNextBtnDisabled = () => {
-        const noSelectedChoices = (this.state.isPollQuizMode && !getQuizAnswers(this.card));
+        const noSelectedChoices = true; //(this.state.isPollQuizMode && !getQuizAnswers(this.card));
 
         const title = this.state.title;
         const btnTitle = this.state.btnTitle;

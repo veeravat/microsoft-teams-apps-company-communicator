@@ -38,12 +38,7 @@
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Remove="ClientApp\src\components\common\ChoiceContainer\ChoiceContainer.tsx" />
-    <None Remove="ClientApp\src\components\common\InputBox\InputBox.tsx" />
-    <None Remove="ClientApp\src\components\common\Utils.ts" />
-  </ItemGroup>
-
+  
 
 
   <ItemGroup>
@@ -54,11 +49,7 @@
     <ProjectReference Include="..\CompanyCommunicator.Common\Microsoft.Teams.Apps.CompanyCommunicator.Common.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <TypeScriptCompile Include="ClientApp\src\components\common\ChoiceContainer\ChoiceContainer.tsx" />
-    <TypeScriptCompile Include="ClientApp\src\components\common\InputBox\InputBox.tsx" />
-    <TypeScriptCompile Include="ClientApp\src\components\common\Utils.ts" />
-  </ItemGroup>
+  
 
 
 

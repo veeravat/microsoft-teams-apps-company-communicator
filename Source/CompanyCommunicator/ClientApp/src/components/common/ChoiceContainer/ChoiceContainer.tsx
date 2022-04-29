@@ -3,14 +3,13 @@
 
 import * as React from "react";
 import "./ChoiceContainer.scss";
-import { Text, Checkbox, ShorthandValue, AddIcon, BoxProps, TrashCanIcon, Input } from "@fluentui/react-northstar";
+import { Text, Checkbox, ShorthandValue, AddIcon, BoxProps, TrashCanIcon, Input, AcceptIcon, Status } from "@fluentui/react-northstar";
 import { InputBox } from "../InputBox/InputBox";
 import { TFunction } from "i18next";
 import { withTranslation, WithTranslation } from "react-i18next";
 
 export interface IChoiceContainerOption {
     value: string;
-    choicePrefix?: JSX.Element;
     checked: boolean;
     choicePlaceholder: string;
     deleteChoiceLabel: string;
@@ -83,7 +82,10 @@ class ChoiceContainer extends React.Component<IChoiceContainerProps> {
                 this.currentFocus = i;
                 focusOnErrorSet = true;
             }
-
+            let choicePrefix; 
+            if (this.props.options[i].checked) {
+                choicePrefix = <Status state="success" icon={<AcceptIcon />} title="correct answer" />;
+            }
             items.push(
                 <div key={"option" + i} className="checklist-item-container">
                     <div className="checklist-item">
@@ -97,25 +99,22 @@ class ChoiceContainer extends React.Component<IChoiceContainerProps> {
                         {!this.props.multiselect &&
                             <Input
                             onChange={(e, props) => {
-                                console.log(e.target.checked);
                                 this.props.onItemChecked(i, e.target.checked);
                             }}
-                            checked={this.props.options[i].checked}
-                            wrapper={{
-                                styles: { padding: '5px', backgroundColor: 'green' },
-                            }}
+                            checked={this.props.options[i].checked}                            
                             disabled={!this.props.quizMode}
                             className="checklist-checkbox"
                             name="radioChoice"
                             type="radio" />
                         }
-                        <div className="checklist-input-box">
+                        <div className="choice-item">
                             <InputBox
                                 ref={(inputBox) => {
                                     if (inputBox && i == this.currentFocus) {
                                         inputBox.focus();
                                     }
                                 }}
+                                prefixJSX={choicePrefix}
                                 fluid
                                 input={{ className }}
                                 maxLength={this.props.maxLength}

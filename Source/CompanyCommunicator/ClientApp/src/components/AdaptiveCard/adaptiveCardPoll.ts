@@ -11,7 +11,8 @@ AdaptiveCards.AdaptiveCard.onProcessMarkdown = function (text, result) {
     result.didProcess = true;
 }
 
-AdaptiveCards.AdaptiveCard.onExecuteAction = function (action) { alert('Voted'); };
+AdaptiveCards.AdaptiveCard.onExecuteAction = function (action)
+{ console.log('AdaptiveCard.onExecuteAction'); };
 AdaptiveCards.AdaptiveCard.onInputValueChanged = function (input: AdaptiveCards.Input) {
     console.log(input);
     console.log(input.value);

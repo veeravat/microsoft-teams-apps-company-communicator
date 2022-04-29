@@ -556,7 +556,6 @@ class NewPoll extends React.Component<INewPollProps, formState> {
     }
 
     renderChoicesSection = () => {
-        const choicePrefix = <CircleIcon outline size="small" className="choice-item-circle" disabled />;
         const options = this.state.pollOptions;
 
         let choiceOptions: any[] = [];
@@ -565,7 +564,6 @@ class NewPoll extends React.Component<INewPollProps, formState> {
             const choiceOption: IChoiceContainerOption = {
                 value: option,
                 checked: false,
-                choicePrefix: choicePrefix,
                 choicePlaceholder: this.localize("PollChoice", { "choiceNumber": i + 1 }),
                 deleteChoiceLabel: this.localize("PollDeleteChoiceX", { "choiceNumber": i + 1 })
             };
@@ -627,6 +625,7 @@ class NewPoll extends React.Component<INewPollProps, formState> {
                                 <Flex.Item size="size.half">
                                     <Flex column className="formContentContainer">
                                         <Input className="inputField"
+                                            autoFocus
                                             value={this.state.title}
                                             label={this.localize("TitleText")}
                                             placeholder={this.localize("PlaceHolderTitle")}
@@ -669,13 +668,13 @@ class NewPoll extends React.Component<INewPollProps, formState> {
                                                     h3: false,
                                                     image: false
                                                 }} />
-                                            <TextArea
-                                                autoFocus
+                                            <TextArea                                                
                                                 placeholder={this.localize("Summary")}
                                                 value={this.state.summary}
                                                 onChange={this.onSummaryChanged}
                                                 id="summaryTextArea"
-                                                fluid />
+                                                fluid
+                                                resize="vertical" />
                                         </div>
 
                                         
@@ -1274,11 +1273,19 @@ class NewPoll extends React.Component<INewPollProps, formState> {
         const adaptiveCard = new AdaptiveCards.AdaptiveCard();
         adaptiveCard.parse(this.state.card);
         const renderedCard = adaptiveCard.render();
-        const container = document.getElementsByClassName('adaptiveCardContainer')[0].firstChild;
-        if (container != null) {
-            container.replaceWith(renderedCard);
-        } else {
-            document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
+
+        if (renderedCard) {
+            const inputs = renderedCard.getElementsByTagName('input');
+            Array.from(inputs).forEach((inputElement: Element): void => {
+                (inputElement as HTMLInputElement).disabled = true;
+            });
+
+            const container = document.getElementsByClassName('adaptiveCardContainer')[0].firstChild;
+            if (container != null) {
+                container.replaceWith(renderedCard);
+            } else {
+                document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
+            }
         }
     }
 }

@@ -37,6 +37,7 @@ export interface IMessage {
     reactionsCount?: string;
     failed?: string;
     unknown?: string;
+    canceled?: string;
     sentDate?: string;
     sentBy?: string;
     imageLink?: string;
@@ -231,6 +232,7 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
             response.data.acknowledgementsCount = formatNumber(response.data.acknowledgementsCount);
             response.data.failed = formatNumber(response.data.failed);
             response.data.unknown = response.data.unknown && formatNumber(response.data.unknown);
+            response.data.canceled = response.data.canceled && formatNumber(response.data.canceled);
             response.data.messageType = response.data.messageType;
             response.data.pollOptions = response.data.pollOptions;
             this.setState({
@@ -304,9 +306,15 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
 
                                             <br />
                                             <label>{this.localize("Failure", { "FailureCount": this.state.message.failed })}</label>
-                                            <br />
+                                            {this.state.message.canceled &&
+                                                <>
+                                                    <br />
+                                                    <label>{this.localize("Canceled", { "CanceledCount": this.state.message.canceled })}</label>
+                                                </>
+                                            }
                                             {this.state.message.unknown &&
                                                 <>
+                                                    <br />
                                                     <label>{this.localize("Unknown", { "UnknownCount": this.state.message.unknown })}</label>
                                                 </>
                                             }

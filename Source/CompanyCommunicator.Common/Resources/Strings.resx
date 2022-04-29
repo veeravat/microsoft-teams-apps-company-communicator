@@ -286,4 +286,10 @@
   <data name="PollThanks" xml:space="preserve">
     <value>Thanks👍</value>
   </data>
+  <data name="Canceled" xml:space="preserve">
+    <value>Canceled</value>
+  </data>
+  <data name="ColumnName_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
 </root>

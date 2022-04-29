@@ -21,7 +21,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services;
     using Newtonsoft.Json;
@@ -119,6 +118,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             try
             {
+                // Check if notification is canceled.
+                var isCanceled = await this.notificationService.IsNotificationCanceled(messageContent);
+                if (isCanceled)
+                {
+                    // No-op in case notification is canceled.
+                    return;
+                }
+
                 // Check if recipient is a guest user.
                 if (messageContent.IsRecipientGuestUser())
                 {
@@ -181,10 +188,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 // Bad message shouldn't be requeued.
                 log.LogError(exception, $"InvalidOperationException thrown. Error message: {exception.Message}");
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                var errorMessage = $"{e.GetType()}: {e.Message}";
-                log.LogError(e, $"Failed to send message. ErrorMessage: {errorMessage}");
+                var exceptionMessage = $"{exception.GetType()}: {exception.Message}";
+                log.LogError(exception, $"Failed to send message. ErrorMessage: {exceptionMessage}");
 
                 // Update status code depending on delivery count.
                 var statusCode = SentNotificationDataEntity.FaultedAndRetryingStatusCode;
@@ -202,7 +209,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     totalNumberOfSendThrottles: 0,
                     statusCode: statusCode,
                     allSendStatusCodes: $"{statusCode},",
-                    errorMessage: errorMessage);
+                    errorMessage: this.localizer.GetString("Failed"),
+                    exception: exception.ToString());
 
                 throw;
             }
@@ -219,6 +227,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             SendMessageResponse sendMessageResponse,
             ILogger log)
         {
+            var statusReason = string.Empty;
             if (sendMessageResponse.ResultType == SendMessageResult.Succeeded)
             {
                 log.LogInformation($"Successfully sent the message." +
@@ -230,6 +239,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     $"\nRecipient Id: {messageContent.RecipientData.RecipientId}" +
                     $"\nResult: {sendMessageResponse.ResultType}." +
                     $"\nErrorMessage: {sendMessageResponse.ErrorMessage}.");
+
+                statusReason = this.localizer.GetString("Failed");
             }
 
             await this.notificationService.UpdateSentNotification(
@@ -239,7 +250,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     totalNumberOfSendThrottles: sendMessageResponse.TotalNumberOfSendThrottles,
                     statusCode: sendMessageResponse.StatusCode,
                     allSendStatusCodes: sendMessageResponse.AllSendStatusCodes,
-                    errorMessage: sendMessageResponse.ErrorMessage);
+                    errorMessage: statusReason,
+                    exception: sendMessageResponse.ErrorMessage);
 
             // Throttled
             if (sendMessageResponse.ResultType == SendMessageResult.Throttled)

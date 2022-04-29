@@ -479,13 +479,20 @@ class NewPoll extends React.Component<INewPollProps, formState> {
                 this.updateCard();
             });
         }
-        //if (answers) {
-        //    let newAnswers = answers.filter(a => a !== i);
-        //    this.setState({ pollQuizAnswers: newAnswers });
-        //    let a: string = newAnswers.map((answer: number): number => answer).join(',')
-        //    setCardPollQuizSelectedValue(this.card, a);
-        //    this.updateCard();
-        //}
+        if (answers && !checked) {
+            let newAnswers = answers.filter(a => a !== i);
+
+            let a: string = newAnswers.join();
+
+            setCardPollQuizSelectedValue(this.card, a);
+
+            this.setState({
+                pollQuizAnswers: newAnswers,
+                card: this.card
+            }, () => {
+                this.updateCard();
+            });
+        }
         console.log('onItemChecked');
         console.log(this.state.pollQuizAnswers);
     }
@@ -570,7 +577,10 @@ class NewPoll extends React.Component<INewPollProps, formState> {
         return (
             <Flex column>
                 <div className="indentation">
-                    <ChoiceContainer options={choiceOptions}
+                    <ChoiceContainer
+                        options={choiceOptions}
+                        multiselect={this.state.isPollMultipleChoice}
+                        quizMode={this.state.isPollQuizMode}
                         onItemChecked={(i, checked: boolean) => {
                             this.onItemChecked(i, checked);
                         }}

@@ -23,6 +23,7 @@ export interface IChoiceContainerProps extends WithTranslation {
     limit?: number;
     maxLength?: number;
     multiselect?: boolean;
+    quizMode: boolean;
     focusOnError?: boolean;
     inputClassName?: string;
     onUpdateChoice?: (i, value) => void;
@@ -86,13 +87,23 @@ class ChoiceContainer extends React.Component<IChoiceContainerProps> {
             items.push(
                 <div key={"option" + i} className="checklist-item-container">
                     <div className="checklist-item">
-                        <Checkbox
+                        {this.props.multiselect && <Checkbox disabled={!this.props.quizMode}
                             className="checklist-checkbox"
                             checked={this.props.options[i].checked}
                             onChange={(e, props) => {
                                 this.props.onItemChecked(i, props.checked);
                             }}
-                        />
+                        />}
+                        {!this.props.multiselect &&
+                            <Input
+                            wrapper={{
+                                styles: { padding: '5px', backgroundColor: 'green' },
+                            }}
+                            disabled={!this.props.quizMode}
+                            className="checklist-checkbox"
+                            name="radioChoice"
+                            type="radio" />
+                        }
                         <div className="checklist-input-box">
                             <InputBox
                                 ref={(inputBox) => {

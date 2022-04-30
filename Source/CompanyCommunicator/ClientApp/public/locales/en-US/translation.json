@@ -108,5 +108,6 @@
   "PollAddChoice": "Add Choice",
   "PollSubmitVote": "Submit Vote",
   "PollChoice": "Choice {{choiceNumber}}",
-  "PollDeleteChoiceX": "Delete Choice {{choiceNumber}}"
+  "PollDeleteChoiceX": "Delete Choice {{choiceNumber}}",
+  "PollQuizCorrectAnswer": "Correct answer"
 }

@@ -71,9 +71,9 @@ export class InputBox extends React.Component<IInputBoxProps> {
 
     private getInputItem(): JSX.Element {
         return (
-            <Flex gap="gap.smaller">
-                {this.props.prefixJSX}
+            <Flex gap="gap.smaller">                
                 {this.getInput()}
+                {this.props.prefixJSX}
             </Flex>
         );
     }

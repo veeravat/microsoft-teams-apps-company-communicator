@@ -281,7 +281,7 @@
     <value>Vote</value>
   </data>
   <data name="PollQuizValidAnswer" xml:space="preserve">
-    <value>👉</value>
+    <value>✅</value>
   </data>
   <data name="PollThanks" xml:space="preserve">
     <value>Thanks👍</value>

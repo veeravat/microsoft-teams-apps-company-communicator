@@ -84,30 +84,33 @@ class ChoiceContainer extends React.Component<IChoiceContainerProps> {
             }
             let choicePrefix; 
             if (this.props.options[i].checked) {
-                choicePrefix = <Status state="success" icon={<AcceptIcon />} title="correct answer" />;
+                choicePrefix = <Status state="success" icon={<AcceptIcon />} title={this.localize("PollQuizCorrectAnswer") } className="choice-item-circle" />;
             }
             items.push(
                 <div key={"option" + i} className="checklist-item-container">
                     <div className="checklist-item">
-                        {this.props.multiselect && <Checkbox disabled={!this.props.quizMode}
-                            className="checklist-checkbox"
-                            checked={this.props.options[i].checked}
-                            onChange={(e, props) => {
-                                this.props.onItemChecked(i, props.checked);
-                            }}
-                        />}
-                        {!this.props.multiselect &&
-                            <Input
-                            onChange={(e, props) => {
-                                this.props.onItemChecked(i, e.target.checked);
-                            }}
-                            checked={this.props.options[i].checked}                            
-                            disabled={!this.props.quizMode}
-                            className="checklist-checkbox"
-                            name="radioChoice"
-                            type="radio" />
-                        }
-                        <div className="choice-item">
+                        
+                            {this.props.multiselect && <Checkbox disabled={!this.props.quizMode}
+                                className="checklist-checkbox"
+                                checked={this.props.options[i].checked}
+                                onChange={(e, props) => {
+                                    this.props.onItemChecked(i, props.checked);
+                                }}
+                            />}
+                            {!this.props.multiselect &&
+                                <Input
+                                    onChange={(e, props) => {
+                                        this.props.onItemChecked(i, e.target.checked);
+                                    }}
+                                    checked={this.props.options[i].checked}
+                                    disabled={!this.props.quizMode}
+                                    className="radio-gap checklist-checkbox"
+                                    name="radioChoice"
+                                    type="radio" />
+                            }
+                        
+                        
+                        <div className="checklist-input-box">
                             <InputBox
                                 ref={(inputBox) => {
                                     if (inputBox && i == this.currentFocus) {

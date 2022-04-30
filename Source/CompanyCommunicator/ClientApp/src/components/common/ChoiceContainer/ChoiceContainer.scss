@@ -36,15 +36,11 @@
 }
 
 .plus-icon {
-    @include resolve-dir(margin-right, 8px);
+    margin-right: 8px;
 }
 
 .item-content {
     font-size: 14px;
-
-    .client-mobile & {
-        font-size: 16px;
-    }
 }
 
 .checklist-input-box {
@@ -68,8 +64,9 @@
     column-gap: unset !important;
 }
 
-.checkbox-gap {
-    @include resolve-dir(padding-right, 5px);
+.radio-gap {
+    padding-right: 10px;
+    padding-left: 10px;
 }
 
 

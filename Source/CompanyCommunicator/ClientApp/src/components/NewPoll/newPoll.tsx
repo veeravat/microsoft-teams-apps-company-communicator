@@ -23,6 +23,7 @@ import { TFunction } from "i18next";
 import TimePicker, { LanguageDirection } from '../common/TimePicker';
 import LocalizedDatePicker from '../common/LocalizedDatePicker';
 import ChoiceContainer, { IChoiceContainerOption } from '../common/ChoiceContainer/ChoiceContainer';
+import { Utils } from '../common/Utils';
 
 type dropdownItem = {
     key: string,
@@ -449,8 +450,14 @@ class NewPoll extends React.Component<INewPollProps, formState> {
         let options = [...this.state.pollOptions];
         options.splice(i, 1);        
         setCardPollOptions(this.card, this.state.isPollMultipleChoice, options);
-        this.updateCard();
-        this.setState({ pollOptions: options });
+
+        this.setState({
+            pollOptions: options,
+            pollQuizAnswers: [],
+            card: this.card
+        }, () => {
+            this.updateCard();
+        });
     }
 
     private onItemChecked(i: number, checked: boolean) {
@@ -733,7 +740,7 @@ class NewPoll extends React.Component<INewPollProps, formState> {
                             <Flex className="footerContainer" vAlign="end" hAlign="end">
                                 <Flex className="buttonContainer">
                                     <Flex.Item push>
-                                        <Button content={this.localize("Back")} onClick={this.onBack} secondary />
+                                        <Button content={this.localize("Back")} disabled={this.isBackBtnDisabled()} onClick={this.onBack} secondary />
                                     </Flex.Item>
                                     <Button content={this.localize("Next")} disabled={this.isNextBtnDisabled()} id="saveBtn" onClick={this.onNext} primary />
                                     
@@ -969,14 +976,18 @@ class NewPoll extends React.Component<INewPollProps, formState> {
     }
 
     private isNextBtnDisabled = () => {
-        const noSelectedChoices = true; //(this.state.isPollQuizMode && !getQuizAnswers(this.card));
+        const noSelectedChoices =  this.state.pollQuizAnswers ? this.state.pollQuizAnswers.length === 0 : true;
 
         const title = this.state.title;
-        const btnTitle = this.state.btnTitle;
-        const btnLink = this.state.btnLink;
+        if (Utils.isEmpty(title)) return true;
         
-        return !(title && ((btnTitle && btnLink) || (!btnTitle && !btnLink)) && (this.state.errorImageUrlMessage === "")
-            && (this.state.errorButtonUrlMessage === "")) && noSelectedChoices;
+        return (this.state.isPollQuizMode && noSelectedChoices);
+    }
+
+    private isBackBtnDisabled = () => {
+        const noSelectedChoices = this.state.pollQuizAnswers ? this.state.pollQuizAnswers.length === 0 : true;
+
+        return this.state.isPollQuizMode && noSelectedChoices;
     }
 
     private getItems = () => {

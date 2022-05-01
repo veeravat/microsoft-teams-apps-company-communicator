@@ -7,16 +7,11 @@ import moment from "moment";
 import 'moment/min/locales.min';
 import { Flex } from '@fluentui/react-northstar';
 import { useState } from "react";
-import { DatePicker } from 'office-ui-fabric-react/lib/DatePicker';
-import { Fabric, Customizer, IDatePickerStrings  } from 'office-ui-fabric-react/lib';
-import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
+import { DatePicker, Fabric, Customizer, IDatePickerStrings } from '@fluentui/react';
 //import { DarkCustomizations } from "../../../helpers/dark-customizations";
 //import { DefaultCustomizations } from "../../../helpers/default-customizations";
 //import Constants from "../../../constants/resources";
 import "./localizeddatepicker.scss";
-
-
-initializeIcons();
 
 let dayPickerStrings: IDatePickerStrings = {
     months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],

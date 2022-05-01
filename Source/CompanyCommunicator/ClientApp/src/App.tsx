@@ -9,6 +9,7 @@ import NewMessage from './components/NewMessage/newMessage';
 import NewPoll from './components/NewPoll/newPoll';
 import StatusTaskModule from './components/StatusTaskModule/statusTaskModule';
 import './App.scss';
+import { initializeIcons } from '@fluentui/react/lib/Icons';
 import { Provider, teamsTheme, teamsDarkTheme, teamsHighContrastTheme } from '@fluentui/react-northstar'
 import SendConfirmationTaskModule from './components/SendConfirmationTaskModule/sendConfirmationTaskModule';
 import * as microsoftTeams from "@microsoft/teams-js";
@@ -137,6 +138,7 @@ class App extends React.Component<{}, IAppState> {
     }
 
     public render(): JSX.Element {
+        initializeIcons();
         return (
             <div>
                 {this.setThemeComponent()}

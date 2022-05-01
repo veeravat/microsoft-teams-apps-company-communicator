@@ -502,11 +502,38 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Correct!.
+        /// </summary>
+        public static string PollQuizCorrect {
+            get {
+                return ResourceManager.GetString("PollQuizCorrect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ✅.
         /// </summary>
-        public static string PollQuizValidAnswer {
+        public static string PollQuizCorrectAnswer {
             get {
-                return ResourceManager.GetString("PollQuizValidAnswer", resourceCulture);
+                return ResourceManager.GetString("PollQuizCorrectAnswer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sorry, this isn&apos;t the correct answer..
+        /// </summary>
+        public static string PollQuizWrong {
+            get {
+                return ResourceManager.GetString("PollQuizWrong", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ❌.
+        /// </summary>
+        public static string PollQuizWrongAnswer {
+            get {
+                return ResourceManager.GetString("PollQuizWrongAnswer", resourceCulture);
             }
         }
         

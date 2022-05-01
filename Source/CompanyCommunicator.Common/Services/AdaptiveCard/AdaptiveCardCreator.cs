@@ -133,9 +133,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 {
                     string optionTitle = options[i];
                     var result = Array.Find(answers, element => element == i.ToString());
-                    if (voted && !string.IsNullOrWhiteSpace(result))
+                    if (voted)
                     {
-                        optionTitle = Strings.PollQuizValidAnswer + " " + optionTitle;
+                        if (!string.IsNullOrWhiteSpace(result))
+                        {
+                            optionTitle = optionTitle + " " + Strings.PollQuizCorrectAnswer;
+                        }
+                        else
+                        {
+                            optionTitle = optionTitle + " " + Strings.PollQuizWrongAnswer;
+                        }
                     }
 
                     adaptiveCoices.Add(new AdaptiveChoice() { Title = optionTitle, Value = i.ToString() });

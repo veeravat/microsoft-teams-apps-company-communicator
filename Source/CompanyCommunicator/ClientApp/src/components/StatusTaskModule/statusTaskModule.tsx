@@ -7,7 +7,7 @@ import './statusTaskModule.scss';
 import { getSentNotification, exportNotification, getReactionsCount, getPollResult } from '../../apis/messageListApi';
 import { RouteComponentProps } from 'react-router-dom';
 import * as AdaptiveCards from "adaptivecards";
-import { TooltipHost } from 'office-ui-fabric-react';
+import { TooltipHost } from '@fluentui/react';
 import { Loader, List, Image, Button, DownloadIcon, AcceptIcon, Flex } from '@fluentui/react-northstar';
 import { Chart, EChartTypes, Provider, themeNames } from "@fluentui/react-teams";
 import * as microsoftTeams from "@microsoft/teams-js";
@@ -160,7 +160,7 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                                 labels: Array.from(choiceOptions.values()).map(x => x.title),
                                 datasets: [
                                     {
-                                        label: "Votes",
+                                        label: this.localize("PollResultsTitle"),
                                         data: Array.from(choiceOptions.values()).map(x => x.count),
                                     },
                                 ],
@@ -264,9 +264,9 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                                         </div>
                                         {this.state.message.messageType === 'Poll' && this.state.pollResultsChartData &&
                                             <div className="contentField">
-                                                <h3>Poll results</h3>
+                                            <h3>{this.localize("PollResultsTitle")}</h3>
                                                 <Provider themeName={themeNames.Default} lang="en-US">
-                                                    <Chart type={EChartTypes.BarHorizontal} data={this.state.pollResultsChartData} title="Poll results" />
+                                                <Chart type={EChartTypes.BarHorizontal} data={this.state.pollResultsChartData} title={this.localize("PollResultsTitle")} />
                                                 </Provider>
 
                                             </div>

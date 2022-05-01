@@ -4,9 +4,8 @@
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { withTranslation, WithTranslation } from "react-i18next";
-import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import * as AdaptiveCards from "adaptivecards";
-import { Button, Loader, Dropdown, Text, Flex, Input, TextArea, RadioGroup, Checkbox, Datepicker, CircleIcon } from '@fluentui/react-northstar'
+import { Button, Loader, Dropdown, Text, Flex, Input, TextArea, RadioGroup, Checkbox, Datepicker, CircleIcon, FilesImageIcon } from '@fluentui/react-northstar'
 import * as microsoftTeams from "@microsoft/teams-js";
 import { SimpleMarkdownEditor } from 'react-simple-markdown-editor';
 
@@ -15,7 +14,7 @@ import './teamPoll.scss';
 import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, searchGroups, getGroups, verifyGroupAccess } from '../../apis/messageListApi';
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
-    setCardAuthor, setCardBtn, setCardPollOptions, getQuizAnswers, setCardPollQuizSelectedValue
+    setCardAuthor, setCardBtn, setCardPollOptions, setCardPollQuizSelectedValue
 } from '../AdaptiveCard/adaptiveCardPoll';
 import { getBaseUrl } from '../../configVariables';
 import { ImageUtil } from '../../utility/imageutility';
@@ -120,7 +119,6 @@ class NewPoll extends React.Component<INewPollProps, formState> {
 
     constructor(props: INewPollProps) {
         super(props);
-        initializeIcons();
         this.localize = this.props.t;
         this.card = getInitAdaptiveCard(this.localize);
         this.setDefaultCard(this.card);
@@ -653,6 +651,7 @@ class NewPoll extends React.Component<INewPollProps, formState> {
                                             <Flex.Item push>
                                                 <Button onClick={this.handleUploadClick}
                                                     size="medium" className="inputField"
+                                                    icon={<FilesImageIcon />}
                                                     content={this.localize("UploadImage")} iconPosition="before" />
                                             </Flex.Item>
                                             <input type="file" accept=".jpg, .jpeg, .png, .gif"
@@ -872,11 +871,8 @@ class NewPoll extends React.Component<INewPollProps, formState> {
 
                                         </RadioGroup>
                                         
-                                        <h3>{this.localize("SendOptions")}</h3>
+                                        <h3>{this.localize("SendOptions")}</h3>                                        
                                         
-                                        <Checkbox label={this.localize("RequestReadReceipt")}
-                                            checked={this.state.teamsOptionSelected ? false: this.state.selectedRequestReadReceipt}
-                                            onChange={this.onRequestReadReceiptChanged} disabled={this.state.teamsOptionSelected} />
                                         <Checkbox label={this.localize("DelayDelivery")} checked={this.state.selectedDelayDelivery}
                                             onChange={this.onDelayDeliveryChanged} />
                                         <Flex gap="gap.smaller">

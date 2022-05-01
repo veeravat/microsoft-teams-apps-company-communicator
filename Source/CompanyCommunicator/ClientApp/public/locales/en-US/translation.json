@@ -16,6 +16,7 @@
   "EditMessage": "Edit message",
   "EditPoll": "Edit poll",
   "NewMessage": "New message",
+  "NewPoll": "New poll",
   "ViewStatus": "View status",
   "SendConfirmation": "Send confirmation",
   "SendOptions": "Options",
@@ -109,5 +110,6 @@
   "PollSubmitVote": "Submit Vote",
   "PollChoice": "Choice {{choiceNumber}}",
   "PollDeleteChoiceX": "Delete Choice {{choiceNumber}}",
-  "PollQuizCorrectAnswer": "Correct answer"
+  "PollQuizCorrectAnswer": "Correct answer",
+  "PollResultsTitle": "Poll results"
 }

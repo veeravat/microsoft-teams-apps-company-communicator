@@ -25,7 +25,7 @@
   "Summary": "Сводка",
   "Author": "Автор",
   "ModifiedBy": "Изменен",
-  "SentBy":  "Отправлен",
+  "SentBy": "Отправлен",
   "Author1": "- Автор",
   "ButtonTitle": "Название кнопки",
   "ButtonURL": "URL-адрес кнопки",
@@ -92,5 +92,17 @@
   "ExportErrorMessage": "Повторите попытку экспорта результатов. Если проблема не устранена, обратитесь за помощью к ИТ-администратору.",
   "ExportButtonText": "Экспорт подробных результатов",
   "ExportButtonProgressText": "Выполняется экспорт",
-  "ErrorURLMessage": "URL-адрес должен начинаться с https://"
+  "ErrorURLMessage": "URL-адрес должен начинаться с https://",
+  "PollOptions": "Варианты опроса",
+  "PollMultipleChoice": "Разрешить несколько ответов",
+  "PollAddChoice": "Добавить вариант",
+  "PollSubmitVote": "Проголосовать",
+  "PollChoice": "Вариант {{choiceNumber}}",
+  "PollDeleteChoiceX": "Удалить вариант выбора {{choiceNumber}}",
+  "EditPoll": "Редактирование опроса",
+  "NewPoll": "Новый опрос",
+  "PollAnonymousVoting": "Anonymous Voting",
+  "PollQuizMode": "Quiz Mode",
+  "PollQuizCorrectAnswer": "Correct answer",
+  "PollResultsTitle": "Представление результатов опроса"
 }

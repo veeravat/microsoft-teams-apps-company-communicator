@@ -4,7 +4,6 @@
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { withTranslation, WithTranslation } from "react-i18next";
-import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import * as AdaptiveCards from "adaptivecards";
 import { Button, Loader, Dropdown, Text, Flex, Input, TextArea, RadioGroup, Checkbox, Datepicker } from '@fluentui/react-northstar'
 import * as microsoftTeams from "@microsoft/teams-js";
@@ -104,7 +103,6 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
     constructor(props: INewMessageProps) {
         super(props);
-        initializeIcons();
         this.localize = this.props.t;
         this.card = getInitAdaptiveCard(this.localize);
         this.setDefaultCard(this.card);

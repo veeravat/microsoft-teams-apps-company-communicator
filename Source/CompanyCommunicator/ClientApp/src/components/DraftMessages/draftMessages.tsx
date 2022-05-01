@@ -4,7 +4,6 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { withTranslation, WithTranslation } from "react-i18next";
-import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import { Loader, List, Flex, Text } from '@fluentui/react-northstar';
 import * as microsoftTeams from "@microsoft/teams-js";
 
@@ -57,7 +56,6 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
 
     constructor(props: IMessageProps) {
         super(props);
-        initializeIcons();
         this.localize = this.props.t;
         this.isOpenTaskModuleAllowed = true;
         this.state = {

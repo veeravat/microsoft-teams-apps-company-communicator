@@ -8,7 +8,7 @@ import DraftMessages from '../DraftMessages/draftMessages';
 import './tabContainer.scss';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { getBaseUrl } from '../../configVariables';
-import { Accordion, Button, Flex, SplitButton } from '@fluentui/react-northstar';
+import { Accordion, Button, Flex, PollIcon, SplitButton } from '@fluentui/react-northstar';
 import { getDraftMessagesList } from '../../actions';
 import { connect } from 'react-redux';
 import { TFunction } from "i18next";
@@ -90,15 +90,14 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
                             {
                                 key: 'newMessage',
                                 content: this.localize("NewMessage"),
+                                onClick: () => { this.onNewMessage(); },
                             },
                             {
                                 key: 'newPoll',
-                                content: 'New Poll',
-                            },
-                            {
-                                key: 'uploadContentPack',
-                                content: 'Upload content pack',
-                            },
+                                content: this.localize("NewPoll"),
+                                icon: <PollIcon />,
+                                onClick: () => { this.onNewPoll(); },
+                            }
                         ]}
                         button={{
                             content: this.localize("NewMessage"),
@@ -109,8 +108,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
                         toggleButton={{
                             'aria-label': 'more options',
                         }}
-                        onMainButtonClick={this.onNewMessage}
-                        onMenuItemClick={this.onNewPoll}
+                        onMainButtonClick={this.onNewMessage}                        
                     />
                 </Flex>
                 <Flex className="messageContainer">
@@ -141,7 +139,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
     public onNewPoll = () => {
         let taskInfo: ITaskInfo = {
             url: this.state.urlPoll,
-            title: 'New Poll',
+            title: this.localize("NewPoll"),
             height: 530,
             width: 1000,
             fallbackUrl: this.state.url,

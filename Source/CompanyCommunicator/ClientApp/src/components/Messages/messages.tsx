@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { withTranslation, WithTranslation } from "react-i18next";
-import { TooltipHost } from 'office-ui-fabric-react';
+import { TooltipHost } from '@fluentui/react';
 import { Loader, List, Flex, Text, AcceptIcon, CloseIcon, ExclamationCircleIcon, ExclamationTriangleIcon } from '@fluentui/react-northstar';
 import * as microsoftTeams from "@microsoft/teams-js";
 

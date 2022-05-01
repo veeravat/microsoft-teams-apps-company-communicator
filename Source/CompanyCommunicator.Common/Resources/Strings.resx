@@ -280,7 +280,7 @@
   <data name="PollSubmitVote" xml:space="preserve">
     <value>Vote</value>
   </data>
-  <data name="PollQuizValidAnswer" xml:space="preserve">
+  <data name="PollQuizCorrectAnswer" xml:space="preserve">
     <value>✅</value>
   </data>
   <data name="PollThanks" xml:space="preserve">
@@ -291,5 +291,14 @@
   </data>
   <data name="ColumnName_Error" xml:space="preserve">
     <value>Error</value>
+  </data>
+  <data name="PollQuizCorrect" xml:space="preserve">
+    <value>Correct!</value>
+  </data>
+  <data name="PollQuizWrong" xml:space="preserve">
+    <value>Sorry, this isn't the correct answer.</value>
+  </data>
+  <data name="PollQuizWrongAnswer" xml:space="preserve">
+    <value>❌</value>
   </data>
 </root>

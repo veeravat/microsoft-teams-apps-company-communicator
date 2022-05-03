@@ -43,6 +43,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             return await this.analyticsService.GetPollVoteResultByNotificationIdAsync(id);
         }
 
+        [HttpGet("pollvotes/{id}")]
+        public async Task<int> GetUniquePollVotesCount(string id)
+        {
+            return await this.analyticsService.GetUniquePollVotesCountByNotificationIdAsync(id);
+        }
+
+        [HttpGet("quizcorrect/{id}")]
+        public async Task<int> GetFullyCorrectQuizAnswersCount(string id)
+        {
+            return await this.analyticsService.GetFullyCorrectQuizAnswersCountByNotificationIdAsync(id);
+        }
+
         [HttpGet("ackcount/{id}")]
         public async Task<int> GetAckCount(string id)
         {

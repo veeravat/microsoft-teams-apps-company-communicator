@@ -104,5 +104,10 @@
   "PollAnonymousVoting": "Anonymous Voting",
   "PollQuizMode": "Quiz Mode",
   "PollQuizCorrectAnswer": "Correct answer",
-  "PollResultsTitle": "Представление результатов опроса"
+  "PollResultsTitle": "Представление результатов опроса",
+  "PollParticipation": "Участие: {{percent}}%",
+  "PollParticipationIndicatorSingular": "Ответил {{votes}} из {{succeeded}}",
+  "PollParticipationIndicatorPlural": "Ответило людей: {{votes}} из {{succeeded}}",
+  "PollQuizResults": "Правильно на этот вопрос ответило: {{percent}}% ({{correct}} из {{votes}}).",
+  "PollQuizNoCorrectAnswers": "На этот вопрос никто не ответил правильно."
 }

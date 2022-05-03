@@ -547,7 +547,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Thanks👍.
+        ///   Looks up a localized string similar to Your response has been submitted..
         /// </summary>
         public static string PollThanks {
             get {

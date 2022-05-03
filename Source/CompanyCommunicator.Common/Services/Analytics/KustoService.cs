@@ -33,7 +33,16 @@
                           + "| where name == 'TrackReaction'  and notificationId == '{0}' | summarize Count=dcount(userId) by notificationId";
 
         private readonly string pollVoteResult = "customEvents| extend notificationId = tostring(customDimensions['notificationId']), userId = tostring(customDimensions['userId']), vote = tostring(customDimensions['vote'])"
-                          + "| where name == 'TrackPollVote' and notificationId == '{0}'  | summarize count() by vote";
+                          + "| where name == 'TrackPollVote' and notificationId == '{0}'  | summarize dcount(userId) by vote";
+
+        /// <summary>
+        /// Coveres multi-choice and quiz cases.
+        /// </summary>
+        private readonly string totalVotesFromUniqueUsers = "customEvents | extend notificationId = tostring(customDimensions['notificationId']), userId = tostring(customDimensions['userId'])"
+                          + "| where name == 'TrackPollVote' and notificationId == '{0}' | summarize dcount(userId)";
+
+        private readonly string totalFullyCorrectQuizAnswers = "customEvents | extend notificationId = tostring(customDimensions['notificationId']), userId = tostring(customDimensions['userId']), quizResult = tobool(customDimensions['quizResult'])"
+                          + "| where name == 'TrackPollQuizResult' and notificationId == '{0}' and quizResult == true | summarize dcount(userId)";
 
         private readonly string timespan = "P90D";
 
@@ -67,6 +76,40 @@
             {
                 this.logger.LogError(ex, $"GetUniqueViewsCountByNotificationIdAsync. Error getting result from Application Insights. notificationId={notificationId}, query ={query}, uri={uri}");
                 return new KustoQueryResult();
+            }
+        }
+
+        public async Task<int> GetUniquePollVotesCountByNotificationIdAsync(string notificationId, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var query = string.Format(this.totalVotesFromUniqueUsers, notificationId);
+            var uri = string.Format(Host, this.appInsightsId, query, this.timespan);
+
+            try
+            {
+                var result = await this.GetKustoQueryResultAsync(query, uri, cancellationToken);
+                return this.GetCount(result);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"GetUniquePollVotesCountByNotificationIdAsync. Error getting result from Application Insights. notificationId={notificationId}, query ={query}, uri={uri}");
+                return 0;
+            }
+        }
+
+        public async Task<int> GetFullyCorrectQuizAnswersCountByNotificationIdAsync(string notificationId, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var query = string.Format(this.totalFullyCorrectQuizAnswers, notificationId);
+            var uri = string.Format(Host, this.appInsightsId, query, this.timespan);
+
+            try
+            {
+                var result = await this.GetKustoQueryResultAsync(query, uri, cancellationToken);
+                return this.GetCount(result);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"GetFullyCorrectQuizAnswersCountByNotificationIdAsync. Error getting result from Application Insights. notificationId={notificationId}, query ={query}, uri={uri}");
+                return 0;
             }
         }
 
@@ -187,6 +230,18 @@
             }
 
             var count = rows[0][1];
+            return Convert.ToInt32(count);
+        }
+
+        private int GetCount(KustoQueryResult result)
+        {
+            var rows = result.Tables[0].Rows;
+            if (rows.Count == 0)
+            {
+                return 0;
+            }
+
+            var count = rows[0][0];
             return Convert.ToInt32(count);
         }
     }

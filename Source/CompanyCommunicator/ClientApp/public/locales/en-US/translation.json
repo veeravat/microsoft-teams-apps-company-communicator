@@ -111,5 +111,10 @@
   "PollChoice": "Choice {{choiceNumber}}",
   "PollDeleteChoiceX": "Delete Choice {{choiceNumber}}",
   "PollQuizCorrectAnswer": "Correct answer",
-  "PollResultsTitle": "Poll results"
+  "PollResultsTitle": "Poll results",
+  "PollParticipation": "Participation {{percent}}%",
+  "PollParticipationIndicatorSingular": "{{votes}} of {{succeeded}} responded",
+  "PollParticipationIndicatorPlural": "{{votes}} of {{succeeded}} responded",
+  "PollQuizResults": "{{percent}}% of respondents ({{correct}} of {{votes}}) answered this question correctly.",
+  "PollQuizNoCorrectAnswers": "No one answered this question correctly."
 }

@@ -16,5 +16,9 @@
         Task<int> GetReactionsCountByNotificationIdAsync(string notificationId, CancellationToken cancellationToken = default(CancellationToken));
 
         Task<KustoQueryResult> GetPollVoteResultByNotificationIdAsync(string notificationId, CancellationToken cancellationToken = default(CancellationToken));
+
+        Task<int> GetFullyCorrectQuizAnswersCountByNotificationIdAsync(string notificationId, CancellationToken cancellationToken = default(CancellationToken));
+
+        Task<int> GetUniquePollVotesCountByNotificationIdAsync(string notificationId, CancellationToken cancellationToken = default(CancellationToken));
     }
 }

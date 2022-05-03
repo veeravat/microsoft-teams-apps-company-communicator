@@ -13,6 +13,27 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Newtonsoft.Json;
 
+    public class Mentioned
+    {
+        public string id { get; set; }
+
+        public string name { get; set; }
+    }
+
+    public class Entity
+    {
+        public string type { get; set; }
+
+        public string text { get; set; }
+
+        public Mentioned mentioned { get; set; }
+    }
+
+    public class Root
+    {
+        public List<Entity> entities { get; set; }
+    }
+
     /// <summary>
     /// Adaptive Card Creator service.
     /// </summary>
@@ -105,6 +126,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
 
             if (!string.IsNullOrWhiteSpace(summary))
             {
+                if (summary.Contains("[user]"))
+                {
+                    summary = summary.Replace("[user]", "<at>Adele UPN</at>");
+
+                    var mentionEntity = new Entity()
+                    {
+                        type = "mention",
+                        text = "<at>Adele UPN</at>",
+                        mentioned = new Mentioned() 
+                        {
+                            id = "ec09bb03-bc97-40d3-9883-c7d7b3582fa6",
+                            name = "Adele Vance"
+                        }
+                    };
+                    var root = new Root() { entities = new List<Entity>() { mentionEntity } };
+                    //string mentioned = "{\"entities\": [{ \"type\": \"mention\",  \"text\": \"<at>Adele UPN</at>\",    \"mentioned\": { \"id\": \"ec09bb03-bc97-40d3-9883-c7d7b3582fa6\",\"name\": \"Adele Vance\" }}]}";
+                    card.AdditionalProperties.Add("msteams", root);
+                }
+
                 card.Body.Add(new AdaptiveTextBlock()
                 {
                     Text = summary,
@@ -133,7 +173,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 {
                     string optionTitle = options[i];
                     var result = Array.Find(answers, element => element == i.ToString());
-                    if (voted)
+                    if (voted && pollQuizAnswers != "[]")
                     {
                         if (!string.IsNullOrWhiteSpace(result))
                         {
@@ -179,14 +219,48 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 }
                 else
                 {
-                    card.Body.Add(new AdaptiveTextBlock()
+                    if (!string.IsNullOrWhiteSpace(pollQuizAnswers) && pollQuizAnswers != "[]"
+                        && !string.IsNullOrWhiteSpace(selectedChoice))
                     {
-                        Text = Strings.PollThanks,
-                        Size = AdaptiveTextSize.ExtraLarge,
-                        Weight = AdaptiveTextWeight.Bolder,
-                        Color = AdaptiveTextColor.Good,
-                        Wrap = true,
-                    });
+                        string[] correctAnswers = JsonConvert.DeserializeObject<string[]>(pollQuizAnswers);
+                        string[] userAnswers = selectedChoice.Split(',');
+                        var set = new HashSet<string>(correctAnswers);
+                        bool userFullAnswer = set.SetEquals(userAnswers);
+
+                        if (userFullAnswer)
+                        {
+                            card.Body.Add(new AdaptiveTextBlock()
+                            {
+                                Text = Strings.PollQuizCorrect,
+                                Size = AdaptiveTextSize.ExtraLarge,
+                                Weight = AdaptiveTextWeight.Bolder,
+                                Color = AdaptiveTextColor.Good,
+                                Wrap = true,
+                            });
+                        }
+                        else
+                        {
+                            card.Body.Add(new AdaptiveTextBlock()
+                            {
+                                Text = Strings.PollQuizWrong,
+                                Size = AdaptiveTextSize.ExtraLarge,
+                                Weight = AdaptiveTextWeight.Bolder,
+                                Color = AdaptiveTextColor.Warning,
+                                Wrap = true,
+                            });
+                        }
+                    }
+                    else
+                    {
+                        card.Body.Add(new AdaptiveTextBlock()
+                        {
+                            Text = Strings.PollThanks,
+                            Size = AdaptiveTextSize.ExtraLarge,
+                            Weight = AdaptiveTextWeight.Bolder,
+                            Color = AdaptiveTextColor.Good,
+                            Wrap = true,
+                        });
+                    }
                 }
             }
 
@@ -237,7 +311,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
 
             // Full width Adaptive card.
             // card.AdditionalProperties.Add("msteams", new { width = "full" });
-
+            
             return card;
         }
     }

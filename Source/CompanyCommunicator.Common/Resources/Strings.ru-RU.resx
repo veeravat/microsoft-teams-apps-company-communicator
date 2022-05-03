@@ -268,4 +268,13 @@
   <data name="AckConfirmation" xml:space="preserve">
     <value>Спасибо за подтверждение!</value>
   </data>
+  <data name="PollQuizCorrect" xml:space="preserve">
+    <value>Правильно!</value>
+  </data>
+  <data name="PollQuizWrong" xml:space="preserve">
+    <value>Ответ неправильный.</value>
+  </data>
+  <data name="PollThanks" xml:space="preserve">
+    <value>Ваш ответ отправлен.</value>
+  </data>
 </root>

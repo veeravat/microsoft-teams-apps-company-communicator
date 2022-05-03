@@ -19,8 +19,8 @@ import {
 import { getBaseUrl } from '../../configVariables';
 import { ImageUtil } from '../../utility/imageutility';
 import { TFunction } from "i18next";
-import TimePicker, { LanguageDirection } from '../common/TimePicker';
-import LocalizedDatePicker from '../common/LocalizedDatePicker';
+import TimePicker, { LanguageDirection } from '../common/DateAndTimePicker/TimePicker';
+import LocalizedDatePicker from '../common/DateAndTimePicker/LocalizedDatePicker';
 
 type dropdownItem = {
     key: string,

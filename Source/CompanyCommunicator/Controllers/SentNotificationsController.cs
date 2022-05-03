@@ -259,6 +259,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 SendingCompleted = notificationEntity.IsCompleted(),
                 MessageType = notificationEntity.MessageType,
                 PollOptions = notificationEntity.PollOptions,
+                IsPollQuizMode = notificationEntity.IsPollQuizMode,
+                PollQuizAnswers = notificationEntity.PollQuizAnswers,
+                IsPollMultipleChoice = notificationEntity.IsPollMultipleChoice,
             };
 
             // In case we have blob name instead of URL to public image.

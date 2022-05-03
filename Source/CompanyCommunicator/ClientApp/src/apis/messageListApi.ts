@@ -51,6 +51,16 @@ export const getPollResult = async (id: number): Promise<any> => {
     return await axios.get(url);
 }
 
+export const getVotesCount = async (id: number): Promise<any> => {
+    let url = baseAxiosUrl + "/analytics/pollvotes/" + id;
+    return await axios.get(url);
+}
+
+export const getCorrectQuizesCount = async (id: number): Promise<any> => {
+    let url = baseAxiosUrl + "/analytics/quizcorrect/" + id;
+    return await axios.get(url);
+}
+
 export const getDraftNotification = async (id: number): Promise<any> => {
     let url = baseAxiosUrl + "/draftnotifications/" + id;
     return await axios.get(url);

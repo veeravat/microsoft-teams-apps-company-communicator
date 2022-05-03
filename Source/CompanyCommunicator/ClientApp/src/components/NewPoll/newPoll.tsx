@@ -19,8 +19,8 @@ import {
 import { getBaseUrl } from '../../configVariables';
 import { ImageUtil } from '../../utility/imageutility';
 import { TFunction } from "i18next";
-import TimePicker, { LanguageDirection } from '../common/TimePicker';
-import LocalizedDatePicker from '../common/LocalizedDatePicker';
+import TimePicker, { LanguageDirection } from '../common/DateAndTimePicker/TimePicker';
+import LocalizedDatePicker from '../common/DateAndTimePicker/LocalizedDatePicker';
 import ChoiceContainer, { IChoiceContainerOption } from '../common/ChoiceContainer/ChoiceContainer';
 import { Utils } from '../common/Utils';
 
@@ -651,7 +651,6 @@ class NewPoll extends React.Component<INewPollProps, formState> {
                                             <Flex.Item push>
                                                 <Button onClick={this.handleUploadClick}
                                                     size="medium" className="inputField"
-                                                    icon={<FilesImageIcon />}
                                                     content={this.localize("UploadImage")} iconPosition="before" />
                                             </Flex.Item>
                                             <input type="file" accept=".jpg, .jpeg, .png, .gif"

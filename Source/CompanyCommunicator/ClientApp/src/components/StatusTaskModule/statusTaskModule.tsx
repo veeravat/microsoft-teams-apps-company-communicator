@@ -4,11 +4,11 @@
 import * as React from 'react';
 import { withTranslation, WithTranslation } from "react-i18next";
 import './statusTaskModule.scss';
-import { getSentNotification, exportNotification, getReactionsCount, getPollResult } from '../../apis/messageListApi';
+import { getSentNotification, exportNotification, getReactionsCount, getPollResult, getCorrectQuizesCount, getVotesCount } from '../../apis/messageListApi';
 import { RouteComponentProps } from 'react-router-dom';
 import * as AdaptiveCards from "adaptivecards";
-import { TooltipHost } from '@fluentui/react';
-import { Loader, List, Image, Button, DownloadIcon, AcceptIcon, Flex } from '@fluentui/react-northstar';
+import { Icon, Label, ProgressIndicator, Stack, TooltipHost } from '@fluentui/react';
+import { Loader, List, Image, Text, Button, DownloadIcon, AcceptIcon, Flex, Avatar, Status, CloseIcon, Divider } from '@fluentui/react-northstar';
 import { Chart, EChartTypes, Provider, themeNames } from "@fluentui/react-teams";
 import * as microsoftTeams from "@microsoft/teams-js";
 import {
@@ -18,6 +18,7 @@ import {
 import { ImageUtil } from '../../utility/imageutility';
 import { formatDate, formatDuration, formatNumber } from '../../i18n';
 import { TFunction } from "i18next";
+import { PhotoUtil } from '../../utility/userPhotoUtil';
 
 export interface IListItem {
     header: string,
@@ -58,6 +59,8 @@ export interface IMessage {
     messageType?: string;
     pollOptions?: string,
     isPollMultipleChoice?: boolean;
+    isPollQuizMode?: boolean;
+    pollQuizAnswers?: string;
 }
 
 export interface IStatusState {
@@ -66,8 +69,11 @@ export interface IStatusState {
     page: string;
     teamId?: string;
     reactionsCount: number;
+    correctQuizesCount: number;
+    votesCount: number;
     pollResultsChartData?: any;
     isPollMultipleChoice: boolean;
+    sentByUserPhoto: any;
 }
 
 interface StatusTaskModuleProps extends RouteComponentProps, WithTranslation { }
@@ -80,6 +86,7 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
     };
 
     private card: any;
+    private photoUtil: PhotoUtil = new PhotoUtil();
 
     constructor(props: StatusTaskModuleProps) {
         super(props);
@@ -94,7 +101,10 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
             page: "ViewStatus",
             teamId: '',
             reactionsCount: 0,
-            isPollMultipleChoice: false
+            correctQuizesCount: 0,
+            votesCount: 0,
+            isPollMultipleChoice: false,
+            sentByUserPhoto: '',
         };
     }
 
@@ -120,55 +130,78 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
 
                     if (this.state.message.pollOptions) {
                         const options: string[] = JSON.parse(this.state.message.pollOptions);
-                        console.log(options);
                         setCardPollOptions(this.card, this.state.isPollMultipleChoice, options);
 
-                        this.getPollResult(id).then((response) => {
+                        let choiceOptions = new Map();
+                        let i = 0;
+                        options.forEach((option) => {
+                            const choiceOption = {
+                                title: option,
+                                count: 0,
+                                answer: false,
+                            };
+                            choiceOptions.set(i.toString(), choiceOption);
+                            i++;
+                        });
+
+                        Promise.all([this.getPollResult(id), this.getVotesCount(id), this.getCorrectQuizesCount(id)]).then((responses) => {
                             //if (this.state.message.pollOptions) {
                             //const options: string[] = JSON.parse(this.state.message.pollOptions);
-                            let choiceOptions = new Map();
-
-                            let i = 0;
-                            options.forEach((option) => {
-                                const choiceOption = {
-                                    title: option,
-                                    count: 0,
-                                };
-                                choiceOptions.set(i.toString(), choiceOption);
-                                i++;
-                            });
 
                             console.log('choiceOptions init');
                             console.log(choiceOptions);
+                            if (this.state.message.isPollQuizMode && this.state.message.pollQuizAnswers) {
+                                const answers: string[] = JSON.parse(this.state.message.pollQuizAnswers);
+                                console.log('answers ');
+                                console.log(answers);
+                                for (var jj = 0; jj < answers.length; jj++) {
+                                    let optionNum = answers[jj];
+                                    console.log("optionNum: " + optionNum);
+                                    let current = choiceOptions.get(optionNum.toString());
+                                    console.log(current);
+                                    current.answer = true;
+                                    choiceOptions.set(optionNum.toString(), current);
+                                }
+                            }
+                            console.log('choiceOptions after quiz answers');
+                            console.log(choiceOptions);
 
-
-                            let rows = response.data.tables[0].rows;
+                            let rows = responses[0].data.tables[0].rows;
+                            //let totalVotes: number = 0;
                             if (rows) {
                                 for (var j = 0; j < rows.length; j++) {
                                     let optionNum = rows[j][0];
-                                    let optionCount = rows[j][1]
+                                    let optionCount = rows[j][1];
                                     console.log("optionNum: " + optionNum + " optionCount: " + optionCount);
                                     let current = choiceOptions.get(optionNum);
                                     console.log(current);
                                     current.count = optionCount;
+                                    //totalVotes = totalVotes + parseInt(optionCount);
                                     choiceOptions.set(optionNum, current);
                                 }
                             }
                             console.log('choiceOptions add counts');
                             console.log(choiceOptions);
-                            const chartData = {
-                                labels: Array.from(choiceOptions.values()).map(x => x.title),
-                                datasets: [
-                                    {
-                                        label: this.localize("PollResultsTitle"),
-                                        data: Array.from(choiceOptions.values()).map(x => x.count),
-                                    },
-                                ],
-                            }
-                            this.setState({ pollResultsChartData: chartData });
-
+                            //const chartData = {
+                            //    labels: Array.from(choiceOptions.values()).map(x => x.title),
+                            //    datasets: [
+                            //        {
+                            //            label: this.localize("PollResultsTitle"),
+                            //            data: Array.from(choiceOptions.values()).map(x => x.count),
+                            //        },
+                            //    ],
+                            //}
+                            this.setState({
+                                pollResultsChartData:
+                                    { choiceOptions: choiceOptions }
+                            });
+                            console.log(this.state.pollResultsChartData);
                             //}
                         });
+
+                        //this.getPollResult(id).then((response) => {
+                            
+                        //});
                     }
                     else {
                         setCardHidePoll(this.card);
@@ -190,7 +223,7 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                 });
             });
             this.getReactionsCount(id);
-
+            this.getSetByUserPhoto('ec09bb03-bc97-40d3-9883-c7d7b3582fa6');
             
         }
     }
@@ -201,6 +234,32 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
             response.data = formatNumber(response.data);
             this.setState({
                 reactionsCount: response.data
+            });
+        } catch (error) {
+            return error;
+        }
+    }
+
+    private getCorrectQuizesCount = async (id: number) => {
+        try {
+            if (this.state.message.isPollQuizMode) {
+                const response = await getCorrectQuizesCount(id);
+                const count = response.data;
+                this.setState({
+                    correctQuizesCount: count
+                });
+            }            
+        } catch (error) {
+            return error;
+        }
+    }
+
+    private getVotesCount = async (id: number) => {
+        try {
+            const response = await getVotesCount(id);
+            const count = response.data;
+            this.setState({
+                votesCount: count
             });
         } catch (error) {
             return error;
@@ -220,6 +279,12 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
         }
     }
 
+    private getSetByUserPhoto = async (userId: string) => { 
+        this.photoUtil.getGraphPhoto(userId).then((uri: string) => {
+            this.setState({ sentByUserPhoto: uri });
+        });
+    }
+
     private getItem = async (id: number) => {
         try {
             const response = await getSentNotification(id);
@@ -235,12 +300,81 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
             response.data.canceled = response.data.canceled && formatNumber(response.data.canceled);
             response.data.messageType = response.data.messageType;
             response.data.pollOptions = response.data.pollOptions;
+            response.data.pollQuizAnswers = response.data.pollQuizAnswers;
             this.setState({
                 message: response.data
             });
         } catch (error) {
             return error;
         }
+    }
+
+    private renderRollResults = () => {
+        let results = this.state.pollResultsChartData;
+
+        const correctAnswerStatus = <Status state="success" icon={<AcceptIcon />} title={this.localize("PollQuizCorrectAnswer")} className="choice-item-circle" />;
+        const wrongAnswerStatus = <Status state="error" icon={<CloseIcon />} className="choice-item-circle" />;
+
+        let i = 0;
+        let items: JSX.Element[] = [];
+        results.choiceOptions.forEach((resultItem) => {
+            items.push(
+                //<Flex gap="gap.small">
+                //    <Flex.Item grow>
+                //        <Flex>
+                //            {resultItem.answer && this.state.message.isPollQuizMode && correctAnswerStatus}
+                //            {!resultItem.answer && this.state.message.isPollQuizMode && wrongAnswerStatus}
+                //            <Flex.Item grow>
+                //                <ProgressIndicator label={resultItem.title} barHeight={4} percentComplete={resultItem.count} />
+                //            </Flex.Item>
+                //        </Flex>
+                //    </Flex.Item>
+                //    <Text>{resultItem.count}</Text>
+                //</Flex>
+                
+                <Stack horizontal={true} horizontalAlign="space-between">
+                     { resultItem.answer && this.state.message.isPollQuizMode && correctAnswerStatus }
+                     {!resultItem.answer && this.state.message.isPollQuizMode && wrongAnswerStatus}
+
+                    <Stack.Item grow={1}>
+                        <ProgressIndicator label={resultItem.title} barHeight={4} percentComplete={resultItem.count / this.state.votesCount } />
+                    </Stack.Item>
+                    <Stack.Item align="end">
+                        <Text>{resultItem.count} ({((resultItem.count / this.state.votesCount) * 100).toFixed() }%)</Text>
+                    </Stack.Item>
+                </Stack>
+            );
+            i++;
+        });
+        return (
+            <>
+                {items}
+                <br />
+                <br/>
+                <Divider />
+                {
+                    this.state.message.isPollQuizMode && ((this.state.correctQuizesCount === 0) ?
+                        this.localize("PollQuizNoCorrectAnswers") :
+                        this.localize("PollQuizResults", {
+                            "percent": ( (this.state.correctQuizesCount / this.state.votesCount) * 100).toFixed(),
+                            "correct": this.state.correctQuizesCount,
+                            "votes": this.state.votesCount,
+                        }))
+                }
+                <Divider />
+                {this.state.message.succeeded && this.state.message.succeeded !== '0' &&
+                    <ProgressIndicator
+                        /*theme={themeNames.Default}}*/
+                    label={this.localize("PollParticipation", { "percent": (this.state.votesCount / parseInt(this.state.message.succeeded) * 100).toFixed() })}
+                        description={
+                            (this.state.votesCount === 1) ?
+                                this.localize("PollParticipationIndicatorSingular", { "votes": this.state.votesCount, "succeeded": this.state.message.succeeded }) :
+                                this.localize("PollParticipationIndicatorPlural", { "votes": this.state.votesCount, "succeeded": this.state.message.succeeded })
+                        }
+                        barHeight={6}
+                        percentComplete={results.totalVotes / parseInt(this.state.message.succeeded)} />}
+            </>            
+            );
     }
 
     public render(): JSX.Element {
@@ -265,15 +399,22 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                                         {this.state.message.messageType === 'Poll' && this.state.pollResultsChartData &&
                                             <div className="contentField">
                                             <h3>{this.localize("PollResultsTitle")}</h3>
-                                                <Provider themeName={themeNames.Default} lang="en-US">
-                                                <Chart type={EChartTypes.BarHorizontal} data={this.state.pollResultsChartData} title={this.localize("PollResultsTitle")} />
-                                                </Provider>
+
+                                            {this.renderRollResults()}
+                                            
+
+
+                                            {/*<Provider themeName={themeNames.Default} lang="en-US">*/}
+                                            {/*    <Chart type={EChartTypes.BarHorizontal} data={this.state.pollResultsChartData} title={this.localize("PollResultsTitle")} />*/}
+                                            {/*</Provider>*/}
 
                                             </div>
                                         }
                                         <div className="contentField">
                                             <h3>{this.localize("SentBy")}</h3>
                                             <span>{this.state.message.sentBy}</span>
+                                            <Avatar name={this.state.message.sentBy} size="smallest"
+                                                image={this.state.sentByUserPhoto} />
                                         </div>
                                         <div className="contentField">
                                             <h3>{this.localize("SendingStarted")}</h3>

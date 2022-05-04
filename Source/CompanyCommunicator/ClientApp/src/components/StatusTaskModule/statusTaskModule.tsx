@@ -85,7 +85,6 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
     };
 
     private card: any;
-    private photoUtil: PhotoUtil = new PhotoUtil();
 
     constructor(props: StatusTaskModuleProps) {
         super(props);
@@ -128,6 +127,7 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                     setCardAuthor(this.card, this.state.message.author);
 
                     if (this.state.message.pollOptions) {
+                        setCardBtn(this.card, this.localize("PollSubmitVote"), "https://adaptivecards.io");
                         const options: string[] = JSON.parse(this.state.message.pollOptions);
                         setCardPollOptions(this.card, this.state.isPollMultipleChoice, options);
 
@@ -197,14 +197,23 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                     let adaptiveCard = new AdaptiveCards.AdaptiveCard();
                     adaptiveCard.parse(this.card);
                     let renderedCard = adaptiveCard.render();
-                    document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
-                    let link = this.state.message.buttonLink;
-                    adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); }                    
+
+                    if (renderedCard) {
+                        const inputs = renderedCard.getElementsByTagName('input');
+                        Array.from(inputs).forEach((inputElement: Element): void => {
+                            (inputElement as HTMLInputElement).disabled = true;
+                        });
+
+                        const container = document.getElementsByClassName('adaptiveCardContainer')[0].firstChild;
+                        if (container != null) {
+                            container.replaceWith(renderedCard);
+                        } else {
+                            document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
+                        }
+                    }                                        
                 });
             });
             this.getReactionsCount(id);
-            this.getSetByUserPhoto('ec09bb03-bc97-40d3-9883-c7d7b3582fa6');
-            
         }
     }
 
@@ -257,12 +266,6 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
         } catch (error) {
             return error;
         }
-    }
-
-    private getSetByUserPhoto = async (userId: string) => { 
-        this.photoUtil.getGraphPhoto(userId).then((uri: string) => {
-            this.setState({ sentByUserPhoto: uri });
-        });
     }
 
     private getItem = async (id: number) => {

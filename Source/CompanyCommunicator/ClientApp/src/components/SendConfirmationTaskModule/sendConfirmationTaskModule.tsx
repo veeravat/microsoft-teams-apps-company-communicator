@@ -5,15 +5,15 @@ import * as React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { withTranslation, WithTranslation } from "react-i18next";
 import * as AdaptiveCards from "adaptivecards";
-import { Loader, Button, Text, List, Image, Flex, FilesPictureColoredIcon, ShiftActivityIcon } from '@fluentui/react-northstar';
+import { Loader, Button, Text, List, Image, Flex} from '@fluentui/react-northstar';
 import * as microsoftTeams from "@microsoft/teams-js";
 
 import './sendConfirmationTaskModule.scss';
 import { getDraftNotification, getConsentSummaries, sendDraftNotification } from '../../apis/messageListApi';
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
-    setCardAuthor, setCardBtn
-} from '../AdaptiveCard/adaptiveCard';
+    setCardAuthor, setCardBtn, setCardHidePoll, setCardPollOptions
+} from '../AdaptiveCard/adaptiveCardPoll';
 import { ImageUtil } from '../../utility/imageutility';
 import { TFunction } from "i18next";
 
@@ -35,6 +35,8 @@ export interface IMessage {
     imageLink?: string;
     summary?: string;
     author?: string;
+    pollOptions?: string,
+    isPollMultipleChoice: boolean;
     buttonLink?: string;
     buttonTitle?: string;
 }
@@ -100,6 +102,16 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
                             setCardImageLink(this.card, this.state.message.imageLink);
                             setCardSummary(this.card, this.state.message.summary);
                             setCardAuthor(this.card, this.state.message.author);
+
+                            if (this.state.message.pollOptions) {
+                                const options: string[] = JSON.parse(this.state.message.pollOptions);
+                                setCardPollOptions(this.card, this.state.message.isPollMultipleChoice, options);
+                                setCardBtn(this.card, this.localize("PollSubmitVote"), "https://adaptivecards.io");
+                            }
+                            else {
+                                setCardHidePoll(this.card);
+                            }
+
                             if (this.state.message.buttonTitle && this.state.message.buttonLink) {
                                 setCardBtn(this.card, this.state.message.buttonTitle, this.state.message.buttonLink);
                             }
@@ -107,10 +119,18 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
                             let adaptiveCard = new AdaptiveCards.AdaptiveCard();
                             adaptiveCard.parse(this.card);
                             let renderedCard = adaptiveCard.render();
-                            document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
-                            if (this.state.message.buttonLink) {
-                                let link = this.state.message.buttonLink;
-                                adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); };
+                            if (renderedCard) {
+                                const inputs = renderedCard.getElementsByTagName('input');
+                                Array.from(inputs).forEach((inputElement: Element): void => {
+                                    (inputElement as HTMLInputElement).disabled = true;
+                                });
+
+                                const container = document.getElementsByClassName('adaptiveCardContainer')[0].firstChild;
+                                if (container != null) {
+                                    container.replaceWith(renderedCard);
+                                } else {
+                                    document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
+                                }
                             }
                         });
                     });

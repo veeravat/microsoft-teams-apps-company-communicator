@@ -8,7 +8,7 @@ import DraftMessages from '../DraftMessages/draftMessages';
 import './tabContainer.scss';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { getBaseUrl } from '../../configVariables';
-import { Accordion, Button, Flex, PollIcon, SplitButton } from '@fluentui/react-northstar';
+import { Accordion, Flex, PollIcon, SplitButton } from '@fluentui/react-northstar';
 import { getDraftMessagesList } from '../../actions';
 import { connect } from 'react-redux';
 import { TFunction } from "i18next";

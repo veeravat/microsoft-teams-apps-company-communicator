@@ -17,7 +17,6 @@ import {
 import { ImageUtil } from '../../utility/imageutility';
 import { formatDate, formatDuration, formatNumber } from '../../i18n';
 import { TFunction } from "i18next";
-import { PhotoUtil } from '../../utility/userPhotoUtil';
 
 export interface IListItem {
     header: string,
@@ -280,10 +279,7 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
             response.data.acknowledgementsCount = formatNumber(response.data.acknowledgementsCount);
             response.data.failed = formatNumber(response.data.failed);
             response.data.unknown = response.data.unknown && formatNumber(response.data.unknown);
-            response.data.canceled = response.data.canceled && formatNumber(response.data.canceled);
-            response.data.messageType = response.data.messageType;
-            response.data.pollOptions = response.data.pollOptions;
-            response.data.pollQuizAnswers = response.data.pollQuizAnswers;
+            response.data.canceled = response.data.canceled && formatNumber(response.data.canceled);            
             this.setState({
                 message: response.data
             });
@@ -298,7 +294,6 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
         const correctAnswerStatus = <Status state="success" icon={<AcceptIcon />} title={this.localize("PollQuizCorrectAnswer")} className="choice-item-circle" />;
         const wrongAnswerStatus = <Status state="error" icon={<CloseIcon />} className="choice-item-circle" />;
 
-        let i = 0;
         let items: JSX.Element[] = [];
         results.choiceOptions.forEach((resultItem) => {
             items.push(    
@@ -317,7 +312,6 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                     </Stack.Item>
                 </Stack>
             );
-            i++;
         });
         return (
             <>

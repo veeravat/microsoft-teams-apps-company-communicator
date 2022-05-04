@@ -38,7 +38,7 @@ export class InputBox extends React.Component<IInputBoxProps> {
     }
 
     componentDidMount() {
-        if (this.renderAs == RenderAs.TextArea && (!Utils.isEmpty(this.props.value) || !Utils.isEmpty(this.props.defaultValue))) {
+        if (this.renderAs === RenderAs.TextArea && (!Utils.isEmpty(this.props.value) || !Utils.isEmpty(this.props.defaultValue))) {
             // Updating height only in case when there is some text in input box becasue if there is no text then rows=1 will show only 1 line.
             // There might be some senario in which element is not completely painted to get their scroll height. Refer https://stackoverflow.com/questions/26556436/react-after-render-code
             // In such cases the height of input box become wrong(looks very large or very small), which usaully occurs on very first load.
@@ -101,10 +101,10 @@ export class InputBox extends React.Component<IInputBoxProps> {
      * Method to adjust height in case of multiline input
      */
     private autoAdjustHeight() {
-        if (this.renderAs == RenderAs.TextArea) {
+        if (this.renderAs === RenderAs.TextArea) {
             this.inputElement.style.height = "";
 
-            if (this.bottomBorderWidth == -1) {
+            if (this.bottomBorderWidth === -1) {
                 this.bottomBorderWidth = parseFloat(getComputedStyle(this.inputElement).getPropertyValue("border-bottom-width"));
             }
             this.inputElement.style.height = this.inputElement.scrollHeight + this.bottomBorderWidth + "px";
@@ -128,7 +128,7 @@ export class InputBox extends React.Component<IInputBoxProps> {
         };
 
         let input: {} = this.props.input;
-        if (this.renderAs == RenderAs.TextArea) {
+        if (this.renderAs === RenderAs.TextArea) {
             input = {
                 ...input,
                 as: "textarea",

@@ -5,7 +5,6 @@
   "dependencies": {
     "@fluentui/react-northstar": "^0.56.0",
     "@fluentui/react": "^8.67.2",
-    "@fluentui/react-teams": "^6.0.0-alpha.1",
     "@microsoft/teams-js": "^1.4.2",
     "adaptivecards": "^2.10.0",
     "axios": "^0.21.4",
@@ -19,9 +18,7 @@
     "msteams-ui-components-react": "^0.8.1",
     "msteams-ui-icons-react": "^0.4.1",
     "react": "^16.8.6",
-    "react-circular-progressbar": "^2.0.4",
     "react-dom": "^16.8.6",
-    "react-highlight-words": "^0.16.0",
     "react-i18next": "^11.7.0",
     "react-redux": "^7.1.0",
     "react-router-dom": "^5.2.0",

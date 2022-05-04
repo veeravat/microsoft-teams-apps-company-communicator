@@ -5,7 +5,7 @@ import * as React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { withTranslation, WithTranslation } from "react-i18next";
 import * as AdaptiveCards from "adaptivecards";
-import { Button, Loader, Dropdown, Text, Flex, Input, TextArea, RadioGroup, Checkbox, Datepicker } from '@fluentui/react-northstar'
+import { Button, Loader, Dropdown, Text, Flex, Input, TextArea, RadioGroup, Checkbox } from '@fluentui/react-northstar'
 import * as microsoftTeams from "@microsoft/teams-js";
 import { SimpleMarkdownEditor } from 'react-simple-markdown-editor';
 

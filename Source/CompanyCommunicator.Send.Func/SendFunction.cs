@@ -6,6 +6,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using AdaptiveCards;
     using Microsoft.Azure.WebJobs;
@@ -278,7 +279,28 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 notification.ImageLink = await this.notificationDataRepository.GetImageAsync(notification.ImageLink, notification.ImageBase64BlobName);
             }
 
+            Root root = null;
+            if (!string.IsNullOrWhiteSpace(notification.Summary) && notification.Summary.Contains("[user]"))
+            {
+                notification.Summary = notification.Summary.Replace("[user]", "<at></at>");
+                var mentionEntity = new Entity()
+                {
+                    type = "mention",
+                    text = "<at></at>",
+                    mentioned = new Mentioned()
+                    {
+                        id = message.RecipientData.RecipientId,
+                        name = "",
+                    },
+                };
+                root = new Root() { entities = new List<Entity>() { mentionEntity } };
+            }
+
             var card = this.adaptiveCardCreator.CreateAdaptiveCard(notification);
+            if (root != null)
+            {
+                card.AdditionalProperties.Add("msteams", root);
+            }
 
             if (message.RecipientData.RecipientType == RecipientDataType.User)
             {
@@ -335,8 +357,29 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             }
 
             messageActivity.Summary = notification.Title;
-
             return messageActivity;
         }
     }
+
+    public class Mentioned
+    {
+        public string id { get; set; }
+
+        public string name { get; set; }
+    }
+
+    public class Entity
+    {
+        public string type { get; set; }
+
+        public string text { get; set; }
+
+        public Mentioned mentioned { get; set; }
+    }
+
+    public class Root
+    {
+        public List<Entity> entities { get; set; }
+    }
+
 }

@@ -7,9 +7,8 @@ import './statusTaskModule.scss';
 import { getSentNotification, exportNotification, getReactionsCount, getPollResult, getCorrectQuizesCount, getVotesCount } from '../../apis/messageListApi';
 import { RouteComponentProps } from 'react-router-dom';
 import * as AdaptiveCards from "adaptivecards";
-import { Icon, Label, ProgressIndicator, Stack, TooltipHost } from '@fluentui/react';
+import { ProgressIndicator, Stack, TooltipHost } from '@fluentui/react';
 import { Loader, List, Image, Text, Button, DownloadIcon, AcceptIcon, Flex, Avatar, Status, CloseIcon, Divider } from '@fluentui/react-northstar';
-import { Chart, EChartTypes, Provider, themeNames } from "@fluentui/react-teams";
 import * as microsoftTeams from "@microsoft/teams-js";
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
@@ -145,9 +144,6 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                         });
 
                         Promise.all([this.getPollResult(id), this.getVotesCount(id), this.getCorrectQuizesCount(id)]).then((responses) => {
-                            //if (this.state.message.pollOptions) {
-                            //const options: string[] = JSON.parse(this.state.message.pollOptions);
-
                             console.log('choiceOptions init');
                             console.log(choiceOptions);
                             if (this.state.message.isPollQuizMode && this.state.message.pollQuizAnswers) {
@@ -167,7 +163,6 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                             console.log(choiceOptions);
 
                             let rows = responses[0].data.tables[0].rows;
-                            //let totalVotes: number = 0;
                             if (rows) {
                                 for (var j = 0; j < rows.length; j++) {
                                     let optionNum = rows[j][0];
@@ -176,32 +171,19 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                                     let current = choiceOptions.get(optionNum);
                                     console.log(current);
                                     current.count = optionCount;
-                                    //totalVotes = totalVotes + parseInt(optionCount);
                                     choiceOptions.set(optionNum, current);
                                 }
                             }
                             console.log('choiceOptions add counts');
                             console.log(choiceOptions);
-                            //const chartData = {
-                            //    labels: Array.from(choiceOptions.values()).map(x => x.title),
-                            //    datasets: [
-                            //        {
-                            //            label: this.localize("PollResultsTitle"),
-                            //            data: Array.from(choiceOptions.values()).map(x => x.count),
-                            //        },
-                            //    ],
-                            //}
+                          
                             this.setState({
                                 pollResultsChartData:
                                     { choiceOptions: choiceOptions }
                             });
                             console.log(this.state.pollResultsChartData);
-                            //}
-                        });
-
-                        //this.getPollResult(id).then((response) => {
                             
-                        //});
+                        });
                     }
                     else {
                         setCardHidePoll(this.card);
@@ -211,8 +193,6 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                     if (this.state.message.buttonTitle !== "" && this.state.message.buttonLink !== "") {
                         setCardBtn(this.card, this.state.message.buttonTitle, this.state.message.buttonLink);
                     }
-
-                    
 
                     let adaptiveCard = new AdaptiveCards.AdaptiveCard();
                     adaptiveCard.parse(this.card);
@@ -318,29 +298,19 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
         let i = 0;
         let items: JSX.Element[] = [];
         results.choiceOptions.forEach((resultItem) => {
-            items.push(
-                //<Flex gap="gap.small">
-                //    <Flex.Item grow>
-                //        <Flex>
-                //            {resultItem.answer && this.state.message.isPollQuizMode && correctAnswerStatus}
-                //            {!resultItem.answer && this.state.message.isPollQuizMode && wrongAnswerStatus}
-                //            <Flex.Item grow>
-                //                <ProgressIndicator label={resultItem.title} barHeight={4} percentComplete={resultItem.count} />
-                //            </Flex.Item>
-                //        </Flex>
-                //    </Flex.Item>
-                //    <Text>{resultItem.count}</Text>
-                //</Flex>
-                
+            items.push(    
                 <Stack horizontal={true} horizontalAlign="space-between">
-                     { resultItem.answer && this.state.message.isPollQuizMode && correctAnswerStatus }
-                     {!resultItem.answer && this.state.message.isPollQuizMode && wrongAnswerStatus}
+                    <Stack.Item className="choice-item-circle">
+                        {resultItem.answer && this.state.message.isPollQuizMode && correctAnswerStatus}
+                        {!resultItem.answer && this.state.message.isPollQuizMode && wrongAnswerStatus}
+                    </Stack.Item>
+                     
 
                     <Stack.Item grow={1}>
-                        <ProgressIndicator label={resultItem.title} barHeight={4} percentComplete={resultItem.count / this.state.votesCount } />
+                        <ProgressIndicator label={resultItem.title} barHeight={4} percentComplete={this.state.votesCount === 0 ? 0 : resultItem.count / this.state.votesCount } />
                     </Stack.Item>
                     <Stack.Item align="end">
-                        <Text>{resultItem.count} ({((resultItem.count / this.state.votesCount) * 100).toFixed() }%)</Text>
+                        <Text> {this.state.votesCount === 0 ? 0 : ((resultItem.count / this.state.votesCount) * 100).toFixed()}% ({resultItem.count})</Text>
                     </Stack.Item>
                 </Stack>
             );
@@ -348,31 +318,29 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
         });
         return (
             <>
-                {items}
-                <br />
-                <br/>
-                <Divider />
-                {
-                    this.state.message.isPollQuizMode && ((this.state.correctQuizesCount === 0) ?
-                        this.localize("PollQuizNoCorrectAnswers") :
-                        this.localize("PollQuizResults", {
-                            "percent": ( (this.state.correctQuizesCount / this.state.votesCount) * 100).toFixed(),
-                            "correct": this.state.correctQuizesCount,
-                            "votes": this.state.votesCount,
-                        }))
-                }
-                <Divider />
                 {this.state.message.succeeded && this.state.message.succeeded !== '0' &&
                     <ProgressIndicator
-                        /*theme={themeNames.Default}}*/
-                    label={this.localize("PollParticipation", { "percent": (this.state.votesCount / parseInt(this.state.message.succeeded) * 100).toFixed() })}
+                        label={this.localize("PollParticipation", { "percent": (this.state.votesCount / parseInt(this.state.message.succeeded) * 100).toFixed() })}
                         description={
                             (this.state.votesCount === 1) ?
                                 this.localize("PollParticipationIndicatorSingular", { "votes": this.state.votesCount, "succeeded": this.state.message.succeeded }) :
                                 this.localize("PollParticipationIndicatorPlural", { "votes": this.state.votesCount, "succeeded": this.state.message.succeeded })
                         }
                         barHeight={6}
-                        percentComplete={results.totalVotes / parseInt(this.state.message.succeeded)} />}
+                        percentComplete={this.state.votesCount / parseInt(this.state.message.succeeded)} />
+                }
+                <Divider />
+                {
+                    this.state.message.isPollQuizMode && ((this.state.correctQuizesCount === 0) ?
+                        this.localize("PollQuizNoCorrectAnswers") :
+                        this.localize("PollQuizResults", {
+                            "percent": ((this.state.correctQuizesCount / this.state.votesCount) * 100).toFixed(),
+                            "correct": this.state.correctQuizesCount,
+                            "votes": this.state.votesCount,
+                        }))
+                }
+                <Divider />
+                {items}
             </>            
             );
     }
@@ -398,16 +366,8 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                                         </div>
                                         {this.state.message.messageType === 'Poll' && this.state.pollResultsChartData &&
                                             <div className="contentField">
-                                            <h3>{this.localize("PollResultsTitle")}</h3>
-
-                                            {this.renderRollResults()}
-                                            
-
-
-                                            {/*<Provider themeName={themeNames.Default} lang="en-US">*/}
-                                            {/*    <Chart type={EChartTypes.BarHorizontal} data={this.state.pollResultsChartData} title={this.localize("PollResultsTitle")} />*/}
-                                            {/*</Provider>*/}
-
+                                                <h3>{this.localize("PollResultsTitle")}</h3>
+                                                {this.renderRollResults()}
                                             </div>
                                         }
                                         <div className="contentField">

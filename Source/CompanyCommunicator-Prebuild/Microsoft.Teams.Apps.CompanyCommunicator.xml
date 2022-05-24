@@ -1,0 +1,1204 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.Teams.Apps.CompanyCommunicator</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.AuthenticationOptions">
+            <summary>
+            Options used for setting up the authentication.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.AuthenticationOptions.AzureAdInstance">
+            <summary>
+            Gets or sets the Azure active directory instance.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.AuthenticationOptions.AzureAdTenantId">
+            <summary>
+            Gets or sets the Azure active directory tenant id.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.AuthenticationOptions.AzureAdClientId">
+            <summary>
+            Gets or sets the Azure active directory client id.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.AuthenticationOptions.AzureAdApplicationIdUri">
+            <summary>
+            Gets or sets the Azure active directory application id uri.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.AuthenticationOptions.AzureAdValidIssuers">
+            <summary>
+            Gets or sets the Azure active directory valid issuers.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.AuthenticationOptions.DisableCreatorUpnCheck">
+            <summary>
+            Gets or sets a value indicating whether the "must be a upn in the authorized list
+            in order to use the app and create notifications" check should be disabled.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.AuthenticationOptions.AuthorizedCreatorUpns">
+            <summary>
+            Gets or sets the valid upns of users who are allowed to access the app and use it to
+            create notifications.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.AuthenticationServiceCollectionExtensions">
+            <summary>
+            Extension class for registering auth services in DI container.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.AuthenticationServiceCollectionExtensions.AddAuthentication(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,Microsoft.Teams.Apps.CompanyCommunicator.Authentication.AuthenticationOptions)">
+            <summary>
+            Extension method to register the authentication services.
+            </summary>
+            <param name="services">IServiceCollection instance.</param>
+            <param name="configuration">The configuration instance.</param>
+            <param name="authenticationOptions">The authentication options.</param>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.GraphTokenProvider">
+            <summary>
+            Add Access Token to Graph Api.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.GraphTokenProvider.#ctor(Microsoft.Identity.Web.ITokenAcquisition)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.GraphTokenProvider"/> class.
+            </summary>
+            <param name="tokenAcquisition">MSAL.NET token acquisition service.</param>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.GraphTokenProvider.AuthenticateRequestAsync(System.Net.Http.HttpRequestMessage)">
+            <summary>
+            Intercepts HttpRequest and add Bearer token.
+            </summary>
+            <param name="request">Represents a HttpRequestMessage.</param>
+            <returns>asynchronous operation.</returns>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.MSGraphScopeHandler">
+            <summary>
+            This class is an authorization handler, which handles the authorization requirement.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.MSGraphScopeHandler.#ctor(Microsoft.Identity.Web.ITokenAcquisition)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.MSGraphScopeHandler"/> class.
+            </summary>
+            <param name="tokenAcquisition">MSAL.NET token acquisition service.</param>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.MSGraphScopeHandler.HandleRequirementAsync(Microsoft.AspNetCore.Authorization.AuthorizationHandlerContext,Microsoft.Teams.Apps.CompanyCommunicator.Authentication.MSGraphScopeRequirement)">
+            <summary>
+            This method handles the authorization requirement.
+            </summary>
+            <param name="context">AuthorizationHandlerContext instance.</param>
+            <param name="requirement">IAuthorizationRequirement instance.</param>
+            <returns>A task that represents the work queued to execute.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.MSGraphScopeHandler.HasScopesAsync(System.String[])">
+            <summary>
+            Check whether the access token has input scopes.
+            This is where we should check if user has valid graph access.
+            </summary>
+            <param name="scopes">Microsoft Graph scopes.</param>
+            <returns>Indicate if access token has scope.</returns>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.MSGraphScopeRequirement">
+            <summary>
+            This class is an authorization policy requirement.
+            It specifies that an access token must contain group.read.all scope.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.MSGraphScopeRequirement.#ctor(System.String[])">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.MSGraphScopeRequirement"/> class.
+            </summary>
+            <param name="scopes">Microsoft Graph Scopes.</param>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.MSGraphScopeRequirement.Scopes">
+            <summary>
+            Gets microsoft Graph Scopes.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.MustBeValidUpnHandler">
+            <summary>
+            This class is an authorization handler, which handles the authorization requirement.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.MustBeValidUpnHandler.#ctor(Microsoft.Extensions.Options.IOptions{Microsoft.Teams.Apps.CompanyCommunicator.Authentication.AuthenticationOptions})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.MustBeValidUpnHandler"/> class.
+            </summary>
+            <param name="authenticationOptions">The authentication options.</param>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.MustBeValidUpnHandler.HandleRequirementAsync(Microsoft.AspNetCore.Authorization.AuthorizationHandlerContext,Microsoft.Teams.Apps.CompanyCommunicator.Authentication.MustBeValidUpnRequirement)">
+            <summary>
+            This method handles the authorization requirement.
+            </summary>
+            <param name="context">AuthorizationHandlerContext instance.</param>
+            <param name="requirement">IAuthorizationRequirement instance.</param>
+            <returns>A task that represents the work queued to execute.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.MustBeValidUpnHandler.IsValidUpn(Microsoft.AspNetCore.Authorization.AuthorizationHandlerContext)">
+            <summary>
+            Check whether a upn is valid or not.
+            This is where we should check against the valid list of UPNs.
+            </summary>
+            <param name="context">Authorization handler context instance.</param>
+            <returns>Indicate if a upn is valid or not.</returns>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.MustBeValidUpnRequirement">
+            <summary>
+            This class is an authorization policy requirement.
+            It specifies that an id token must contain Upn claim.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.PolicyNames">
+            <summary>
+            This class lists the names of the custom authorization policies in the project.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.PolicyNames.MustBeValidUpnPolicy">
+            <summary>
+            The name of the authorization policy, MustHaveUpnClaimPolicy.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Teams.Apps.CompanyCommunicator.Authentication.PolicyNames.MSGraphGroupDataPolicy">
+            <summary>
+            The name of the authorization policy, MSGraphGroupDataPolicy.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Bot.AuthorTeamsActivityHandler">
+            <summary>
+            Company Communicator Author Bot.
+            Captures author data, file upload.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Bot.AuthorTeamsActivityHandler.#ctor(Microsoft.Teams.Apps.CompanyCommunicator.Bot.TeamsFileUpload,Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.User.IUserDataService,Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.IAppSettingsService,Microsoft.Extensions.Localization.IStringLocalizer{Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources.Strings})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.Bot.AuthorTeamsActivityHandler"/> class.
+            </summary>
+            <param name="teamsFileUpload">File upload service.</param>
+            <param name="userDataService">User data service.</param>
+            <param name="appSettingsService">App Settings service.</param>
+            <param name="localizer">Localization service.</param>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Bot.AuthorTeamsActivityHandler.OnConversationUpdateActivityAsync(Microsoft.Bot.Builder.ITurnContext{Microsoft.Bot.Schema.IConversationUpdateActivity},System.Threading.CancellationToken)">
+            <summary>
+            Invoked when a conversation update activity is received from the channel.
+            </summary>
+            <param name="turnContext">The context object for this turn.</param>
+            <param name="cancellationToken">A cancellation token that can be used by other objects
+            or threads to receive notice of cancellation.</param>
+            <returns>A task that represents the work queued to execute.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Bot.AuthorTeamsActivityHandler.OnTeamsFileConsentAcceptAsync(Microsoft.Bot.Builder.ITurnContext{Microsoft.Bot.Schema.IInvokeActivity},Microsoft.Bot.Schema.Teams.FileConsentCardResponse,System.Threading.CancellationToken)">
+            <summary>
+            Invoke when a file upload accept consent activitiy is received from the channel.
+            </summary>
+            <param name="turnContext">The context object for this turn.</param>
+            <param name="fileConsentCardResponse">The accepted response object of File Card.</param>
+            <param name="cancellationToken">A cancellation token that can be used by other objects
+            or threads to receive notice of cancellation.</param>
+            <returns>A task reprsenting asynchronous operation.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Bot.AuthorTeamsActivityHandler.OnTeamsFileConsentDeclineAsync(Microsoft.Bot.Builder.ITurnContext{Microsoft.Bot.Schema.IInvokeActivity},Microsoft.Bot.Schema.Teams.FileConsentCardResponse,System.Threading.CancellationToken)">
+            <summary>
+            Invoke when a file upload decline consent activitiy is received from the channel.
+            </summary>
+            <param name="turnContext">The context object for this turn.</param>
+            <param name="fileConsentCardResponse">The declined response object of File Card.</param>
+            <param name="cancellationToken">A cancellation token that can be used by other objects
+            or threads to receive notice of cancellation.</param>
+            <returns>A task reprsenting asynchronous operation.</returns>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Bot.BotFilterMiddlewareOptions">
+            <summary>
+            Options used for creating the bot filter middleware.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Bot.BotFilterMiddlewareOptions.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.Bot.BotFilterMiddlewareOptions"/> class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Bot.BotFilterMiddlewareOptions.DisableTenantFilter">
+            <summary>
+            Gets or sets a value indicating whether the tenant
+            filtering for the bot should be disabled.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Bot.BotFilterMiddlewareOptions.AllowedTenants">
+            <summary>
+            Gets or sets the allowed tenants list.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Bot.CompanyCommunicatorBotAdapter">
+            <summary>
+            The Company Communicator Bot Adapter.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Bot.CompanyCommunicatorBotAdapter.#ctor(Microsoft.Bot.Connector.Authentication.ICredentialProvider,Microsoft.Teams.Apps.CompanyCommunicator.Bot.CompanyCommunicatorBotFilterMiddleware,Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets.ICertificateProvider)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.Bot.CompanyCommunicatorBotAdapter"/> class.
+            </summary>
+            <param name="credentialProvider">Credential provider service instance.</param>
+            <param name="companyCommunicatorBotFilterMiddleware">Teams message filter middleware instance.</param>
+            <param name="certificateProvider">Certificate provider service instance.</param>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Bot.CompanyCommunicatorBotAdapter.BuildCredentialsAsync(System.String,System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Bot.CompanyCommunicatorBotFilterMiddleware">
+            <summary>
+            The bot's general filter middleware.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Bot.CompanyCommunicatorBotFilterMiddleware.#ctor(Microsoft.Extensions.Options.IOptions{Microsoft.Teams.Apps.CompanyCommunicator.Bot.BotFilterMiddlewareOptions})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.Bot.CompanyCommunicatorBotFilterMiddleware"/> class.
+            </summary>
+            <param name="botFilterMiddlewareOptions">The bot filter middleware options.</param>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Bot.CompanyCommunicatorBotFilterMiddleware.OnTurnAsync(Microsoft.Bot.Builder.ITurnContext,Microsoft.Bot.Builder.NextDelegate,System.Threading.CancellationToken)">
+            <summary>
+            Processes an incoming activity.
+            If the activity's channel id is not "msteams", or its conversation's tenant is not an allowed tenant,
+            then the middleware short circuits the pipeline, and skips the middlewares and handlers
+            that are listed after this filter in the pipeline.
+            </summary>
+            <param name="turnContext">Context object containing information for a single turn of a conversation.</param>
+            <param name="next">The delegate to call to continue the bot middleware pipeline.</param>
+            <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Bot.TeamsDataCapture">
+            <summary>
+            Service to capture teams data.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Bot.TeamsDataCapture.#ctor(Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData.ITeamDataRepository,Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.User.IUserDataService,Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.IAppSettingsService)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.Bot.TeamsDataCapture"/> class.
+            </summary>
+            <param name="teamDataRepository">Team data repository instance.</param>
+            <param name="userDataService">User data service instance.</param>
+            <param name="appSettingsService">App Settings service.</param>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Bot.TeamsDataCapture.OnBotAddedAsync(Microsoft.Bot.Builder.ITurnContext,Microsoft.Bot.Schema.IConversationUpdateActivity,System.Threading.CancellationToken)">
+            <summary>
+            Add channel or personal data in Table Storage.
+            </summary>
+            <param name="turnContext">The context object for this turn.</param>
+            <param name="activity">Teams activity instance.</param>
+            <param name="cancellationToken">A cancellation token that can be used by other objects
+            or threads to receive notice of cancellation.</param>
+            <returns>A task that represents the work queued to execute.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Bot.TeamsDataCapture.OnBotRemovedAsync(Microsoft.Bot.Schema.IConversationUpdateActivity)">
+            <summary>
+            Remove channel or personal data in table storage.
+            </summary>
+            <param name="activity">Teams activity instance.</param>
+            <returns>A task that represents the work queued to execute.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Bot.TeamsDataCapture.OnTeamInformationUpdatedAsync(Microsoft.Bot.Schema.IConversationUpdateActivity)">
+            <summary>
+            Update team information in the table storage.
+            </summary>
+            <param name="activity">Teams activity instance.</param>
+            <returns>A task that represents the work queued to execute.</returns>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Bot.TeamsFileUpload">
+            <summary>
+            Service to upload file to user's one drive.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Bot.TeamsFileUpload.#ctor(System.Net.Http.IHttpClientFactory,Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData.IExportDataRepository,Azure.Storage.Blobs.BlobContainerClient,Microsoft.Extensions.Localization.IStringLocalizer{Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources.Strings})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.Bot.TeamsFileUpload"/> class.
+            </summary>
+            <param name="clientFactory">http client factory.</param>
+            <param name="exportDataRepository">Export Data Repository.</param>
+            <param name="blobContainerClient">azure blob container client.</param>
+            <param name="localizer">Localization service.</param>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Bot.TeamsFileUpload.FileUploadCompletedAsync(Microsoft.Bot.Builder.ITurnContext,Microsoft.Bot.Schema.Teams.FileConsentCardResponse,System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Sends file upload complete card.
+            </summary>
+            <param name="turnContext">The context object for this turn.</param>
+            <param name="fileConsentCardResponse">The accepted response object of File Card.</param>
+            <param name="fileName">The file name.</param>
+            <param name="notificationId">The notfication id.</param>
+            <param name="cancellationToken">A cancellation token that can be used by other objects
+            or threads to receive notice of cancellation.</param>
+            <returns>A task reprsenting asynchronous operation.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Bot.TeamsFileUpload.FileUploadFailedAsync(Microsoft.Bot.Builder.ITurnContext,System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Send the file upload failed message.
+            </summary>
+            <param name="turnContext">The context object for this turn.</param>
+            <param name="notificationId">The notification id.</param>
+            <param name="error">The error message.</param>
+            <param name="cancellationToken">A cancellation token that can be used by other objects
+            or threads to receive notice of cancellation.</param>
+            <returns>A task reprsenting asynchronous operation.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Bot.TeamsFileUpload.UploadToOneDrive(System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Upload the file to user's one drive.
+            </summary>
+            <param name="fileName">The file name.</param>
+            <param name="uploadUrl">The One drive upload url.</param>
+            <param name="cancellationToken">A cancellation token that can be used by other objects
+            or threads to receive notice of cancellation.</param>
+            <returns>A task reprsenting asynchronous operation.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Bot.TeamsFileUpload.CleanUp(Microsoft.Bot.Builder.ITurnContext,System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Clean up the data such as file, consent card, record.
+            </summary>
+            <param name="turnContext">The context object for this turn.</param>
+            <param name="fileName">The file name.</param>
+            <param name="notificationId">The notfication id.</param>
+            <param name="cancellationToken">A cancellation token that can be used by other objects
+            or threads to receive notice of cancellation.</param>
+            <returns>A task reprsenting asynchronous operation.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Bot.TeamsFileUpload.ExtractInformation(System.Object)">
+            <summary>
+            Extract the file name and notification id.
+            </summary>
+            <param name="fileCardContext">The context of file card response.</param>
+            <returns>file name and notification id.</returns>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Bot.UserTeamsActivityHandler">
+            <summary>
+            Company Communicator User Bot.
+            Captures user data, team data.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Bot.UserTeamsActivityHandler.#ctor(Microsoft.Teams.Apps.CompanyCommunicator.Bot.TeamsDataCapture,Microsoft.Bot.Builder.IBotTelemetryClient,Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData.ISentNotificationDataRepository,Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData.INotificationDataRepository,Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard.AdaptiveCardCreator)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.Bot.UserTeamsActivityHandler"/> class.
+            </summary>
+            <param name="teamsDataCapture">Teams data capture service.</param>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Bot.UserTeamsActivityHandler.OnConversationUpdateActivityAsync(Microsoft.Bot.Builder.ITurnContext{Microsoft.Bot.Schema.IConversationUpdateActivity},System.Threading.CancellationToken)">
+            <summary>
+            Invoked when a conversation update activity is received from the channel.
+            </summary>
+            <param name="turnContext">The context object for this turn.</param>
+            <param name="cancellationToken">A cancellation token that can be used by other objects
+            or threads to receive notice of cancellation.</param>
+            <returns>A task that represents the work queued to execute.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Bot.UserTeamsActivityHandler.LogActivityTelemetry(Microsoft.Bot.Schema.IActivity,System.String,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            Log telemetry about the incoming activity.
+            </summary>
+            <param name="activity">The activity</param>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.AuthenticationMetadataController">
+            <summary>
+            Controller for the authentication sign in data.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.AuthenticationMetadataController.#ctor(Microsoft.Extensions.Options.IOptions{Microsoft.Teams.Apps.CompanyCommunicator.Authentication.AuthenticationOptions})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.AuthenticationMetadataController"/> class.
+            </summary>
+            <param name="authenticationOptions">The authentication options.</param>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.AuthenticationMetadataController.GetConsentUrl(System.String,System.String)">
+            <summary>
+            Get authentication consent Url.
+            </summary>
+            <param name="windowLocationOriginDomain">Window location origin domain.</param>
+            <param name="loginHint">UPN value.</param>
+            <returns>Conset Url.</returns>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.BotController">
+            <summary>
+            Message controller for the bot.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.BotController.#ctor(Microsoft.Teams.Apps.CompanyCommunicator.Bot.CompanyCommunicatorBotAdapter,Microsoft.Teams.Apps.CompanyCommunicator.Bot.AuthorTeamsActivityHandler,Microsoft.Teams.Apps.CompanyCommunicator.Bot.UserTeamsActivityHandler)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.BotController"/> class.
+            Dependency Injection will provide the Adapter and IBot implementation at runtime.
+            </summary>
+            <param name="adapter">Company Communicator Bot Adapter instance.</param>
+            <param name="authorBot">Company Communicator Author Bot instance.</param>
+            <param name="userBot">Company Communicator User Bot instance.</param>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.BotController.PostAsync">
+            <summary>
+            POST: api/Messages/user
+            Delegate the processing of the HTTP POST to the adapter.
+            The adapter will invoke the user bot.
+            </summary>
+            <returns>A task that represents the work queued to execute.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.BotController.PostAuthorAsync">
+            <summary>
+            POST: api/Messages/author
+            Delegate the processing of the HTTP POST to the adapter.
+            The adapter will invoke the author bot.
+            </summary>
+            <returns>A task that represents the work queued to execute.</returns>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.DataQueueMessageOptions">
+            <summary>
+            Options for data queue messages.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.DataQueueMessageOptions.ForceCompleteMessageDelayInSeconds">
+            <summary>
+            Gets or sets the value for the delay to be applied to the data queue message
+            used to force mark a notification as complete if it is not already
+            complete to ensure it is not left in a "sending" state.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.DraftNotificationsController">
+            <summary>
+            Controller for the draft notification data.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.DraftNotificationsController.#ctor(Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData.INotificationDataRepository,Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData.ITeamDataRepository,Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview.IDraftNotificationPreviewService,Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.IAppSettingsService,Microsoft.Extensions.Localization.IStringLocalizer{Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources.Strings},Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph.IGroupsService,Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Blob.IBlobStorageProvider)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.DraftNotificationsController"/> class.
+            </summary>
+            <param name="notificationDataRepository">Notification data repository instance.</param>
+            <param name="teamDataRepository">Team data repository instance.</param>
+            <param name="draftNotificationPreviewService">Draft notification preview service.</param>
+            <param name="appSettingsService">App Settings service.</param>
+            <param name="localizer">Localization service.</param>
+            <param name="groupsService">group service.</param>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.DraftNotificationsController.CreateDraftNotificationAsync(Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotification)">
+            <summary>
+            Create a new draft notification.
+            </summary>
+            <param name="notification">A new Draft Notification to be created.</param>
+            <returns>The created notification's id.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.DraftNotificationsController.DuplicateDraftNotificationAsync(System.String)">
+            <summary>
+            Duplicate an existing draft notification.
+            </summary>
+            <param name="id">The id of a Draft Notification to be duplicated.</param>
+            <returns>If the passed in id is invalid, it returns 404 not found error. Otherwise, it returns 200 OK.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.DraftNotificationsController.UpdateDraftNotificationAsync(Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotification)">
+            <summary>
+            Update an existing draft notification.
+            </summary>
+            <param name="notification">An existing Draft Notification to be updated.</param>
+            <returns>A task that represents the work queued to execute.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.DraftNotificationsController.DeleteDraftNotificationAsync(System.String)">
+            <summary>
+            Delete an existing draft notification.
+            </summary>
+            <param name="id">The id of the draft notification to be deleted.</param>
+            <returns>If the passed in Id is invalid, it returns 404 not found error. Otherwise, it returns 200 OK.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.DraftNotificationsController.GetAllDraftNotificationsAsync">
+            <summary>
+            Get draft notifications.
+            </summary>
+            <returns>A list of <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotificationSummary"/> instances.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.DraftNotificationsController.GetDraftNotificationByIdAsync(System.String)">
+            <summary>
+            Get a draft notification by Id.
+            </summary>
+            <param name="id">Draft notification Id.</param>
+            <returns>It returns the draft notification with the passed in id.
+            The returning value is wrapped in a ActionResult object.
+            If the passed in id is invalid, it returns 404 not found error.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.DraftNotificationsController.GetDraftNotificationSummaryForConsentByIdAsync(System.String)">
+            <summary>
+            Get draft notification summary (for consent page) by notification Id.
+            </summary>
+            <param name="notificationId">Draft notification Id.</param>
+            <returns>It returns the draft notification summary (for consent page) with the passed in id.
+            If the passed in id is invalid, it returns 404 not found error.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.DraftNotificationsController.PreviewDraftNotificationAsync(Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotificationPreviewRequest)">
+            <summary>
+            Preview draft notification.
+            </summary>
+            <param name="draftNotificationPreviewRequest">Draft notification preview request.</param>
+            <returns>
+            It returns 400 bad request error if the incoming parameter, draftNotificationPreviewRequest, is invalid.
+            It returns 404 not found error if the DraftNotificationId or TeamsTeamId (contained in draftNotificationPreviewRequest) is not found in the table storage.
+            It returns 500 internal error if this method throws an unhandled exception.
+            It returns 429 too many requests error if the preview request is throttled by the bot service.
+            It returns 200 OK if the method is executed successfully.</returns>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.ExportController">
+            <summary>
+            Coontroller for exporting notification.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.ExportController.#ctor(Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData.ISentNotificationDataRepository,Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData.IExportDataRepository,Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData.IUserDataRepository,Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.ExportQueue.IExportQueue,Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams.ITeamMembersService,Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData.ITeamDataRepository,Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.IAppSettingsService)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.ExportController"/> class.
+            </summary>
+            <param name="sentNotificationDataRepository">SentNotification data repository instance.</param>
+            <param name="exportDataRepository">Export data repository instance.</param>
+            <param name="userDataRepository">User data repository instance.</param>
+            <param name="exportQueue">The service bus queue for the export queue.</param>
+            <param name="memberService">Teams member service.</param>
+            <param name="teamDataRepository">Team data reporsitory.</param>
+            <param name="appSettingsService">App Settings service.</param>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.ExportController.ExportNotificationAsync(Microsoft.Teams.Apps.CompanyCommunicator.Models.ExportRequest)">
+            <summary>
+            Initiate a export of notification.
+            </summary>
+            <param name="exportRequest">export request.</param>
+            <returns>The result of an action method.</returns>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.GroupDataController">
+            <summary>
+            Controller for getting groups.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.GroupDataController.#ctor(Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData.INotificationDataRepository,Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph.IGroupsService)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.GroupDataController"/> class.
+            </summary>
+            <param name="notificationDataRepository">Notification data repository instance.</param>
+            <param name="groupsService">Microsoft Graph service instance.</param>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.GroupDataController.VerifyAccess">
+            <summary>
+            check if user has access.
+            </summary>
+            <returns>indicating user access to group.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.GroupDataController.SearchAsync(System.String)">
+            <summary>
+            Action method to get groups.
+            </summary>
+            <param name="query">user input.</param>
+            <returns>list of group data.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.GroupDataController.GetGroupsAsync(System.String)">
+            <summary>
+            Get Group Data by Id.
+            </summary>
+            <param name="id">Draft notification Id.</param>
+            <returns>List of Group Names.</returns>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.HealthController">
+            <summary>
+            Controller for health endpoint.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.HealthController.Index">
+            <summary>
+            Report health status of the application.
+            </summary>
+            <returns>Action.</returns>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.Options.UserAppOptions">
+            <summary>
+            User app options.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.Options.UserAppOptions.ProactivelyInstallUserApp">
+            <summary>
+            Gets or sets a value indicating whether user app should be proactively installed.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.Options.UserAppOptions.UserAppExternalId">
+            <summary>
+            Gets or sets User app's external Id (id in the manifest).
+            </summary>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.SentNotificationsController">
+            <summary>
+            Controller for the sent notification data.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.SentNotificationsController.#ctor(Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData.INotificationDataRepository,Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData.ISentNotificationDataRepository,Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Analytics.IAnalyticsService,Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData.ITeamDataRepository,Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue.IPrepareToSendQueue,Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue.IDataQueue,Microsoft.Extensions.Options.IOptions{Microsoft.Teams.Apps.CompanyCommunicator.Controllers.DataQueueMessageOptions},Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph.IGroupsService,Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData.IExportDataRepository,Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph.IAppCatalogService,Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.IAppSettingsService,Microsoft.Extensions.Options.IOptions{Microsoft.Teams.Apps.CompanyCommunicator.Controllers.Options.UserAppOptions},Microsoft.Extensions.Logging.ILoggerFactory)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.SentNotificationsController"/> class.
+            </summary>
+            <param name="notificationDataRepository">Notification data repository service that deals with the table storage in azure.</param>
+            <param name="sentNotificationDataRepository">Sent notification data repository.</param>
+            <param name="teamDataRepository">Team data repository instance.</param>
+            <param name="prepareToSendQueue">The service bus queue for preparing to send notifications.</param>
+            <param name="dataQueue">The service bus queue for the data queue.</param>
+            <param name="dataQueueMessageOptions">The options for the data queue messages.</param>
+            <param name="groupsService">The groups service.</param>
+            <param name="exportDataRepository">The Export data repository instance.</param>
+            <param name="appCatalogService">App catalog service.</param>
+            <param name="appSettingsService">App settings service.</param>
+            <param name="userAppOptions">User app options.</param>
+            <param name="loggerFactory">The logger factory.</param>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.SentNotificationsController.CreateSentNotificationAsync(Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotification)">
+            <summary>
+            Send a notification, which turns a draft to be a sent notification.
+            </summary>
+            <param name="draftNotification">An instance of <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotification"/> class.</param>
+            <returns>The result of an action method.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.SentNotificationsController.GetSentNotificationsAsync">
+            <summary>
+            Get most recently sent notification summaries.
+            </summary>
+            <returns>A list of <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotificationSummary"/> instances.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.SentNotificationsController.GetSentNotificationByIdAsync(System.String)">
+            <summary>
+            Get a sent notification by Id.
+            </summary>
+            <param name="id">Id of the requested sent notification.</param>
+            <returns>Required sent notification.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.SentNotificationsController.UpdateUserAppIdAsync">
+            <summary>
+            Updates user app id if its not already synced.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.TeamDataController">
+            <summary>
+            Controller for the teams data.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.TeamDataController.#ctor(Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData.ITeamDataRepository)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.TeamDataController"/> class.
+            </summary>
+            <param name="teamDataRepository">Team data repository instance.</param>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Controllers.TeamDataController.GetAllTeamDataAsync">
+            <summary>
+            Get data for all teams.
+            </summary>
+            <returns>A list of team data.</returns>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview.DraftNotificationPreviewService">
+            <summary>
+            Draft notification preview service.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview.DraftNotificationPreviewService.#ctor(Microsoft.Extensions.Options.IOptions{Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot.BotOptions},Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard.AdaptiveCardCreator,Microsoft.Teams.Apps.CompanyCommunicator.Bot.CompanyCommunicatorBotAdapter)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview.DraftNotificationPreviewService"/> class.
+            </summary>
+            <param name="botOptions">The bot options.</param>
+            <param name="adaptiveCardCreator">Adaptive card creator service.</param>
+            <param name="companyCommunicatorBotAdapter">Bot framework http adapter instance.</param>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview.DraftNotificationPreviewService.SendPreview(Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData.NotificationDataEntity,Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData.TeamDataEntity,System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview.IDraftNotificationPreviewService">
+            <summary>
+            Interface for DraftNotificationPreviewService.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview.IDraftNotificationPreviewService.SendPreview(Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData.NotificationDataEntity,Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData.TeamDataEntity,System.String)">
+            <summary>
+            Send a preview of a draft notification.
+            </summary>
+            <param name="draftNotificationEntity">Draft notification entity.</param>
+            <param name="teamDataEntity">The team data entity.</param>
+            <param name="teamsChannelId">The Teams channel id.</param>
+            <returns>It returns HttpStatusCode.OK, if this method triggers the bot service to send the adaptive card successfully.
+            It returns HttpStatusCode.TooManyRequests, if the bot service throttled the request to send the adaptive card.</returns>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Localization.LocalizationServiceCollectionExtensions">
+            <summary>
+            Extension class for registering localization services in DI container.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Localization.LocalizationServiceCollectionExtensions.AddLocalizationSettings(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Adds localization settings to specified IServiceCollection.
+            </summary>
+            <param name="services">Collection of services.</param>
+            <param name="configuration">Application configuration properties.</param>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Localization.RequestCultureProvider">
+            <summary>
+            The CompanyCommunicatorCultureProvider implements the interface <see cref="T:Microsoft.AspNetCore.Localization.IRequestCultureProvider"/>.
+            The provider gets locale info from User-Agent header for requests come from the BOT framework.
+            It gets the info from Accept-Language header if it's a not a BOT request.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Localization.RequestCultureProvider.DetermineProviderCultureResult(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            Get the culture of the current request.
+            </summary>
+            <param name="httpContext">The current request.</param>
+            <returns>A Task resolving to the culture info if found, null otherwise.</returns>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Models.BaseNotification">
+            <summary>
+            Base notification model class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.BaseNotification.Id">
+            <summary>
+            Gets or sets Id.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.BaseNotification.Title">
+            <summary>
+            Gets or sets Title value.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.BaseNotification.ImageLink">
+            <summary>
+            Gets or sets the Image Link value.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.BaseNotification.ImageBase64BlobName">
+            <summary>
+            Gets or sets the blob name for the image in base64 format.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.BaseNotification.Summary">
+            <summary>
+            Gets or sets the Summary value.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.BaseNotification.Author">
+            <summary>
+            Gets or sets the Author value.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.BaseNotification.ButtonTitle">
+            <summary>
+            Gets or sets the Button Title value.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.BaseNotification.ButtonLink">
+            <summary>
+            Gets or sets the Button Link value.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.BaseNotification.CreatedDateTime">
+            <summary>
+            Gets or sets the Created DateTime value.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotification">
+            <summary>
+            Draft notification model class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotification.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotification"/> class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotification.Teams">
+            <summary>
+            Gets or sets Teams audience id collection.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotification.Rosters">
+            <summary>
+            Gets or sets Rosters audience id collection.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotification.Groups">
+            <summary>
+            Gets or sets Groups audience id collection.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotification.AllUsers">
+            <summary>
+            Gets or sets a value indicating whether a notification should be sent to all the users.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotification.Validate(Microsoft.Extensions.Localization.IStringLocalizer{Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources.Strings},System.String@)">
+            <summary>
+            Validates a draft notification.
+            Teams and Rosters property should not contain more than 20 items.
+            </summary>
+            <param name="localizer">The string localizer service.</param>
+            <param name="errorMessage">It returns the error message found by the method to the callers.</param>
+            <returns>A flag indicates if a draft notification is valid or not.</returns>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotificationPreviewRequest">
+            <summary>
+            Draft notification preview request model class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotificationPreviewRequest.DraftNotificationId">
+            <summary>
+            Gets or sets draft notification id.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotificationPreviewRequest.TeamsTeamId">
+            <summary>
+            Gets or sets Teams team id.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotificationPreviewRequest.TeamsChannelId">
+            <summary>
+            Gets or sets Teams channel id.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotificationSummary">
+            <summary>
+            Draft Notification Summary model class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotificationSummary.Id">
+            <summary>
+            Gets or sets Notification Id.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotificationSummary.Title">
+            <summary>
+            Gets or sets Title value.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotificationSummaryForConsent">
+            <summary>
+            Draft notification summary (for consent page) model class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotificationSummaryForConsent.NotificationId">
+            <summary>
+            Gets or sets Notification Id value.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotificationSummaryForConsent.TeamNames">
+            <summary>
+            Gets or sets Team Names value.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotificationSummaryForConsent.RosterNames">
+            <summary>
+            Gets or sets Roster Names value.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotificationSummaryForConsent.GroupNames">
+            <summary>
+            Gets or sets Group Names value.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotificationSummaryForConsent.AllUsers">
+            <summary>
+            Gets or sets a value indicating whether the All Users option is selected.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Models.ExportRequest">
+            <summary>
+            Export request model class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.ExportRequest.Id">
+            <summary>
+            Gets or sets the notification id.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.ExportRequest.TeamId">
+            <summary>
+            Gets or sets the Team Id.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Models.GroupData">
+            <summary>
+            Group data model class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.GroupData.Id">
+            <summary>
+            Gets or sets group Id.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.GroupData.Name">
+            <summary>
+            Gets or sets name.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.GroupData.Mail">
+            <summary>
+            Gets or sets mail.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotification">
+            <summary>
+            Sent notification model class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotification.SendingStartedDate">
+            <summary>
+            Gets or sets the sending started date time.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotification.SentDate">
+            <summary>
+            Gets or sets the Sent DateTime value.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotification.Succeeded">
+            <summary>
+            Gets or sets the number of recipients who have received the notification successfully.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotification.ViewsCount">
+            <summary>
+            Gets or sets the number of recipients who have viewed the notification successfully.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotification.AcknowledgementsCount">
+            <summary>
+            Gets or sets the number of recipients who have acknowledged the notification successfully.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotification.Failed">
+            <summary>
+            Gets or sets the number of recipients who failed in receiving the notification.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotification.Unknown">
+            <summary>
+            Gets or sets the number of recipients whose delivery status is unknown.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotification.TeamNames">
+            <summary>
+            Gets or sets Teams audience name collection.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotification.RosterNames">
+            <summary>
+            Gets or sets Rosters audience name collection.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotification.GroupNames">
+            <summary>
+            Gets or sets Groups audience name collection.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotification.AllUsers">
+            <summary>
+            Gets or sets a value indicating whether a notification was sent to all users.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotification.ErrorMessage">
+            <summary>
+            Gets or sets error message.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotification.WarningMessage">
+            <summary>
+            Gets or sets warning message.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotification.CanDownload">
+            <summary>
+            Gets or sets a value indicating whether user can download notification.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotification.SendingCompleted">
+            <summary>
+            Gets or sets a value indicating whether sending is in progress.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotificationSummary">
+            <summary>
+            Sent notification summary model class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotificationSummary.Id">
+            <summary>
+            Gets or sets Notification Id.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotificationSummary.Title">
+            <summary>
+            Gets or sets Title value.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotificationSummary.CreatedDateTime">
+            <summary>
+            Gets or sets Created DateTime value.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotificationSummary.SentDate">
+            <summary>
+            Gets or sets Sent DateTime value.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotificationSummary.Succeeded">
+            <summary>
+            Gets or sets the number of recipients who have received the notification successfully.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotificationSummary.Failed">
+            <summary>
+            Gets or sets the number of recipients who failed in receiving the notification.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotificationSummary.Unknown">
+            <summary>
+            Gets or sets the number of recipients whose delivery status is unknown.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotificationSummary.TotalMessageCount">
+            <summary>
+            Gets or sets the total number of messages to be sent.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotificationSummary.SendingStartedDate">
+            <summary>
+            Gets or sets the sending started date time.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.SentNotificationSummary.Status">
+            <summary>
+            Gets or sets notification status. <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData.NotificationStatus"/> for possible values.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Models.TeamData">
+            <summary>
+            Teams data model class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.TeamData.Id">
+            <summary>
+            Gets or sets team Id.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Models.TeamData.Name">
+            <summary>
+            Gets or sets name.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Pages.ErrorModel">
+            <summary>
+            Error model class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Pages.ErrorModel.RequestId">
+            <summary>
+            Gets or sets the request id.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Pages.ErrorModel.ShowRequestId">
+            <summary>
+            Gets a value indicating whether the request id is null or empty.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Pages.ErrorModel.OnGet">
+            <summary>
+            Sets the request id.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Program">
+            <summary>
+            Program class of the company communicator application.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Program.Main(System.String[])">
+            <summary>
+            Main function of the company communicator application.
+            It builds a web host, then launches the company communicator into it.
+            </summary>
+            <param name="args">Arguments passed in to the function.</param>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Program.CreateHostBuilder(System.String[])">
+            <summary>
+            Create the web host builder.
+            </summary>
+            <param name="args">Arguments passed into the main function.</param>
+            <returns>A web host builder instance.</returns>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions.NotificationRepositoryExtensions">
+            <summary>
+            Extensions for the repository of the notification data.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions.NotificationRepositoryExtensions.CreateDraftNotificationAsync(Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData.INotificationDataRepository,Microsoft.Teams.Apps.CompanyCommunicator.Models.DraftNotification,System.String)">
+            <summary>
+            Create a new draft notification.
+            </summary>
+            <param name="notificationRepository">The notification repository.</param>
+            <param name="notification">Draft Notification model class instance passed in from Web API.</param>
+            <param name="userName">Name of the user who is running the application.</param>
+            <returns>The newly created notification's id.</returns>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions.TeamDataRepositoryExtensions">
+            <summary>
+            Extensions for the repository of the team data stored in the table storage.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions.TeamDataRepositoryExtensions.SaveTeamDataAsync(Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData.ITeamDataRepository,Microsoft.Bot.Schema.IConversationUpdateActivity)">
+            <summary>
+            Add channel data in Table Storage.
+            </summary>
+            <param name="teamDataRepository">The team data repository.</param>
+            <param name="activity">Bot conversation update activity instance.</param>
+            <returns>A task that represents the work queued to execute.</returns>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions.TeamDataRepositoryExtensions.RemoveTeamDataAsync(Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData.ITeamDataRepository,Microsoft.Bot.Schema.IConversationUpdateActivity)">
+            <summary>
+            Remove channel data in table storage.
+            </summary>
+            <param name="teamDataRepository">The team data repository.</param>
+            <param name="activity">Bot conversation update activity instance.</param>
+            <returns>A task that represents the work queued to execute.</returns>
+        </member>
+        <member name="T:Microsoft.Teams.Apps.CompanyCommunicator.Startup">
+            <summary>
+            Register services in DI container, and set up middle-wares in the pipeline.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Startup.#ctor(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Teams.Apps.CompanyCommunicator.Startup"/> class.
+            </summary>
+            <param name="configuration">IConfiguration instance.</param>
+        </member>
+        <member name="P:Microsoft.Teams.Apps.CompanyCommunicator.Startup.Configuration">
+            <summary>
+            Gets the IConfiguration instance.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Startup.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            This method gets called by the runtime. Use this method to add services to the container.
+            </summary>
+            <param name="services">IServiceCollection instance.</param>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Startup.Configure(Microsoft.AspNetCore.Builder.IApplicationBuilder,Microsoft.AspNetCore.Hosting.IWebHostEnvironment)">
+            <summary>
+            This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+            </summary>
+            <param name="app">IApplicationBuilder instance, which is a class that provides the mechanisms to configure an application's request pipeline.</param>
+            <param name="env">IHostingEnvironment instance, which provides information about the web hosting environment an application is running in.</param>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Startup.FillAuthenticationOptionsProperties(Microsoft.Teams.Apps.CompanyCommunicator.Authentication.AuthenticationOptions,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Fills the AuthenticationOptions's properties with the correct values from the configuration.
+            </summary>
+            <param name="authenticationOptions">The AuthenticationOptions whose properties will be filled.</param>
+            <param name="configuration">The configuration.</param>
+        </member>
+        <member name="M:Microsoft.Teams.Apps.CompanyCommunicator.Startup.HandleGlobalException(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            Handle exceptions happened in the HTTP process pipe-line.
+            </summary>
+            <param name="applicationBuilder">IApplicationBuilder instance, which is a class that provides the mechanisms to configure an application's request pipeline.</param>
+        </member>
+    </members>
+</doc>

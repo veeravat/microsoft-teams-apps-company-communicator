@@ -67,43 +67,8 @@ SET MSBUILD_PATH=%ProgramFiles(x86)%\MSBuild\14.0\Bin\MSBuild.exe
 :: Deployment
 :: ----------
 
-echo Handling ASP.NET Core Web Application deployment.
+echo Company Communicator deployment.
 
-@REM :: 1. Restore nuget packages
-@REM echo Restoring NuGet packages
-@REM call :ExecuteCmd dotnet restore "%DEPLOYMENT_SOURCE%\Source\Microsoft.Teams.Apps.CompanyCommunicator.sln"
-@REM IF !ERRORLEVEL! NEQ 0 goto error
-
-@REM :: 2. Restore npm packages
-@REM echo Restoring npm packages (this can take several minutes)
-@REM pushd "%DEPLOYMENT_SOURCE%\Source\CompanyCommunicator\ClientApp"
-
-@REM call :ExecuteCmd npm install --no-audit
-@REM IF !ERRORLEVEL! NEQ 0 (
-@REM     echo First attempt failed, retrying once
-@REM     call :ExecuteCmd npm install --no-audit
-@REM )
-@REM popd
-@REM IF !ERRORLEVEL! NEQ 0 goto error
-
-@REM :: 3. Build the client app
-@REM echo Building the client app (this can take several minutes)
-@REM pushd "%DEPLOYMENT_SOURCE%\Source\CompanyCommunicator\ClientApp"
-@REM call :ExecuteCmd npm run build
-@REM popd
-@REM IF !ERRORLEVEL! NEQ 0 goto error
-
-@REM :: 4. Build and publish
-@REM echo Building the application
-@REM call :ExecuteCmd dotnet publish "%DEPLOYMENT_SOURCE%\Source\CompanyCommunicator\Microsoft.Teams.Apps.CompanyCommunicator.csproj" --output "%DEPLOYMENT_TEMP%" --configuration Release -property:KuduDeployment=1
-@REM IF !ERRORLEVEL! NEQ 0 goto error
-
-@REM :: 5. KuduSync
-@REM call :ExecuteCmd "%KUDU_SYNC_CMD%" -v 50 -f "%DEPLOYMENT_SOURCE%\Source\CompanyCommunicator-Prebuild" -t "%DEPLOYMENT_TARGET%" -n "%NEXT_MANIFEST_PATH%" -p "%PREVIOUS_MANIFEST_PATH%" 
-@REM IF !ERRORLEVEL! NEQ 0 goto error
-
-
-:: 6. upzip
 call :ExecuteCmd unzip -oq "%DEPLOYMENT_SOURCE%\Source\CompanyCommunicator-Prebuild.zip" -d "%DEPLOYMENT_TARGET%" 
 IF !ERRORLEVEL! NEQ 0 goto error
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -131,5 +96,5 @@ exit /b 1
 
 :end
 endlocal
-echo "Finished successfully."
+echo Finished successfully.
 exit /b 0

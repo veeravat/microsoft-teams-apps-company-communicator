@@ -1,0 +1,31 @@
+{
+  "files": {
+    "main.css": "/static/css/main.39b33f26.chunk.css",
+    "main.js": "/static/js/main.ea5da9d2.chunk.js",
+    "main.js.map": "/static/js/main.ea5da9d2.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.f341037b.js",
+    "runtime-main.js.map": "/static/js/runtime-main.f341037b.js.map",
+    "static/js/2.e5fb7fb0.chunk.js": "/static/js/2.e5fb7fb0.chunk.js",
+    "static/js/2.e5fb7fb0.chunk.js.map": "/static/js/2.e5fb7fb0.chunk.js.map",
+    "index.html": "/index.html",
+    "static/css/main.39b33f26.chunk.css.map": "/static/css/main.39b33f26.chunk.css.map",
+    "static/js/2.e5fb7fb0.chunk.js.LICENSE.txt": "/static/js/2.e5fb7fb0.chunk.js.LICENSE.txt",
+    "static/media/TeamsAssets-Light.eot": "/static/media/TeamsAssets-Light.14c3e6f0.eot",
+    "static/media/TeamsAssets-Light.ttf": "/static/media/TeamsAssets-Light.66561737.ttf",
+    "static/media/TeamsAssets-Light.woff": "/static/media/TeamsAssets-Light.6d0fa9a8.woff",
+    "static/media/TeamsAssets-Light.svg": "/static/media/TeamsAssets-Light.73e6fac8.svg",
+    "static/media/TeamsAssets-Light.woff2": "/static/media/TeamsAssets-Light.e8bd73e2.woff2",
+    "static/media/TeamsAssets-Regular.woff2": "/static/media/TeamsAssets-Regular.59b42e51.woff2",
+    "static/media/TeamsAssets-Regular.eot": "/static/media/TeamsAssets-Regular.5da5870e.eot",
+    "static/media/TeamsAssets-Regular.svg": "/static/media/TeamsAssets-Regular.7239f6ef.svg",
+    "static/media/TeamsAssets-Regular.woff": "/static/media/TeamsAssets-Regular.a49d84c5.woff",
+    "static/media/TeamsAssets-Regular.ttf": "/static/media/TeamsAssets-Regular.ace6ce92.ttf",
+    "static/media/getFetch.cjs": "/static/media/getFetch.582d29c4.cjs"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.f341037b.js",
+    "static/js/2.e5fb7fb0.chunk.js",
+    "static/css/main.39b33f26.chunk.css",
+    "static/js/main.ea5da9d2.chunk.js"
+  ]
+}

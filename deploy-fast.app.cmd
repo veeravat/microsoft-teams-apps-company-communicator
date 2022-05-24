@@ -104,7 +104,7 @@ echo Handling ASP.NET Core Web Application deployment.
 
 
 :: 6. upzip
-call :ExecuteCmd unzip "%DEPLOYMENT_SOURCE%\Source\CompanyCommunicator-Prebuild.zip" -d "%DEPLOYMENT_TARGET%"
+call :ExecuteCmd unzip "%DEPLOYMENT_SOURCE%\Source\CompanyCommunicator-Prebuild.zip" -d "%DEPLOYMENT_TARGET%" -o -q
 IF !ERRORLEVEL! NEQ 0 goto error
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 goto end

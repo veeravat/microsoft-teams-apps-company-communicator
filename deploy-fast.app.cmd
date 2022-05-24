@@ -102,6 +102,10 @@ echo Handling ASP.NET Core Web Application deployment.
 call :ExecuteCmd "%KUDU_SYNC_CMD%" -v 50 -f "%DEPLOYMENT_SOURCE%\Source\CompanyCommunicator-Prebuild" -t "%DEPLOYMENT_TARGET%" -n "%NEXT_MANIFEST_PATH%" -p "%PREVIOUS_MANIFEST_PATH%" 
 IF !ERRORLEVEL! NEQ 0 goto error
 
+
+:: 6. upzip
+
+
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 goto end
 
